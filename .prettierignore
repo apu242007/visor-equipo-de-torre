@@ -8,3 +8,5 @@ public
 package-lock.json
 src/components/ui
 src/index.css
+
+.claude/worktrees

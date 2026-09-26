@@ -54,3 +54,6 @@ docs/references/*/*.jpeg
 docs/references/*/*.webp
 docs/references/*/*.avif
 docs/references/enganche/*.png
+
+# worktrees de agentes
+.claude/worktrees/

@@ -8,6 +8,7 @@ export default tseslint.config(
   {
     ignores: [
       'dist',
+      '.claude',
       'node_modules',
       'reference',
       'tests',
