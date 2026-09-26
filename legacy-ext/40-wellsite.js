@@ -677,60 +677,17 @@
 
   // ═════════════════════════════════════════ APAREJO / GANCHO ═════════════════════════════════════════
   /**
-   * Envuelve el aparejo original: éste crea `bloque_viajero` (que el visor anima vía `wh`), las amelas, el elevador y los 6 ramales
-   * (`Lh`) — estado interno del visor que no está expuesto. Se conservan las poleas, amelas y ramales; las placas, el vástago y el gancho
-   * se reemplazan por un bloque IDECO amarillo con gancho forjado. Las 6 líneas del folleto se mantienen (ver conflicto en cabecera).
+   * Envuelve el aparejo original: éste crea `bloque_viajero` (que el visor anima vía `wh`), las amelas, el elevador y los 6 ramales (`Lh`) — estado
+   * interno del visor que no está expuesto. Los ramales, el grupo animado y los grupos `amelas`/`elevador` se conservan; el rediseño (bloque con poleas
+   * de garganta, gancho forjado con pestillo, amelas, elevador de tubing articulado y elevador de varillas nuevo) vive en legacy-ext/41-aparejo.js
+   * (`window.__tackerAparejo`). Sin ese módulo el visor conserva su aparejo original. Las 6 líneas del folleto se mantienen (ver conflicto en cabecera).
    */
   function wrapAparejo(api) {
     const original = api.Ot.aparejo
     api.Ot.aparejo = (g, e) => {
       original(g, e)
-      const blk = g.children.find((o) => o.name === 'bloque_viajero')
-      if (!blk) return
-      const m = mats(api)
-      const bp3 = dropsGroup(
-        blk,
-        'BP-3',
-        'Folleto: IDECO 110 t, 6 líneas (Libro DROPS BP-3 dice 8 líneas de 1 1/8": conflicto documental, se mantienen 6).',
-      )
-
-      // retira placas, vástago, gancho y pasador originales; las poleas (cilindros/toros de r=.36 y cubos) pasan al grupo BP-3
-      for (const ch of [...blk.children]) {
-        if (!ch.isMesh) continue
-        const t = ch.geometry.type
-        const p = ch.geometry.parameters || {}
-        const isPlate = t === 'BoxGeometry'
-        const isStem =
-          t === 'CylinderGeometry' &&
-          Math.abs(p.radiusTop - 0.11) < 1e-6 &&
-          Math.abs(p.height - 0.7) < 1e-6
-        const isPin = t === 'CylinderGeometry' && p.radiusTop < 0.03
-        const isHook = t === 'TorusGeometry' && Math.abs(p.radius - 0.26) < 1e-6
-        if (isPlate || isStem || isPin || isHook) {
-          blk.remove(ch)
-          ch.geometry.dispose()
-        } else bp3.add(ch)
-      }
-
-      const P = new Batch()
-      const M = new Batch()
-      // placas laterales amarillas (contorno redondeado arriba), eje central, tornillos y travesaño inferior
-      for (const s of [-1, 1]) {
-        P.box(C.YEL, 0.86, 0.7, 0.1, 0, -0.1, s * 0.33)
-        P.cyl(C.YEL, 0.5, 0.5, 0.1, 0, 0.25, s * 0.33, 'z', 24)
-        M.cyl(C.STEEL, 0.09, 0.09, 0.04, 0, 0.25, s * 0.4, 'z', 10)
-      }
-      M.cyl(C.STEEL, 0.06, 0.06, 0.8, 0, 0.25, 0, 'z', 10)
-      P.box(C.YEL, 0.6, 0.18, 0.7, 0, -0.54, 0)
-      // swivel y vástago del gancho
-      P.cyl(C.DARK, 0.13, 0.13, 0.22, 0, -0.72, 0, 'y', 14)
-      P.cyl(C.YEL, 0.09, 0.09, 0.32, 0, -0.9, 0, 'y', 12)
-      // gancho forjado: arco de 290° abierto arriba a la derecha + orejas donde cuelgan las amelas + pestillo de seguridad
-      P.loop(C.YEL, 0, -1.32, 0, 0.29, 'xy', PI / 2, PI / 2 + (290 * PI) / 180, 0.075, 28)
-      M.cyl(C.STEEL, 0.05, 0.05, 0.7, 0, -1.62, 0, 'z', 8)
-      M.rod(C.DARK, [0.27, -1.2, 0], [0.04, -1.05, 0], 0.016)
-      P.flush(bp3, m.paint, 'bloque_pintura')
-      M.flush(bp3, m.metal, 'bloque_acero')
+      const redesign = window.__tackerAparejo
+      if (redesign) redesign.build(g, api, { K, Batch, dropsGroup })
     }
   }
 
