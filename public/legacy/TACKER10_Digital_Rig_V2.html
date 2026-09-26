@@ -2675,7 +2675,7 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
  *   - aparejo      → bloque IDECO amarillo con gancho forjado (envuelve el original: conserva sus ramales y el estado interno del visor)
  *   - bop          → BOP Cameron 7 1/16" 5M anular + doble (rojo, color PENDIENTE), choke manifold (posición confirmada, detalle aproximado),
  *                    líneas de choke/matar, eslinga de anclaje y acumulador de 5 botellones
- *   - llave        → llave hidráulica de tubing, cuñas, línea de suspensión y poste de retenida (grampas + brazo)
+ *   - llave        → llave hidráulica de tubing, cuñas, línea de suspensión y poste de retenida (sujeto al mástil, no al piso; grampas + brazo)
  *   - caballetes   → planchada 12×2,4 m, plano inclinado (bandeja) y caballetes de 2 m con tubing/varillas
  *   - circulacion  → pileta de ensayo 12×2,4 m, cubicador, desgasificador, bomba triplex 6×2,4 m, cañerías al pozo (el manifold de maniobra anterior es ahora el choke manifold del BOP)
  *   - entorno      → Group `locacion_entorno` (fuera de los 13 componentes: ni seleccionable ni en R.pickables): ripio, torres de luz,
@@ -3960,9 +3960,25 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     }
     P.box(PAINT.main, 0.04, 0.03, 0.04, -0.62, 3.115, 0.27) // argolla de anclaje de los látigos
 
-    // ─────────────────────────── brazo de reacción (torque arm) hasta el poste de retenida ───────────────────────────
+    // ─────────────────────────── brazo de retenida: el poste va SUJETO AL MÁSTIL, no apoya en el piso de trabajo ───────────────────────────
+    // Decisión del usuario: el brazo de retenida está siempre vinculado al mástil; un poste con base en el piso restaría espacio de trabajo.
+    // El poste redondo corre paralelo al montante delantero del mástil (lado +z), sujeto con dos grampas (PRL-1 arriba, PRL-2 abajo) y sin
+    // tocar el piso. Posición del montante por `api.ni` (eje inclinado del mástil); semiancho local 0,8 m y sección 0,16 m: APROXIMADOS.
+    const LEG_X = 0.8
+    const LEG_Z = 0.8
+    const legAt = (y) => {
+      const p0 = api.ni(0, LEG_X, LEG_Z)
+      const p1 = api.ni(10, LEG_X, LEG_Z)
+      const p = api.ni((10 * (y - p0.y)) / (p1.y - p0.y), LEG_X, LEG_Z)
+      return [p.x, y, p.z]
+    }
+    const POST_GAP = 0.14 // medio montante (0,08) + separación + radio del poste (0,05)
+    const postAt = (y) => {
+      const [x, , z] = legAt(y)
+      return [x + POST_GAP, y, z]
+    }
     const armA = [0.25, 3.03, 0.27]
-    const armB = [0.945, 3.03, 1.19]
+    const armB = postAt(3.03)
     const armLen = Math.hypot(armB[0] - armA[0], armB[2] - armA[2])
     const armRy = Math.atan2(-(armB[2] - armA[2]), armB[0] - armA[0])
     P.box(
@@ -3990,27 +4006,10 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     }
     P.box(PAINT.main, 0.1, 0.11, 0.09, armA[0], 3.03, armA[2], armRy) // oreja de articulación
     M.cyl(C.STEEL, 0.02, 0.02, 0.17, armA[0], 3.03, armA[2], 'y', 8) // perno de articulación
-    P.cyl(PAINT.main, 0.058, 0.058, 0.08, 0.95, 3.0, 1.21, 'y', 12) // abrazadera sobre el poste
+    P.cyl(PAINT.main, 0.058, 0.058, 0.08, armB[0], 3.0, armB[2], 'y', 12) // abrazadera sobre el poste
 
-    // ─────────────────────────── poste de retenida: columna de apoyo + poste redondo, sujetos con dos grampas ───────────────────────────
-    P.box(C.GRAY, 0.12, 2.6, 0.12, 0.95, FL + 1.3, 1.35)
-    M.cyl(C.GRAY_L, 0.05, 0.05, 2.4, 0.95, FL + 1.2, 1.21, 'y', 10)
-    P.box(C.GRAY, 0.4, 0.03, 0.4, 0.95, FL + 0.015, 1.3) // placa base
-    for (const [dx, dz] of [
-      [-1, -1],
-      [1, -1],
-      [-1, 1],
-      [1, 1],
-    ]) {
-      M.cyl(C.DARK, 0.016, 0.016, 0.04, 0.95 + dx * 0.16, FL + 0.05, 1.3 + dz * 0.16, 'y', 6) // bulones de anclaje
-      M.rod(
-        C.GRAY_L,
-        [0.95 + dx * 0.15, FL + 0.03, 1.3 + dz * 0.15],
-        [0.95 + dx * 0.05, FL + 0.42, 1.3 + dz * 0.05],
-        0.012,
-        4,
-      ) // rigidizadores
-    }
+    // poste redondo de retenida: solo sujeto al montante del mástil por las grampas PRL-1/PRL-2 (extremo inferior libre, sobre el piso)
+    M.rod(C.GRAY_L, postAt(2.75), postAt(4.75), 0.05, 10)
 
     P.flush(g, m.paint, 'llave_pintura')
     M.flush(g, m.metal, 'llave_acero')
@@ -4018,18 +4017,20 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     S.flush(g, m.metal, 'llave_cunas')
     G.flush(g, dialMat, 'llave_manometro', { cast: false })
 
-    // PRL-1 / PRL-2 · grampas superior e inferior ("8 bulones con tuercas autofrenantes": 4 pasantes con cabeza y tuerca = 8 fijaciones)
+    // PRL-1 / PRL-2 · grampas superior e inferior que sujetan el poste al montante del mástil ("8 bulones con tuercas autofrenantes":
+    // 4 pasantes con cabeza y tuerca = 8 fijaciones). Dos placas laterales abrazan montante + poste; los bulones pasan por fuera de ambos.
     const clamp = (id, yc, note) => {
       const grp = dropsGroup(g, id, note)
       const cp = new Batch()
       const cm = new Batch()
-      cp.box(C.GRAY, 0.18, 0.24, 0.04, 0.95, yc, 1.44)
-      cp.box(C.GRAY, 0.18, 0.24, 0.04, 0.95, yc, 1.13)
-      for (const dx of [-0.06, 0.06])
+      const [px, , pz] = legAt(yc)
+      const cx = px + POST_GAP / 2
+      for (const s of [-1, 1]) cp.box(C.GRAY, 0.34, 0.24, 0.04, cx, yc, pz + s * 0.1)
+      for (const dx of [-0.13, 0.13])
         for (const dy of [-0.08, 0.08]) {
-          cm.cyl(C.STEEL, 0.02, 0.02, 0.36, 0.95 + dx, yc + dy, 1.285, 'z', 6)
-          cm.cyl(C.DARK, 0.032, 0.032, 0.03, 0.95 + dx, yc + dy, 1.47, 'z', 6)
-          cm.cyl(C.DARK, 0.032, 0.032, 0.03, 0.95 + dx, yc + dy, 1.1, 'z', 6)
+          cm.cyl(C.STEEL, 0.02, 0.02, 0.28, cx + dx, yc + dy, pz, 'z', 6)
+          for (const s of [-1, 1])
+            cm.cyl(C.DARK, 0.032, 0.032, 0.03, cx + dx, yc + dy, pz + s * 0.135, 'z', 6)
         }
       cp.flush(grp, m.paint, id + '_grampa')
       cm.flush(grp, m.metal, id + '_bulones')
@@ -4037,9 +4038,13 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     clamp(
       'PRL-1',
       4.4,
-      'Libro DROPS p.24: grampa superior con 8 bulones y tuercas autofrenantes ([DUDOSO] "8 por bulones").',
+      'Libro DROPS p.24: grampa superior con 8 bulones y tuercas autofrenantes ([DUDOSO] "8 por bulones"). Sujeta el poste al mástil.',
     )
-    clamp('PRL-2', 2.95, 'Libro DROPS p.25: grampa inferior, igual que PRL-1.')
+    clamp(
+      'PRL-2',
+      2.95,
+      'Libro DROPS p.25: grampa inferior, igual que PRL-1. Sujeta el poste al mástil.',
+    )
 
     // PRL-3 · sujeción del brazo de la llave al poste: perno pasante con cadena y seguro + eslinga con grillete de 4 elementos
     const prl3 = dropsGroup(
@@ -4049,15 +4054,18 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     )
     const pm = new Batch()
     const pc = new Batch()
-    pm.cyl(C.STEEL, 0.03, 0.03, 0.22, 0.93, 3.0, 1.17, 'y', 8) // perno pasante
-    pm.cyl(C.RED, 0.009, 0.009, 0.06, 0.93, 3.13, 1.17, 'x', 5) // seguro
-    pm.loop(C.RED, 0.95, 3.36, 1.3, 0.06, 'xy', 0, 2 * PI, 0.012, 12) // grillete
+    const pinX = armB[0] + 0.03
+    const pinZ = armB[2] - 0.04
+    const [gxp, , gzp] = postAt(3.36)
+    pm.cyl(C.STEEL, 0.03, 0.03, 0.22, pinX, 3.0, pinZ, 'y', 8) // perno pasante
+    pm.cyl(C.RED, 0.009, 0.009, 0.06, pinX, 3.13, pinZ, 'x', 5) // seguro
+    pm.loop(C.RED, gxp, 3.36, gzp + 0.09, 0.06, 'xy', 0, 2 * PI, 0.012, 12) // grillete
     pc.tube(
       C.DARK,
       [
-        [0.93, 3.11, 1.17],
-        [0.98, 3.2, 1.25],
-        [0.95, 3.3, 1.3],
+        [pinX, 3.11, pinZ],
+        [gxp + 0.03, 3.2, gzp + 0.05],
+        [gxp, 3.3, gzp + 0.09],
       ],
       0.012,
     ) // cadena

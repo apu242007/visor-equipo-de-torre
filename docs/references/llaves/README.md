@@ -26,12 +26,17 @@ verificar (fotos de catálogo de terceros): no se embeben en el HTML y **no est�
 - **Manómetro de torque** (`llave_manometro`): caja, esfera, 11 marcas, aguja **en cero**. No lleva escala ni valor.
 - **Mangueras** (`llave_mangueras`): 2 principales (mismo recorrido y extremos que las anteriores, elevadas ~8 cm para no rozar la pata
   PT-3), 2 del motor y 2 del cilindro; conexiones de latón, abrazaderas y 2 látigos de seguridad (whip checks).
-- **Brazo de reacción**: viga de sección rectangular con nervios y oreja de articulación, hasta una abrazadera sobre el poste (mismo
-  punto de anclaje que antes, perno PRL-3 en 0,93 · 3,0 · 1,17).
+- **Brazo de reacción**: viga de sección rectangular con nervios y oreja de articulación, hasta una abrazadera sobre el poste de
+  retenida, que ahora está sujeto al mástil (perno PRL-3 junto al poste).
 - **Cuñas manuales y buje** (`llave_cunas`): buje cónico, 3 segmentos articulados con dados y estrías, 2 bisagras con pasador, 2 asas con
   empuñadura hacia el lado abierto.
-- **Poste de retenida**: se conserva (columna, poste redondo, placa base); se agregan bulones de anclaje y rigidizadores.
-- **DROPS PRL-1 / PRL-2 / PRL-3**: sin cambios (mismos grupos `drops_PRL-x`, `userData.dropsId`, nombres de malla y posiciones).
+- **Poste de retenida — vinculado al mástil (decisión del usuario)**: el brazo de retenida siempre está vinculado al mástil y no al piso de
+  trabajo, porque un poste con base en el piso restaría espacio. Se eliminaron la columna de apoyo, la placa base, los bulones de anclaje y
+  los rigidizadores. Ahora es un poste redondo paralelo al montante delantero del mástil (lado +z, y 2,75…4,75 m; extremo inferior libre
+  sobre el piso) sujeto con dos grampas al montante. La posición sale del eje inclinado del mástil (`api.ni`, semiancho local 0,8 m y
+  montante de 0,16 m: **aproximados**, medidos sobre el modelo actual).
+- **DROPS PRL-1 / PRL-2 / PRL-3**: mismos grupos `drops_PRL-x`, `userData.dropsId` y nombres de malla; las grampas PRL-1 (y 4,4 m) y
+  PRL-2 (y 2,95 m) ahora abrazan montante y poste (placas laterales y bulones por fuera de ambos). PRL-3 se mueve con el extremo del brazo.
 
 ## Estado de los datos
 

@@ -45,10 +45,20 @@ test('la llave se construye con mallas fusionadas y nombradas (5 propias + los g
 
 test('se conservan los grupos DROPS PRL-1, PRL-2 y PRL-3 con sus puntos de anclaje', () => {
   assert.ok(fn.includes("'PRL-1',\n      4.4,"))
-  assert.ok(fn.includes("clamp('PRL-2', 2.95,"))
+  assert.match(fn, /clamp\(\s*'PRL-2',\s*2\.95,/)
   assert.ok(fn.includes("'PRL-3',\n      'Libro DROPS p.25"))
-  for (const s of ['0.93, 3.0, 1.17', '0.95, 3.36, 1.3', 'id + \'_grampa\'', 'PRL-3_perno', 'PRL-3_cadena']) assert.ok(fn.includes(s), s)
+  for (const s of ["id + '_grampa'", 'PRL-3_perno', 'PRL-3_cadena']) assert.ok(fn.includes(s), s)
   assert.ok(fn.includes('dropsGroup('))
+})
+
+test('el poste de retenida va sujeto al mástil (grampas al montante), sin base ni apoyo en el piso de trabajo', () => {
+  assert.ok(fn.includes('api.ni('), 'la posición sale del eje inclinado del mástil')
+  assert.ok(fn.includes('const legAt = (y)') && fn.includes('const postAt = (y)'))
+  assert.ok(fn.includes('M.rod(C.GRAY_L, postAt(2.75), postAt(4.75)'), 'poste paralelo al montante, extremo inferior libre')
+  // nada del poste anterior apoyado en el piso: columna de apoyo, placa base, bulones de anclaje, rigidizadores
+  for (const gone of ['placa base', 'bulones de anclaje', 'rigidizadores', 'FL + 1.3, 1.35']) assert.ok(!fn.includes(gone), gone)
+  // el extremo inferior queda por encima del piso (FL = 2,36 m)
+  assert.ok(2.75 > 2.36)
 })
 
 test('el color de la llave es configurable y está marcado como pendiente', () => {
