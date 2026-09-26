@@ -1,0 +1,19 @@
+# Texto siempre con LF (los hashes de reference/legacy y los tests del build dependen de ello).
+* text=auto eol=lf
+
+# Los .cmd de Windows necesitan CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binarios.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.wasm binary
+*.glb binary
+*.woff2 binary
+
+# Evidencia inmutable y copia runtime generada: nunca normalizar.
+reference/legacy/** -text
+public/legacy/** -text

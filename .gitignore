@@ -1,0 +1,49 @@
+# dependencias y build
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+
+# secretos
+.env
+.env.*
+!.env.example
+
+# caches de herramientas
+.vite/
+.eslintcache
+.cache/
+.tmp/
+.turbo/
+*.log
+npm-debug.log*
+
+# Claude Code: config local (nunca versionar)
+.claude/settings.local.json
+.claude/*.local.*
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# modelos 3D originales pesados (se versionan solo los optimizados en public/models/)
+assets/source/**
+!assets/source/README.md
+!assets/source/.gitkeep
+
+# artefactos de Playwright MCP
+.playwright-mcp/
+
+# salidas temporales de build/capturas
+
+# documentos de terceros marcados "YPF-Privado": se quedan en el disco, no en git
+**/Taller de Aseguramiento*.pdf
+**/Upstream YPF*.pdf
+
+# documentos internos de Tacker (PDF fuente y sus capturas): quedan en el disco, no en el repo publico
+docs/fuentes/**/*.pdf
+docs/pdf-review/pages/
