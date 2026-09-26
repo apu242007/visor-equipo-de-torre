@@ -609,6 +609,131 @@
     // ═══════════════════════════════ PISO DE ENGANCHE (jaula) ═══════════════════════════════
     // Estético / fuente: folleto TACKER 10 p1 (foto: jaula/caja grande colgada del mástil con logo TACKER) y Libro DROPS
     // p7–11. El piso de enganche real NO tiene cotas en los documentos: huella y alturas aquí son aproximadas.
+    // Detalle adicional: referencia CAD genérica `docs/references/enganche/` (tipología, no cota; ver README de esa carpeta).
+
+    /** Cadena de retención: `n` eslabones cuadrados alternados (planos a 90°) entre `p` y `q` ([x, y, z]). */
+    function chain(B, p, q, n) {
+      for (let i = 0; i < n; i++) {
+        const u = n > 1 ? i / (n - 1) : 0
+        const x = p[0] + (q[0] - p[0]) * u
+        const y = p[1] + (q[1] - p[1]) * u
+        const z = p[2] + (q[2] - p[2]) * u
+        if (i % 2) B.box(M.steelL, 0.012, 0.045, 0.028, x, y, z)
+        else B.box(M.steelL, 0.028, 0.045, 0.012, x, y, z)
+      }
+    }
+
+    /** Textura de chapa antideslizante (losanges alternados a 90°) a partir del constructor de la textura del logo. */
+    function plateTexture(refMap) {
+      if (!refMap || typeof document === 'undefined') return null
+      try {
+        const c = document.createElement('canvas')
+        c.width = c.height = 128
+        const ctx = c.getContext('2d')
+        ctx.fillStyle = '#5f666c'
+        ctx.fillRect(0, 0, 128, 128)
+        for (let i = 0; i < 4; i++)
+          for (let j = 0; j < 4; j++) {
+            ctx.save()
+            ctx.translate(16 + 32 * i, 16 + 32 * j)
+            ctx.rotate(((i + j) % 2 ? 1 : -1) * (PI / 4))
+            ctx.fillStyle = '#9aa2a8'
+            ctx.fillRect(-11, -3, 22, 6)
+            ctx.fillStyle = '#c3c9cd'
+            ctx.fillRect(-11, -3, 22, 2)
+            ctx.restore()
+          }
+        const tex = new refMap.constructor(c)
+        tex.wrapS = tex.wrapT = 1000 // RepeatWrapping
+        tex.colorSpace = refMap.colorSpace
+        tex.anisotropy = 4
+        tex.needsUpdate = true
+        return tex
+      } catch (e) {
+        console.warn('[20-mast] textura de chapa no disponible', e)
+        return null
+      }
+    }
+
+    /** Piso de chapa antideslizante: 2 cuadriláteros (una malla, UV en metros / 0,32). Sin textura cae a color liso. */
+    function buildDeckPlate(t, logo) {
+      const tex = plateTexture(logo && logo.map)
+      const plate = mat(
+        'chapa_antideslizante',
+        tex ? '#ffffff' : '#7d848a',
+        0.55,
+        0.45,
+        tex ? { map: tex } : undefined,
+      )
+      const y = N + 0.036
+      // x 0,62–1,95 (todo el ancho) y x 1,95–2,86 solo de z −0,05 a 1,0: en el resto se apoyan los dedos del peine (PE-6)
+      const quads = [
+        [0.62, -1.0, 1.95, 1.0],
+        [1.95, -0.05, 2.86, 1.0],
+      ]
+      const pos = []
+      const nor = []
+      const uv = []
+      const idx = []
+      quads.forEach(([x0, z0, x1, z1], k) => {
+        for (const [x, z] of [
+          [x0, z0],
+          [x0, z1],
+          [x1, z1],
+          [x1, z0],
+        ]) {
+          pos.push(x, y, z)
+          nor.push(0, 1, 0)
+          uv.push(x / 0.32, z / 0.32)
+        }
+        idx.push(4 * k, 4 * k + 1, 4 * k + 3, 4 * k + 1, 4 * k + 2, 4 * k + 3)
+      })
+      const geo = new BufferGeometry()
+      geo.setAttribute('position', new FloatAttr(new Float32Array(pos), 3))
+      geo.setAttribute('normal', new FloatAttr(new Float32Array(nor), 3))
+      geo.setAttribute('uv', new FloatAttr(new Float32Array(uv), 2))
+      geo.setIndex(idx)
+      const mesh = new Mesh(geo, plate)
+      ir(mesh)
+      mesh.name = 'piso_chapa'
+      t.add(mesh)
+    }
+
+    /** Arco tubular de contención (pórtico trasero, lado mástil) con panel de barandas a cada lado. Una malla blanca. */
+    function buildContainmentArch(t) {
+      const g = new Group()
+      g.name = 'arco_contencion'
+      t.add(g)
+      const A = makeBatch()
+      const AX = 1.05 // plano del arco (x local)
+      const R = 0.5 // semiancho de la abertura de paso
+      const top = N + 1.8 // arranque del semicírculo (cima N + 2,3 = aro superior de la jaula)
+      for (const s of [-1, 1]) {
+        A.line(M.white, [AX, N - 0.02, s * R], [AX, top, s * R], 0.035, 8)
+        A.box(M.white, 0.14, 0.02, 0.14, AX, N + 0.04, s * R) // placa de base abulonada
+        for (const y of [0.45, 0.9, 1.35])
+          A.line(M.white, [AX, N + y, s * R], [AX, N + y, s * 1.05], 0.022, 6)
+        A.line(M.white, [AX, top - 0.1, s * R], [0.4, N + 2.3, s * 1.05], 0.03, 6) // tirante trasero al aro
+      }
+      A.poly(M.white, arcPts(AX, top, 0, R, 0, PI, 12, 'zy'), 0.035, 8)
+      A.flush(g, 'arco_contencion')
+    }
+
+    /** Patines de apoyo bajo el marco rojo (tubo con tapas, cartelas y travesaños). Una malla oscura. */
+    function buildSkids(t) {
+      const g = new Group()
+      g.name = 'patines'
+      t.add(g)
+      const P = makeBatch()
+      for (const z of [-0.95, 0.95]) {
+        P.cyl(M.dark, 0.055, 0.055, 2.75, 1.625, N - 0.2, z, 'x', 10)
+        for (const x of [0.25, 3.0]) P.cyl(M.dark, 0.07, 0.07, 0.03, x, N - 0.2, z, 'x', 10)
+        for (const x of [0.7, 1.6, 2.5]) P.box(M.dark, 0.26, 0.14, 0.02, x, N - 0.14, z)
+      }
+      for (const x of [0.45, 2.7]) P.cyl(M.dark, 0.035, 0.035, 1.9, x, N - 0.2, 0, 'z', 8)
+      P.flush(g, 'patines')
+    }
+
     Ot.enganche = (g) => {
       const t = Ml(g)
       t.name = 'acceso_y_enganchador'
@@ -641,15 +766,19 @@
         L.poly(M.steelL, hoop, 0.02, 5)
       }
       L.line(M.steelL, [-1.23, 0.4, 0], [-1.23, N + 0.8, 0], 0.017, 6)
-      L.box(M.steel, 1.45, 0.05, 0.7, -0.27, N - 0.02, 0)
+      L.box(M.steelL, 1.45, 0.05, 0.7, -0.27, N - 0.02, 0)
       L.flush(t, 'escalera')
 
-      // Jaula: piso reja, marco rojo, montantes y aro superior blancos, paneles laterales con logo, barandas amarillas.
+      // ── Detalle del piso según referencia CAD genérica (docs/references/enganche/README.md; APROXIMADO, sin cotas as-built):
+      // piso de chapa antideslizante, peines con dedos individuales, paneles con barandas de caños horizontales,
+      // arco tubular de contención y patines de apoyo. Huella y alturas = envolvente anterior (no cambian).
+      // Mallas nuevas y nombradas: `piso_chapa`, `arco_contencion`, `patines` (el resto suma a `jaula_*` y a los `drops_PE-*`).
+      buildDeckPlate(t, logo)
+
+      // Jaula: sub-piso, marco rojo, montantes y aro superior blancos, paneles laterales con logo, barandas.
       const B = makeBatch()
-      B.box(M.dark, 2.55, 0.06, 2.1, 1.625, N, 0)
-      for (let z = -0.98; z <= 0.99; z += 0.14)
-        B.box(M.steelL, 2.5, 0.025, 0.02, 1.625, N + 0.04, z)
-      for (let x = 0.5; x <= 2.8; x += 0.3) B.box(M.steelL, 0.02, 0.025, 2.05, x, N + 0.045, 0)
+      B.box(M.dark, 1.6, 0.06, 2.1, 1.15, N, 0) // sub-piso x 0,35–1,95
+      B.box(M.dark, 0.95, 0.06, 1.1, 2.425, N, 0.5) // sub-piso x 1,95–2,90 (z ≥ −0,05); el resto queda abierto bajo los dedos del peine
       for (const z of [-1.05, 1.05]) B.box(M.red, 2.7, 0.14, 0.09, 1.6, N - 0.05, z)
       for (const x of [0.35, 2.9]) B.box(M.red, 0.09, 0.14, 2.2, x, N - 0.05, 0)
       for (const x of [0.9, 1.6, 2.3]) B.box(M.red, 0.06, 0.1, 2.0, x, N - 0.08, 0)
@@ -664,16 +793,32 @@
       for (const z of [-1.05, 1.05]) B.box(M.white, 2.5, 0.06, 0.06, 1.63, N + 2.3, z)
       for (const x of [0.4, 2.85]) B.box(M.white, 0.06, 0.06, 2.1, x, N + 2.3, 0)
       for (let x = 0.7; x < 2.8; x += 0.5) B.box(M.steelL, 0.03, 0.03, 2.1, x, N + 2.32, 0) // techo enrejado
-      // paneles laterales (mitad inferior) y barrotes superiores
+      // largueros longitudinales bajo el piso y placas de base de los montantes (aproximado)
+      for (const z of [-0.45, 0.45]) B.box(M.red, 2.5, 0.1, 0.05, 1.6, N - 0.08, z)
+      for (const x of [0.4, 1.6, 2.85])
+        for (const z of [-1.05, 1.05]) B.box(M.white, 0.14, 0.02, 0.14, x, N + 0.045, z)
+      // paneles laterales (mitad inferior de chapa, con nervios y cantonera superior) y barandas de caños horizontales
       for (const z of [-1.06, 1.06]) {
         B.box(M.white, 1.8, 0.95, 0.035, 1.95, N + 0.6, z)
-        for (let x = 1.1; x < 2.85; x += 0.3) B.box(M.steelL, 0.025, 1.2, 0.025, x, N + 1.7, z)
+        B.box(M.white, 1.8, 0.03, 0.08, 1.95, N + 1.08, z * 1.01)
+        for (const x of [1.4, 1.95, 2.5]) B.box(M.white, 0.04, 0.9, 0.02, x, N + 0.6, z * 0.97)
+        for (const y of [1.4, 1.7, 2.0])
+          B.cyl(M.steelL, 0.018, 0.018, 2.45, 1.625, N + y, z, 'x', 6)
+        for (const x of [1.05, 2.2]) B.box(M.white, 0.05, 1.2, 0.05, x, N + 1.7, z)
         B.box(M.yellow, 2.5, 0.05, 0.06, 1.63, N + 1.12, z * 1.01)
       }
+      // panel trasero lateral (lado +z, entre el mástil y el arco); en el lado −z queda la puerta PE-7
+      B.box(M.white, 0.65, 0.5, 0.03, 0.725, N + 0.4, 1.06)
       // frente: barandas y rodapié
       for (const y of [N + 0.55, N + 1.1]) B.box(M.yellow, 0.05, 0.05, 2.1, 2.9, y, 0)
       B.box(M.red, 0.03, 0.15, 2.1, 2.9, N + 0.1, 0)
+      for (const z of [-1.0, 1.0]) B.box(M.yellow, 0.05, 1.15, 0.05, 2.9, N + 0.58, z) // postes de la baranda frontal
+      // rodapiés laterales de la zona de dedos (contienen tubulares y herramientas)
+      for (const z of [-1.0, 1.0]) B.box(M.red, 0.9, 0.09, 0.02, 2.4, N + 0.06, z)
       B.flush(t, 'jaula')
+
+      buildContainmentArch(t)
+      buildSkids(t)
 
       // Logo TACKER en ambos paneles laterales (el del lado -z se gira para que se lea)
       if (logo && Plane) {
@@ -719,6 +864,10 @@
       for (let x = 0.9; x <= 2.0; x += 0.22) s.box(M.steelL, 0.02, 0.03, 0.55, x, N + 0.005, 1.36)
       s.cyl(M.red, 0.03, 0.03, 1.3, 1.45, N + 0.02, 1.085, 'x', 8)
       for (const x of [0.85, 2.05]) s.box(M.yellow, 0.05, 0.05, 0.05, x, N + 0.06, 1.1)
+      // detalle (aproximado): largueros longitudinales de la rejilla y baranda baja exterior con postes
+      for (const z of [1.2, 1.5]) s.box(M.steelL, 1.3, 0.03, 0.02, 1.45, N + 0.005, z)
+      s.box(M.yellow, 1.3, 0.04, 0.03, 1.45, N + 0.06, 1.63)
+      for (const x of [0.85, 2.05]) s.box(M.yellow, 0.04, 0.12, 0.04, x, N + 0.05, 1.63)
       s.done()
 
       // PE-5 · trampolín (abulonado; eslinga de seguridad de 3/8" con 4 eslabones engrampados)
@@ -729,13 +878,27 @@
         const u = i * 0.17
         s.box(M.dark, 0.05, 0.05, 0.05, 3.78 + (2.9 - 3.78) * u, N + 2.3 * u, 0.25)
       }
+      // detalle (aproximado): tacos antideslizantes, rodapiés laterales y bisagras con pasador contra el borde del piso
+      for (let x = 3.0; x <= 3.76; x += 0.15) s.box(M.steelL, 0.02, 0.012, 0.5, x, N, 0)
+      for (const z of [-0.285, 0.285]) s.box(M.red, 0.9, 0.09, 0.02, 3.35, N + 0.03, z)
+      for (const z of [-0.2, 0.2]) s.cyl(M.dark, 0.03, 0.03, 0.1, 2.93, N - 0.02, z, 'z', 8)
+      s.cyl(M.dark, 0.012, 0.012, 0.6, 2.93, N - 0.02, 0, 'z', 6)
       s.done()
 
-      // PE-6 · peines del piso de enganche (abulonados; eslinga 3/8")
+      // PE-6 · peines del piso de enganche (abulonados; eslinga 3/8"). Ocho dedos individuales (APROXIMADO: paso y ancho
+      // de la referencia genérica, no cota del equipo) apoyados en un travesaño raíz y un larguero inferior.
       s = spot(t, 'PE-6', 2.4, N + 0.09, 0)
-      for (let z = -0.8; z <= 0.81; z += 0.2) s.box(M.steel, 0.95, 0.03, 0.05, 2.4, N + 0.075, z)
-      s.box(M.steel, 0.04, 0.05, 1.8, 1.95, N + 0.09, 0)
-      s.line(M.steelL, [2.88, N + 0.15, 0.9], [1.95, N + 0.12, 0.85], 0.012, 5)
+      for (let i = 0; i < 8; i++) {
+        const z = -0.93 + 0.12 * i
+        s.box(M.steelL, 0.86, 0.03, 0.04, 2.4, N + 0.04, z)
+        const tip = s.box(M.steelL, 0.1, 0.03, 0.04, 2.87, N + 0.028, z) // punta biselada
+        tip.rotation.z = -0.25
+        s.cyl(M.steelL, 0.014, 0.014, 0.03, 2.02, N + 0.07, z, 'y', 5) // bulón de fijación
+      }
+      s.box(M.steelL, 0.05, 0.06, 0.9, 1.955, N + 0.05, -0.52) // travesaño raíz
+      s.box(M.steelL, 0.05, 0.05, 0.9, 2.55, N, -0.52) // larguero inferior de apoyo
+      s.box(M.steelL, 0.9, 0.09, 0.02, 2.4, N + 0.04, -0.03) // guía lateral hacia el paso central
+      s.line(M.steelL, [2.88, N + 0.12, -0.98], [1.98, N + 0.1, -0.9], 0.012, 5)
       s.done()
 
       // PE-7 · puerta de ingreso al piso (bisagras soldadas, cadenas soldadas), lado -z junto al mástil
@@ -745,23 +908,17 @@
       for (const x of [0.4, 1.0]) s.box(M.yellow, 0.04, 0.95, 0.04, x, N + 0.58, -1.08)
       s.box(M.yellow, 0.6, 0.03, 0.03, 0.7, N + 0.58, -1.08)
       for (const y of [N + 0.3, N + 0.85]) s.cyl(M.steel, 0.03, 0.03, 0.09, 0.4, y, -1.08, 'y', 6)
-      s.poly(
-        M.steelL,
-        [
-          D(1.0, N + 0.95, -1.1),
-          D(1.06, N + 0.85, -1.12),
-          D(1.1, N + 0.72, -1.12),
-          D(1.06, N + 0.6, -1.1),
-        ],
-        0.012,
-        4,
-      )
-      for (const y of [N + 0.9, N + 0.75]) s.box(M.steelL, 0.05, 0.03, 0.03, 1.08, y, -1.12)
+      // detalle (aproximado): travesaños intermedios, diagonal, pestillo y cadena de retención de eslabones alternados
+      for (const y of [0.35, 0.82]) s.box(M.yellow, 0.6, 0.03, 0.03, 0.7, N + y, -1.08)
+      s.line(M.yellow, [0.4, N + 0.12, -1.08], [1.0, N + 1.05, -1.08], 0.015, 4)
+      s.cyl(M.steel, 0.02, 0.02, 0.09, 0.98, N + 0.58, -1.1, 'z', 6)
+      chain(s, [1.0, N + 0.98, -1.115], [1.1, N + 0.6, -1.115], 8)
+      for (const y of [N + 0.98, N + 0.6]) s.box(M.steelL, 0.05, 0.03, 0.03, 1.07, y, -1.12)
       s.done()
 
       // PE-8 · sujeción del piso de enganche (cáncamo soldado)
       s = spot(t, 'PE-8', 0.5, N - 0.14, 1.1)
-      s.box(M.steel, 0.1, 0.06, 0.06, 0.5, N - 0.13, 1.09)
+      s.box(M.steelL, 0.1, 0.06, 0.06, 0.5, N - 0.13, 1.09)
       s.ring(M.steelL, 0.5, N - 0.22, 1.13, 0.045, 0.014, 'xy', 8)
       s.done()
 
@@ -783,12 +940,10 @@
       for (const z of [0.35, 0.95]) s.box(M.yellow, 0.04, 0.95, 0.04, 2.93, N + 0.58, z)
       s.box(M.yellow, 0.03, 0.03, 0.6, 2.93, N + 0.58, 0.65)
       s.cyl(M.steel, 0.028, 0.028, 0.1, 2.93, N + 0.58, 0.35, 'y', 6)
-      s.poly(
-        M.steelL,
-        [D(2.95, N + 0.5, 0.36), D(2.99, N + 0.4, 0.4), D(2.99, N + 0.3, 0.46)],
-        0.012,
-        4,
-      )
+      // detalle (aproximado): travesaños intermedios, diagonal y cadena del perno pasador de eslabones alternados
+      for (const y of [0.35, 0.82]) s.box(M.yellow, 0.03, 0.03, 0.6, 2.93, N + y, 0.65)
+      s.line(M.yellow, [2.93, N + 0.12, 0.35], [2.93, N + 1.05, 0.95], 0.015, 4)
+      chain(s, [2.96, N + 0.5, 0.36], [2.99, N + 0.28, 0.46], 5)
       s.done()
 
       // PE-12 · 2 poleas de deslizamiento del piso (viajeras, abulonadas a cáncamos soldados) sobre el frente del mástil
