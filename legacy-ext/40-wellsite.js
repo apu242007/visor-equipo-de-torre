@@ -734,86 +734,662 @@
     }
   }
 
-  // ═════════════════════════════════════════ LLAVE HIDRÁULICA + POSTE DE RETENIDA ═════════════════════════════════════════
+  // ═════════════════════════════════════════ LLAVE HIDRÁULICA + CUÑAS + POSTE DE RETENIDA ═════════════════════════════════════════
+  /**
+   * Componente 08 (`llave`): llave hidráulica de tubing con llave de contrafuerza (backup), cuñas manuales, línea de suspensión y poste
+   * de retenida. Tipología GENÉRICA tomada de dos fotos de referencia de catálogo (no es el equipo del TACKER 10): llave de garganta
+   * abierta tipo placa con estructura tubular, cilindro hidráulico, mangueras y franjas de advertencia, y llave con cabezal, manómetro
+   * de torque, patas con resorte, palancas y válvulas de mando.
+   * Confirmado: posición del pozo/piso, libro DROPS (PRL-1/2/3: grampas, perno del brazo, eslinga). Aproximado: forma, cotas, ruteo de
+   * mangueras, escala del manómetro (la aguja queda en cero: NO indica ningún valor). PENDIENTE: modelo/fabricante, torque y capacidad,
+   * rango de diámetros, color real, presión hidráulica.
+   * Mallas fusionadas: `llave_pintura`, `llave_acero`, `llave_mangueras`, `llave_cunas` (cuñas + buje) y `llave_manometro`.
+   */
   function buildLlave(g, api) {
     const m = mats(api)
-    const P = new Batch()
-    const M = new Batch()
-    const H = new Batch()
+    const P = new Batch() // llave_pintura: chapa, brazo, estructura
+    const M = new Batch() // llave_acero: dados, bulones, cilindro, tubería
+    const H = new Batch() // llave_mangueras: mangueras y látigos
+    const S = new Batch() // llave_cunas: cuñas manuales + buje
+    const G = new Batch() // llave_manometro: manómetro de torque
+    const dialMat = api.pn('#ffffff', 0.3, 0.08, { vertexColors: true })
     const FL = 2.36 // cota superior del piso de trabajo (subestructura)
 
-    // cuñas (slips) en el buje del piso + sarta de tubing 2 7/8" (estético: una parada)
-    P.cyl(C.DARK, 0.36, 0.48, 0.12, 0, FL + 0.06, 0, 'y', 20)
-    for (const [x, z] of [
-      [0.09, 0],
-      [-0.09, 0],
-      [0, 0.09],
-      [0, -0.09],
+    /**
+     * Color de la pintura de la llave. 'RED' (fotos de referencia genéricas) | 'ORIGINAL' (amarillo del visor anterior).
+     * PENDIENTE: el color del equipo real no está confirmado.
+     */
+    const LLAVE_COLOR = 'RED'
+    const PAINT =
+      LLAVE_COLOR === 'RED' ? { main: '#B3262B', acc: '#D4494E' } : { main: C.YEL, acc: '#F7CF6A' }
+    const STEEL_D = '#4A4F55' // acero oscuro (dados, cuerpos de válvula)
+    const BRASS = '#B08A3A' // conexiones de mangueras
+    const SPRING = '#E9A21B' // resorte de las patas
+    const cos = Math.cos
+    const sin = Math.sin
+
+    // ─────────── geometría a medida (más liviana que `ta`, que fija 32×6 caras por tubo) ───────────
+    const sub3 = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+    const cross3 = (a, b) => [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0],
+    ]
+    const norm3 = (a) => {
+      const l = Math.hypot(a[0], a[1], a[2]) || 1
+      return [a[0] / l, a[1] / l, a[2] / l]
+    }
+    const mesh = () => ({ pos: [], nor: [], idx: [] })
+    /** Cuadrilátero de 2 triángulos; el orden se corrige para que la cara mire hacia las normales declaradas. */
+    const quad = (o, vs, ns) => {
+      const i = o.pos.length / 3
+      for (let k = 0; k < 4; k++) {
+        o.pos.push(vs[k][0], vs[k][1], vs[k][2])
+        o.nor.push(ns[k][0], ns[k][1], ns[k][2])
+      }
+      const c = cross3(sub3(vs[2], vs[0]), sub3(vs[3], vs[1]))
+      const d =
+        c[0] * (ns[0][0] + ns[2][0]) + c[1] * (ns[0][1] + ns[2][1]) + c[2] * (ns[0][2] + ns[2][2])
+      if (d >= 0) o.idx.push(i, i + 1, i + 2, i, i + 2, i + 3)
+      else o.idx.push(i, i + 2, i + 1, i, i + 3, i + 2)
+    }
+    const finish = (o) => {
+      const geo = new K.BufferGeometry()
+      geo.setAttribute('position', new K.Attr(new Float32Array(o.pos), 3))
+      geo.setAttribute('normal', new K.Attr(new Float32Array(o.nor), 3))
+      geo.setAttribute('uv', new K.Attr(new Float32Array((o.pos.length / 3) * 2), 2))
+      geo.setIndex(o.idx)
+      return geo
+    }
+
+    /**
+     * Sector anular (o tronco de cono hueco): radios (interior, exterior) abajo `r0i,r0o` y arriba `r1i,r1o`, entre las alturas y0..y1
+     * y los ángulos a0..a1 (rad; x = cos a, z = sin a), en `n` pasos. `bottom`/`caps` = false omiten la tapa inferior / los cortes.
+     */
+    const sectorGeo = (
+      r0i,
+      r0o,
+      r1i,
+      r1o,
+      y0,
+      y1,
+      a0,
+      a1,
+      n,
+      { bottom = true, caps = true } = {},
+    ) => {
+      const o = mesh()
+      const at = (r, y, a) => [r * cos(a), y, r * sin(a)]
+      const dy = y1 - y0
+      for (let k = 0; k < n; k++) {
+        const a = a0 + ((a1 - a0) * k) / n
+        const b = a0 + ((a1 - a0) * (k + 1)) / n
+        const up = [0, 1, 0]
+        const dn = [0, -1, 0]
+        quad(o, [at(r1i, y1, a), at(r1o, y1, a), at(r1o, y1, b), at(r1i, y1, b)], [up, up, up, up])
+        if (bottom)
+          quad(
+            o,
+            [at(r0i, y0, a), at(r0o, y0, a), at(r0o, y0, b), at(r0i, y0, b)],
+            [dn, dn, dn, dn],
+          )
+        const no = (t) => norm3([cos(t) * dy, -(r1o - r0o), sin(t) * dy])
+        quad(
+          o,
+          [at(r0o, y0, a), at(r1o, y1, a), at(r1o, y1, b), at(r0o, y0, b)],
+          [no(a), no(a), no(b), no(b)],
+        )
+        const ni = (t) => norm3([-cos(t) * dy, r1i - r0i, -sin(t) * dy])
+        quad(
+          o,
+          [at(r0i, y0, a), at(r1i, y1, a), at(r1i, y1, b), at(r0i, y0, b)],
+          [ni(a), ni(a), ni(b), ni(b)],
+        )
+      }
+      if (caps) {
+        const n0 = [sin(a0), 0, -cos(a0)]
+        const n1 = [-sin(a1), 0, cos(a1)]
+        quad(
+          o,
+          [at(r0i, y0, a0), at(r0o, y0, a0), at(r1o, y1, a0), at(r1i, y1, a0)],
+          [n0, n0, n0, n0],
+        )
+        quad(
+          o,
+          [at(r0i, y0, a1), at(r0o, y0, a1), at(r1o, y1, a1), at(r1i, y1, a1)],
+          [n1, n1, n1, n1],
+        )
+      }
+      return finish(o)
+    }
+    /** Interpolación Catmull-Rom uniforme: `per` muestras por tramo. */
+    const spline = (pts, per) => {
+      const out = []
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(0, i - 1)]
+        const p1 = pts[i]
+        const p2 = pts[i + 1]
+        const p3 = pts[Math.min(pts.length - 1, i + 2)]
+        for (let s = 0; s < per; s++) {
+          const t = s / per
+          const t2 = t * t
+          const t3 = t2 * t
+          out.push(
+            [0, 1, 2].map(
+              (c) =>
+                0.5 *
+                (2 * p1[c] +
+                  (-p0[c] + p2[c]) * t +
+                  (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2 +
+                  (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3),
+            ),
+          )
+        }
+      }
+      out.push(pts[pts.length - 1])
+      return out
+    }
+    /** Tubo de radio `r` con `radial` caras a lo largo de la polilínea `path` (marcos por transporte paralelo). */
+    const tubeGeo = (path, r, radial = 6) => {
+      const n = path.length
+      const tan = path.map((_, i) =>
+        norm3(sub3(path[Math.min(n - 1, i + 1)], path[Math.max(0, i - 1)])),
+      )
+      const up = Math.abs(tan[0][1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]
+      let nn = up
+      const rings = []
+      for (let i = 0; i < n; i++) {
+        const t = tan[i]
+        const d = nn[0] * t[0] + nn[1] * t[1] + nn[2] * t[2]
+        nn = norm3([nn[0] - d * t[0], nn[1] - d * t[1], nn[2] - d * t[2]])
+        const bb = cross3(t, nn)
+        const ring = []
+        for (let j = 0; j < radial; j++) {
+          const th = (2 * PI * j) / radial
+          const dir = [
+            cos(th) * nn[0] + sin(th) * bb[0],
+            cos(th) * nn[1] + sin(th) * bb[1],
+            cos(th) * nn[2] + sin(th) * bb[2],
+          ]
+          ring.push({
+            p: [path[i][0] + dir[0] * r, path[i][1] + dir[1] * r, path[i][2] + dir[2] * r],
+            n: dir,
+          })
+        }
+        rings.push(ring)
+      }
+      const o = mesh()
+      for (let i = 0; i < n - 1; i++)
+        for (let j = 0; j < radial; j++) {
+          const j2 = (j + 1) % radial
+          const a = rings[i][j]
+          const b = rings[i][j2]
+          const c = rings[i + 1][j2]
+          const d = rings[i + 1][j]
+          quad(o, [a.p, b.p, c.p, d.p], [a.n, b.n, c.n, d.n])
+        }
+      return finish(o)
+    }
+    /** Toro de radio mayor `R` y menor `r` en el plano 'xy' | 'zy' | 'xz' (eje del toro = la normal del plano). */
+    const torusGeo = (R, r, plane, radial = 5, seg = 12) => {
+      const e1 = plane === 'zy' ? [0, 0, 1] : [1, 0, 0]
+      const e2 = plane === 'xz' ? [0, 0, 1] : [0, 1, 0]
+      const e3 = cross3(e1, e2)
+      const o = mesh()
+      const vert = (i, j) => {
+        const u = (2 * PI * i) / seg
+        const v = (2 * PI * j) / radial
+        const rd = [
+          cos(u) * e1[0] + sin(u) * e2[0],
+          cos(u) * e1[1] + sin(u) * e2[1],
+          cos(u) * e1[2] + sin(u) * e2[2],
+        ]
+        const nr = [
+          cos(v) * rd[0] + sin(v) * e3[0],
+          cos(v) * rd[1] + sin(v) * e3[1],
+          cos(v) * rd[2] + sin(v) * e3[2],
+        ]
+        return { p: [rd[0] * R + nr[0] * r, rd[1] * R + nr[1] * r, rd[2] * R + nr[2] * r], n: nr }
+      }
+      for (let i = 0; i < seg; i++)
+        for (let j = 0; j < radial; j++) {
+          const a = vert(i, j)
+          const b = vert(i, j + 1)
+          const c = vert(i + 1, j + 1)
+          const d = vert(i + 1, j)
+          quad(o, [a.p, b.p, c.p, d.p], [a.n, b.n, c.n, d.n])
+        }
+      return finish(o)
+    }
+    const hose = (b, c, pts, r, per = 4, radial = 6) => {
+      const path = spline(pts, per)
+      b.push(tubeGeo(path, r, radial), 0, 0, 0, c)
+      return path
+    }
+    const ring = (b, c, x, y, z, R, r, plane, radial = 5, seg = 12) =>
+      b.push(torusGeo(R, r, plane, radial, seg), x, y, z, c)
+    /** Resorte helicoidal vertical (eje Y): `turns` vueltas de radio `R` con alambre `r`, entre y0 e y1. */
+    const spring = (b, c, cx, cz, y0, y1, R, r, turns = 5, per = 8) => {
+      const pts = []
+      const n = turns * per
+      for (let k = 0; k <= n; k++) {
+        const t = k / n
+        const a = 2 * PI * turns * t
+        pts.push([cx + R * cos(a), y0 + (y1 - y0) * t, cz + R * sin(a)])
+      }
+      b.push(tubeGeo(pts, r, 4), 0, 0, 0, c)
+    }
+    /** Caja con rotaciones (rad) aplicadas en el orden X, Z, Y. */
+    const boxRot = (b, c, w, h, d, x, y, z, rx = 0, ry = 0, rz = 0) => {
+      const geo = new K.Box(w, h, d)
+      if (rx) geo.rotateX(rx)
+      if (rz) geo.rotateZ(rz)
+      if (ry) geo.rotateY(ry)
+      return b.push(geo, x, y, z, c)
+    }
+    /** Bulón hexagonal (cabeza baja) sobre un plano horizontal, en el ángulo `a` y radio `R` alrededor de (cx,cz). */
+    const bolts = (b, c, cx, cz, y, R, a0, a1, n) => {
+      for (let k = 0; k < n; k++) {
+        const a = n === 1 ? a0 : a0 + ((a1 - a0) * k) / (n - 1)
+        b.cyl(c, 0.017, 0.017, 0.03, cx + R * cos(a), y + 0.015, cz + R * sin(a), 'y', 5)
+      }
+    }
+    /** Dado (mordaza) radial en el ángulo `a`, centrado en (x,z): cuerpo de acero oscuro + 4 estrías. Cara hacia el eje del tubing. */
+    const die = (b, x, z, a, y, h) => {
+      b.box(STEEL_D, 0.06, h, 0.05, x, y, z, -a)
+      for (let k = 0; k < 4; k++)
+        b.box(
+          C.STEEL,
+          0.012,
+          0.012,
+          0.042,
+          x - 0.034 * cos(a),
+          y - h * 0.36 + k * h * 0.24,
+          z - 0.034 * sin(a),
+          -a,
+        )
+    }
+
+    // ─────────────────────────── cuñas manuales (slips) + buje ───────────────────────────
+    // Buje maestro (cono de asiento) y 3 segmentos articulados de cuña con dados; dos asas hacia +X (lado abierto).
+    S.push(
+      sectorGeo(0.09, 0.48, 0.15, 0.36, FL, FL + 0.12, 0, 2 * PI, 28, {
+        bottom: false,
+        caps: false,
+      }),
+      0,
+      0,
+      0,
+      C.DARK,
+    )
+    const SEG = [
+      [10, 110],
+      [130, 230],
+      [250, 350],
+    ].map(([a, b]) => [(a * PI) / 180, (b * PI) / 180])
+    for (const [a0, a1] of SEG) {
+      S.push(sectorGeo(0.05, 0.1, 0.05, 0.19, FL + 0.02, FL + 0.24, a0, a1, 8), 0, 0, 0, '#8C959C') // cuerpo en cuña
+      const ins = (8 * PI) / 180
+      S.push(
+        sectorGeo(0.046, 0.06, 0.046, 0.06, FL + 0.07, FL + 0.21, a0 + ins, a1 - ins, 4),
+        0,
+        0,
+        0,
+        STEEL_D,
+      ) // dados
+      for (let k = 0; k < 4; k++) {
+        const am = (a0 + a1) / 2
+        S.box(
+          C.STEEL,
+          0.012,
+          0.008,
+          0.05,
+          0.052 * cos(am),
+          FL + 0.09 + k * 0.035,
+          0.052 * sin(am),
+          -am,
+        )
+      }
+    }
+    for (const ah of [(120 * PI) / 180, (240 * PI) / 180]) {
+      // bisagra entre segmentos: pasador vertical + orejas
+      const hx = 0.155 * cos(ah)
+      const hz = 0.155 * sin(ah)
+      S.cyl(C.STEEL, 0.014, 0.014, 0.22, hx, FL + 0.13, hz, 'y', 8)
+      S.box(STEEL_D, 0.04, 0.04, 0.05, hx, FL + 0.21, hz, -ah)
+      S.box(STEEL_D, 0.04, 0.04, 0.05, hx, FL + 0.05, hz, -ah)
+    }
+    for (const sg of [1, -1]) {
+      // asas de las dos cuñas extremas
+      const root = [0.167, FL + 0.2, 0.03 * sg]
+      const elbow = [0.4, FL + 0.26, 0.1 * sg]
+      const tip = [0.4, FL + 0.26, 0.27 * sg]
+      S.rod(C.STEEL, root, elbow, 0.014, 6)
+      S.rod(C.STEEL, elbow, tip, 0.013, 6)
+      S.rod(C.HOSE, [0.4, FL + 0.26, 0.15 * sg], [0.4, FL + 0.26, 0.26 * sg], 0.02, 6) // empuñadura
+      S.cyl(C.STEEL, 0.02, 0.02, 0.02, 0.4, FL + 0.26, 0.275 * sg, 'z', 6)
+    }
+
+    // ─────────────────────────── sarta de tubing (una parada, estético) ───────────────────────────
+    M.cyl(C.STEEL, 0.045, 0.045, 1.5, 0, 3.13, 0, 'y', 12)
+    M.cyl(C.GRAY_L, 0.062, 0.062, 0.14, 0, 3.74, 0, 'y', 12) // cupla
+
+    // ─────────────────────────── llave de contrafuerza (backup), y 2,68–2,80 ───────────────────────────
+    const g0 = Math.asin(0.07 / 0.12) // semiángulo de la garganta (ancho 0,14 m en el borde interior)
+    const A0 = g0
+    const A1 = 2 * PI - g0
+    P.push(sectorGeo(0.12, 0.34, 0.12, 0.34, 2.68, 2.8, A0, A1, 22), 0, 0, 0, PAINT.main)
+    for (const sg of [1, -1]) P.box(PAINT.main, 0.31, 0.12, 0.14, 0.245, 2.74, 0.14 * sg) // labios de la garganta
+    for (const a of [PI, (140 * PI) / 180, (220 * PI) / 180])
+      die(M, 0.09 * cos(a), 0.09 * sin(a), a, 2.74, 0.1)
+    for (const sg of [1, -1]) die(M, 0.12, 0.09 * sg, (PI / 2) * sg, 2.74, 0.1)
+    bolts(M, STEEL_D, 0, 0, 2.8, 0.29, (45 * PI) / 180, (315 * PI) / 180, 9)
+    // 3 columnas entre contrafuerza y llave; patas de apoyo con resorte (2 delanteras) y pata fija trasera
+    for (const [px, pz] of [
+      [0.118, 0.254],
+      [0.118, -0.254],
+      [-0.28, 0],
     ])
-      M.box(C.STEEL, 0.08, 0.16, 0.05, x, FL + 0.19, z, Math.atan2(x, z))
-    M.rod(C.STEEL, [0.1, FL + 0.24, 0], [0.45, FL + 0.3, 0.1], 0.015)
-    M.rod(C.STEEL, [-0.1, FL + 0.24, 0], [-0.45, FL + 0.3, -0.1], 0.015)
-    M.cyl(C.STEEL, 0.045, 0.045, 1.5, 0, 3.13, 0, 'y', 10)
-    M.cyl(C.GRAY_L, 0.062, 0.062, 0.14, 0, 3.74, 0, 'y', 10) // cupla
+      M.cyl(C.STEEL, 0.022, 0.022, 0.16, px, 2.88, pz, 'y', 8)
+    for (const [lx, lz, sp] of [
+      [0.28, 0.485, true],
+      [0.28, -0.485, true],
+      [-0.56, 0, false],
+    ]) {
+      const ang = Math.atan2(lz, lx)
+      P.rod(PAINT.main, [0.32 * cos(ang), 2.76, 0.32 * sin(ang)], [lx, 2.76, lz], 0.024, 6) // ménsula
+      P.cyl(PAINT.main, 0.032, 0.032, 0.14, lx, 2.7, lz, 'y', 8) // camisa de la pata
+      if (sp) {
+        M.cyl(C.STEEL, 0.016, 0.016, 0.28, lx, 2.51, lz, 'y', 6) // vástago telescópico
+        spring(M, SPRING, lx, lz, 2.43, 2.63, 0.036, 0.008, 5, 8)
+      } else M.cyl(C.STEEL, 0.02, 0.02, 0.36, lx, 2.56, lz, 'y', 6)
+      P.box(PAINT.main, 0.14, 0.022, 0.14, lx, FL + 0.011, lz) // patín
+    }
 
-    // llave de tubing (mordazas 2 3/8"–3 1/2"): cuerpo en "C" abierto hacia +X, con llave de contrafuerza debajo
-    P.box(C.YEL, 0.5, 0.24, 0.7, -0.16, 3.0, 0)
-    P.box(C.YEL, 0.5, 0.24, 0.2, 0.16, 3.0, 0.25)
-    P.box(C.YEL, 0.5, 0.24, 0.2, 0.16, 3.0, -0.25)
-    P.cyl(C.DARK, 0.3, 0.3, 0.08, -0.1, 3.16, 0, 'y', 18) // tapa de engranajes
-    P.box(C.YEL, 0.5, 0.16, 0.6, -0.16, 2.74, 0) // contrafuerza
-    P.box(C.YEL, 0.4, 0.16, 0.16, 0.12, 2.74, 0.22)
-    P.box(C.YEL, 0.4, 0.16, 0.16, 0.12, 2.74, -0.22)
-    for (const dz of [-0.09, 0.09]) M.box(C.STEEL, 0.12, 0.14, 0.06, 0.03, 3.0, dz) // mordazas
-    M.cyl(C.DARK, 0.08, 0.08, 0.34, -0.62, 3.0, 0.15, 'x', 10) // motor hidráulico
-    P.box(C.DARK, 0.16, 0.2, 0.2, -0.46, 3.0, 0.15)
-    for (const dz of [-0.37, 0.37]) M.cyl(C.STEEL, 0.05, 0.05, 0.5, 0.02, 3.0, dz, 'x', 10) // cilindros de sujeción de mordazas
-    M.loop(C.STEEL, -0.3, 3.36, 0, 0.1, 'xy', 0, 2 * PI, 0.018, 12) // aro de suspensión
-    M.rod(C.STEEL, [-0.45, 3.0, -0.1], [-0.6, 3.0, -0.75], 0.025) // manija
-    P.cyl(C.YEL, 0.04, 0.04, 0.16, -0.6, 3.0, -0.8, 'z', 8)
+    // ─────────────────────────── cabezal de la llave (garganta, dados, tapa con bulones), y 2,96–3,14 ───────────────────────────
+    P.push(sectorGeo(0.12, 0.36, 0.12, 0.36, 2.96, 3.1, A0, A1, 24), 0, 0, 0, PAINT.main) // placa principal
+    P.box(PAINT.main, 0.44, 0.14, 0.54, -0.44, 3.03, 0) // cola de la placa (mecanismo)
+    for (const sg of [1, -1]) P.box(PAINT.main, 0.33, 0.14, 0.14, 0.255, 3.03, 0.14 * sg) // labios de la garganta
+    P.push(sectorGeo(0.12, 0.3, 0.12, 0.3, 3.1, 3.14, A0, A1, 22), 0, 0, 0, PAINT.acc) // tapa
+    P.box(PAINT.acc, 0.34, 0.04, 0.48, -0.41, 3.12, 0)
+    for (const a of [PI, (130 * PI) / 180, (230 * PI) / 180])
+      die(M, 0.09 * cos(a), 0.09 * sin(a), a, 3.03, 0.13)
+    for (const sg of [1, -1]) die(M, 0.12, 0.09 * sg, (PI / 2) * sg, 3.03, 0.13) // dados de la puerta
+    bolts(M, STEEL_D, 0, 0, 3.14, 0.21, (50 * PI) / 180, (310 * PI) / 180, 8)
+    bolts(M, STEEL_D, 0, 0, 3.1, 0.33, (48 * PI) / 180, (312 * PI) / 180, 9)
+    for (const [bx, bz] of [
+      [-0.3, 0.18],
+      [-0.3, -0.18],
+      [-0.55, 0.18],
+      [-0.55, -0.18],
+    ])
+      M.cyl(STEEL_D, 0.017, 0.017, 0.03, bx, 3.155, bz, 'y', 5)
+    // franjas de advertencia en los labios (amarillo/negro)
+    for (const sg of [1, -1]) {
+      P.box(C.DARK, 0.3, 0.12, 0.004, 0.255, 3.03, (0.21 + 0.002) * sg)
+      for (let k = 0; k < 5; k++)
+        boxRot(
+          P,
+          C.YEL,
+          0.045,
+          0.11,
+          0.003,
+          0.15 + k * 0.055,
+          3.03,
+          (0.21 + 0.004) * sg,
+          0,
+          0,
+          PI / 4,
+        )
+      P.box(C.DARK, 0.004, 0.12, 0.14, 0.42 + 0.002, 3.03, 0.14 * sg)
+      for (const dz of [0.1, 0.17])
+        boxRot(P, C.YEL, 0.003, 0.11, 0.035, 0.42 + 0.005, 3.03, dz * sg, PI / 4)
+    }
+    M.box(C.WHITE, 0.003, 0.05, 0.08, -0.664, 3.03, -0.09) // placa de datos (en blanco: modelo/fabricante PENDIENTE)
 
-    // mangueras hidráulicas hacia el equipo
-    H.tube(
+    // ─────────────────────────── accionamiento: motor, caja de engranajes, válvulas de mando ───────────────────────────
+    P.box(PAINT.main, 0.24, 0.16, 0.34, -0.44, 3.22, 0) // caja de engranajes
+    M.cyl(STEEL_D, 0.055, 0.055, 0.18, -0.46, 3.03, -0.36, 'z', 10) // motor hidráulico
+    P.box(PAINT.main, 0.12, 0.12, 0.02, -0.46, 3.03, -0.265) // brida del motor
+    M.cyl(C.STEEL, 0.045, 0.045, 0.03, -0.46, 3.03, -0.465, 'z', 8)
+    for (const dx of [-0.03, 0.03]) M.cyl(BRASS, 0.011, 0.011, 0.04, -0.46 + dx, 3.09, -0.4, 'y', 6) // bocas del motor
+    // bloque de válvulas: 2 palancas / 1 mando en T
+    P.box(PAINT.main, 0.1, 0.16, 0.18, -0.7, 3.05, 0.12)
+    for (const vz of [0.075, 0.165]) M.cyl(STEEL_D, 0.028, 0.028, 0.05, -0.7, 3.155, vz, 'y', 8)
+    P.rod(PAINT.main, [-0.7, 3.19, 0.075], [-0.73, 3.42, 0.03], 0.01, 5)
+    M.cyl(C.HOSE, 0.019, 0.019, 0.045, -0.73, 3.44, 0.03, 'y', 6) // perilla de la palanca
+    M.rod(C.HOSE, [-0.7, 3.18, 0.165], [-0.7, 3.3, 0.165], 0.01, 5)
+    M.rod(C.HOSE, [-0.7, 3.3, 0.125], [-0.7, 3.3, 0.205], 0.012, 5) // mando en T
+    // empuñadura en D (lado −Z)
+    P.rod(PAINT.main, [-0.26, 3.03, -0.27], [-0.26, 3.03, -0.72], 0.016, 6)
+    P.rod(PAINT.main, [-0.62, 3.03, -0.27], [-0.62, 3.03, -0.72], 0.016, 6)
+    P.rod(PAINT.main, [-0.26, 3.03, -0.72], [-0.62, 3.03, -0.72], 0.016, 6)
+    P.rod(C.DARK, [-0.36, 3.03, -0.72], [-0.52, 3.03, -0.72], 0.022, 6) // empuñadura
+
+    // ─────────────────────────── estructura tubular, cilindro hidráulico superior y suspensión ───────────────────────────
+    for (const sg of [1, -1]) {
+      P.rod(PAINT.main, [-0.34, 3.14, 0.22 * sg], [-0.34, 3.6, 0.21 * sg], 0.022, 6) // montante
+      P.rod(PAINT.main, [-0.55, 3.14, 0.245 * sg], [-0.34, 3.4, 0.22 * sg], 0.016, 5) // tornapunta
+      P.box(PAINT.main, 0.08, 0.02, 0.08, -0.34, 3.15, 0.22 * sg)
+      P.box(PAINT.main, 0.08, 0.09, 0.08, -0.34, 3.64, 0.21 * sg) // cabezal del montante
+    }
+    M.cyl(C.STEEL, 0.036, 0.036, 0.26, -0.34, 3.64, 0, 'z', 10) // camisa del cilindro
+    M.cyl(STEEL_D, 0.04, 0.04, 0.03, -0.34, 3.64, -0.14, 'z', 10)
+    M.cyl(STEEL_D, 0.04, 0.04, 0.03, -0.34, 3.64, 0.14, 'z', 10)
+    M.rod(C.STEEL, [-0.34, 3.64, 0.15], [-0.34, 3.64, 0.21], 0.016, 6) // vástago
+    for (const sg of [1, -1]) M.cyl(BRASS, 0.013, 0.013, 0.04, -0.34, 3.685, 0.11 * sg, 'y', 6) // bocas del cilindro
+    // manómetro de torque: pedestal + caja; aguja en cero (SIN escala ni valor)
+    const gx = -0.44
+    const gy = 3.46
+    const gz = 0
+    const gd = [cos((-20 * PI) / 180), 0, sin((-20 * PI) / 180)] // cara del manómetro (orientación aproximada)
+    M.cyl(STEEL_D, 0.04, 0.04, 0.08, gx, 3.34, gz, 'y', 8)
+    const gp = (k) => [gx + gd[0] * k, gy, gz + gd[2] * k]
+    G.rod(C.STEEL, gp(-0.02), gp(0.02), 0.088, 16) // caja / aro
+    G.rod(C.WHITE, gp(0.019), gp(0.0225), 0.074, 16) // esfera
+    const right = norm3(cross3([-gd[0], 0, -gd[2]], [0, 1, 0]))
+    const gdir = (th, r, k = 0.0232) => [
+      gx + gd[0] * k + right[0] * sin(th) * r,
+      gy + cos(th) * r,
+      gz + gd[2] * k + right[2] * sin(th) * r,
+    ]
+    for (let k = 0; k < 11; k++) {
+      const th = (-135 + k * 27) * (PI / 180)
+      G.rod(C.HOSE, gdir(th, 0.054), gdir(th, 0.067), 0.003, 4)
+    }
+    G.rod(C.RED, gdir(0, 0, 0.0232), gdir((-135 * PI) / 180, 0.05, 0.0245), 0.004, 4) // aguja en cero
+    G.rod(C.HOSE, gp(0.0225), gp(0.027), 0.011, 6) // eje de la aguja
+
+    // línea de suspensión: cabo doble desde los cabezales del cilindro → argolla → línea al mástil (~9 m) con contrapeso
+    const RINGY = 4.0
+    for (const sg of [1, -1])
+      M.rod(C.CABLE, [-0.34, 3.685, 0.21 * sg], [-0.34, RINGY - 0.05, 0], 0.011, 5)
+    ring(M, C.STEEL, -0.34, RINGY, 0, 0.05, 0.009, 'xy', 5, 12)
+    const TOP = [-0.92, 9.0, -0.62]
+    const lineAt = (y) => {
+      const t = (y - (RINGY + 0.05)) / (TOP[1] - (RINGY + 0.05))
+      return [-0.34 + (TOP[0] + 0.34) * t, y, 0 + TOP[2] * t]
+    }
+    M.rod(C.CABLE, [-0.34, RINGY + 0.05, 0], TOP, 0.012, 5)
+    for (const y of [4.62, 4.8, 4.98]) {
+      const [lx, , lz] = lineAt(y)
+      P.cyl(C.DARK, 0.08, 0.08, 0.16, lx, y, lz, 'y', 10) // contrapeso (discos)
+    }
+    P.cyl(C.DARK, 0.03, 0.03, 0.62, lineAt(4.8)[0], 4.8, lineAt(4.8)[2], 'y', 6)
+    // remate superior: polea con carrillos y pasador
+    for (const dz of [-0.05, 0.05]) P.box(C.DARK, 0.16, 0.12, 0.02, TOP[0], TOP[1], TOP[2] + dz)
+    M.cyl(C.STEEL, 0.05, 0.05, 0.05, TOP[0], TOP[1] - 0.005, TOP[2], 'z', 12)
+    M.cyl(C.STEEL, 0.014, 0.014, 0.14, TOP[0], TOP[1], TOP[2], 'z', 6)
+
+    // ─────────────────────────── mangueras (2 principales, 2 del motor, 2 del cilindro) con látigos de seguridad ───────────────────────────
+    const h1 = hose(
+      H,
       C.HOSE,
       [
-        [-0.7, 3.0, 0.15],
-        [-1.0, 2.7, 0.55],
-        [-1.5, 2.45, 1.0],
+        [-0.78, 3.02, 0.075],
+        [-1.02, 2.72, 0.5],
+        [-1.5, 2.53, 1.0],
         [-2.6, 2.42, 1.1],
         [-3.6, 2.4, 1.3],
       ],
       0.03,
+      5,
     )
-    H.tube(
+    const h2 = hose(
+      H,
       C.HOSE,
       [
-        [-0.7, 2.95, 0.2],
+        [-0.78, 3.08, 0.17],
         [-1.05, 2.65, 0.65],
-        [-1.55, 2.44, 1.1],
+        [-1.55, 2.52, 1.1],
         [-2.6, 2.4, 1.25],
         [-3.6, 2.38, 1.45],
       ],
       0.03,
+      5,
     )
+    hose(
+      H,
+      C.HOSE,
+      [
+        [-0.49, 3.1, -0.4],
+        [-0.58, 3.24, -0.36],
+        [-0.76, 3.2, -0.28],
+        [-0.72, 3.09, -0.12],
+        [-0.7, 3.07, 0.025],
+      ],
+      0.016,
+      4,
+      5,
+    )
+    hose(
+      H,
+      C.HOSE,
+      [
+        [-0.43, 3.1, -0.4],
+        [-0.55, 3.28, -0.34],
+        [-0.8, 3.24, -0.26],
+        [-0.76, 3.03, -0.1],
+        [-0.72, 3.02, 0.025],
+      ],
+      0.016,
+      4,
+      5,
+    )
+    hose(
+      H,
+      C.HOSE,
+      [
+        [-0.34, 3.7, 0.11],
+        [-0.48, 3.74, 0.14],
+        [-0.6, 3.55, 0.22],
+        [-0.66, 3.3, 0.26],
+        [-0.68, 3.13, 0.235],
+      ],
+      0.014,
+      4,
+      5,
+    )
+    hose(
+      H,
+      C.HOSE,
+      [
+        [-0.34, 3.7, -0.11],
+        [-0.42, 3.82, -0.02],
+        [-0.58, 3.72, 0.1],
+        [-0.68, 3.45, 0.28],
+        [-0.74, 3.2, 0.3],
+        [-0.72, 3.03, 0.235],
+      ],
+      0.014,
+      4,
+      5,
+    )
+    // conexiones (latón) y abrazaderas de las mangueras principales
+    M.cyl(BRASS, 0.036, 0.036, 0.05, -0.775, 3.02, 0.075, 'x', 8)
+    M.cyl(BRASS, 0.036, 0.036, 0.05, -0.775, 3.08, 0.17, 'x', 8)
+    for (const p of [h1[h1.length - 1], h2[h2.length - 1]])
+      M.cyl(BRASS, 0.036, 0.036, 0.06, p[0] + 0.03, p[1], p[2], 'x', 8)
+    for (const path of [h1, h2])
+      for (const f of [0.28, 0.55, 0.8]) {
+        const p = path[Math.floor(path.length * f)]
+        M.cyl(C.STEEL, 0.037, 0.037, 0.03, p[0], p[1], p[2], 'y', 8)
+      }
+    // látigos de seguridad (whip checks): cable corto de la manguera al soporte del bastidor
+    for (const [path, lug] of [
+      [h1, [-0.62, 3.12, 0.27]],
+      [h2, [-0.62, 3.12, 0.27]],
+    ]) {
+      const p = path[4]
+      hose(
+        H,
+        C.CABLE,
+        [p, [p[0] + 0.04, p[1] + 0.14, p[2] - 0.02], [lug[0] - 0.05, lug[1] + 0.05, lug[2]], lug],
+        0.006,
+        3,
+        4,
+      )
+      M.cyl(C.STEEL, 0.037, 0.037, 0.02, p[0], p[1], p[2], 'y', 8)
+    }
+    P.box(PAINT.main, 0.04, 0.03, 0.04, -0.62, 3.115, 0.27) // argolla de anclaje de los látigos
 
-    // suspensión: cabo doble + línea de suspensión al mástil (~9 m) con contrapeso
-    M.rod(C.CABLE, [-0.28, 3.16, 0.3], [-0.35, 3.55, -0.1], 0.012, 5)
-    M.rod(C.CABLE, [-0.28, 3.16, -0.3], [-0.35, 3.55, -0.1], 0.012, 5)
-    M.rod(C.CABLE, [-0.35, 3.55, -0.1], [-0.92, 9.0, -0.62], 0.012, 5)
-    P.cyl(C.DARK, 0.07, 0.07, 0.5, -0.47, 4.7, -0.21, 'y', 8)
-    P.box(C.DARK, 0.18, 0.12, 0.18, -0.92, 9.0, -0.62)
+    // ─────────────────────────── brazo de reacción (torque arm) hasta el poste de retenida ───────────────────────────
+    const armA = [0.25, 3.03, 0.27]
+    const armB = [0.945, 3.03, 1.19]
+    const armLen = Math.hypot(armB[0] - armA[0], armB[2] - armA[2])
+    const armRy = Math.atan2(-(armB[2] - armA[2]), armB[0] - armA[0])
+    P.box(
+      PAINT.main,
+      armLen,
+      0.09,
+      0.06,
+      (armA[0] + armB[0]) / 2,
+      3.03,
+      (armA[2] + armB[2]) / 2,
+      armRy,
+    )
+    for (let k = 1; k <= 3; k++) {
+      const t = k / 4
+      P.box(
+        PAINT.acc,
+        0.02,
+        0.05,
+        0.1,
+        armA[0] + (armB[0] - armA[0]) * t,
+        3.03,
+        armA[2] + (armB[2] - armA[2]) * t,
+        armRy,
+      ) // nervios
+    }
+    P.box(PAINT.main, 0.1, 0.11, 0.09, armA[0], 3.03, armA[2], armRy) // oreja de articulación
+    M.cyl(C.STEEL, 0.02, 0.02, 0.17, armA[0], 3.03, armA[2], 'y', 8) // perno de articulación
+    P.cyl(PAINT.main, 0.058, 0.058, 0.08, 0.95, 3.0, 1.21, 'y', 12) // abrazadera sobre el poste
 
-    // brazo de reacción hasta el poste de retenida
-    M.rod(C.STEEL, [0.35, 3.0, 0.25], [0.93, 3.0, 1.17], 0.04, 8)
-
-    // poste de retenida: columna de apoyo + poste redondo, sujetos con dos grampas
+    // ─────────────────────────── poste de retenida: columna de apoyo + poste redondo, sujetos con dos grampas ───────────────────────────
     P.box(C.GRAY, 0.12, 2.6, 0.12, 0.95, FL + 1.3, 1.35)
     M.cyl(C.GRAY_L, 0.05, 0.05, 2.4, 0.95, FL + 1.2, 1.21, 'y', 10)
     P.box(C.GRAY, 0.4, 0.03, 0.4, 0.95, FL + 0.015, 1.3) // placa base
+    for (const [dx, dz] of [
+      [-1, -1],
+      [1, -1],
+      [-1, 1],
+      [1, 1],
+    ]) {
+      M.cyl(C.DARK, 0.016, 0.016, 0.04, 0.95 + dx * 0.16, FL + 0.05, 1.3 + dz * 0.16, 'y', 6) // bulones de anclaje
+      M.rod(
+        C.GRAY_L,
+        [0.95 + dx * 0.15, FL + 0.03, 1.3 + dz * 0.15],
+        [0.95 + dx * 0.05, FL + 0.42, 1.3 + dz * 0.05],
+        0.012,
+        4,
+      ) // rigidizadores
+    }
 
     P.flush(g, m.paint, 'llave_pintura')
     M.flush(g, m.metal, 'llave_acero')
     H.flush(g, m.rubber, 'llave_mangueras', { cast: false })
+    S.flush(g, m.metal, 'llave_cunas')
+    G.flush(g, dialMat, 'llave_manometro', { cast: false })
 
     // PRL-1 / PRL-2 · grampas superior e inferior ("8 bulones con tuercas autofrenantes": 4 pasantes con cabeza y tuerca = 8 fijaciones)
     const clamp = (id, yc, note) => {
