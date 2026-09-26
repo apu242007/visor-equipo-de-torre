@@ -1,4 +1,4 @@
-// Componente 10 (sistema de circulación): pileta de ensayo con golpeador, pileta de acumulación (PENDIENTE), textos del panel y ficha.
+// Componente 10 (sistema de circulación): pileta de ensayo con golpeador (única pileta), textos del panel y ficha.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -14,15 +14,14 @@ const start = wellsite.indexOf('  function buildCirculacion(g, api) {');
 const end = wellsite.indexOf('PRE: registro de componentes');
 const circ = wellsite.slice(start, end);
 
-test('el componente 10 se renombra y su función menciona golpeador y pileta de acumulación pendiente', () => {
-  assert.ok(html.includes('name:"Sistema de circulación y piletas",family:"circulacion"'));
-  assert.ok(!html.includes('name:"Sistema de circulaci\\xF3n"'));
+test('el componente 10 mantiene su nombre y su función menciona el golpeador (una sola pileta)', () => {
+  assert.ok(html.includes(String.raw`name:"Sistema de circulaci\xF3n",family:"circulacion"`));
   const i = html.indexOf('at.circulacion.funcion="');
   assert.ok(i > 0);
   const funcion = html.slice(i + 'at.circulacion.funcion="'.length, html.indexOf('";', i));
   assert.ok(funcion.includes("'golpeador'"));
   assert.ok(funcion.includes('mismo equipo, no otro adicional'));
-  assert.ok(funcion.includes('dimensiones y ubicación PENDIENTES'));
+  assert.ok(!/acumulaci/i.test(funcion), 'no hay pileta de acumulación');
   assert.ok(!funcion.includes('"'), 'la cadena de función no debe romper las comillas dobles del bundle');
 });
 
@@ -39,32 +38,13 @@ test('los peligros nuevos se rotulan "referencia, pendiente de validación" (nun
 
 test('la ficha de confiabilidad sigue en B / Parcial y rotula lo nuevo como PENDIENTE', () => {
   assert.match(meta, /grade: 'B',\s*status: 'Parcial'/);
-  assert.match(meta, /PENDIENTE: pileta de acumulación \(no figura en el LAYOUT/);
-  assert.match(meta, /supuestos de referencia,\s*'\s*\+\s*'no dato/);
   assert.match(meta, /window\.__TACKER_META/);
   assert.match(meta, /tacker:boot/);
   assert.ok(html.includes('/* 44-meta-circulacion.js */'), 'el módulo debe estar en el HTML generado');
 });
 
-test('PILETA_ACUM es una constante parametrizada, coincide con la ficha y no invade la pileta de ensayo', () => {
-  const m = circ.match(/const PILETA_ACUM = \{ cx: (-?[\d.]+), cz: (-?[\d.]+), L: ([\d.]+), W: ([\d.]+), H: ([\d.]+) \}/);
-  assert.ok(m, 'PILETA_ACUM = { cx, cz, L, W, H }');
-  const [cx, cz, L, W, H] = m.slice(1).map(Number);
-  // dimensiones del mismo orden que la pileta de ensayo (12 × 2,4 m), sin declararlas dato
-  assert.ok(L >= 8 && L <= 14 && W >= 2 && W <= 3 && H >= 1.5 && H <= 3);
-  // pileta de ensayo: x −8…4, z −15,9…−13,5 (zc = −14,7) → separación mínima de 2 m en Z y patín/rodillos incluidos
-  const zcEnsayo = -14.7;
-  const gap = zcEnsayo - 1.2 - (cz + W / 2);
-  assert.ok(gap >= 2, `separación entre piletas ${gap.toFixed(2)} m`);
-  // la ficha repite los valores como texto (10 × 2,4 × 2,0 m en x −2 · z −19,4)
-  const fmt = (v) => String(v).replace('.', ',').replace('-', '−');
-  assert.ok(meta.includes(`${fmt(L)} × ${fmt(W)} × ${fmt(H.toFixed(1))} m en x ${fmt(cx)} · z ${fmt(cz)}`), 'la ficha no coincide con PILETA_ACUM');
-  assert.ok(/PENDIENTES: dimensiones y ubicación|dimensiones y ubicación PENDIENTES/.test(html));
-  assert.match(circ, /PENDIENTE: el LAYOUT TKR-10 NO la muestra/);
-});
-
 test('subconjuntos con nombre propio y mallas fusionadas por material (presupuesto de draw calls)', () => {
-  for (const name of ['pileta_ensayo', 'golpeador', 'pileta_acumulacion']) assert.ok(circ.includes(`sub('${name}')`), name);
+  for (const name of ['pileta_ensayo', 'golpeador']) assert.ok(circ.includes(`sub('${name}')`), name);
   const flushes = [...circ.matchAll(/\.flush\((\w+), m\.(\w+), '([^']+)'/g)].map((x) => x[3]);
   assert.deepEqual(
     flushes.sort(),
@@ -75,13 +55,16 @@ test('subconjuntos con nombre propio y mallas fusionadas por material (presupues
       'circulacion_mangueras',
       'circulacion_pintura',
       'golpeador_pintura',
-      'pileta_acumulacion_acero',
-      'pileta_acumulacion_pintura',
       'pileta_ensayo_acero',
       'pileta_ensayo_pintura',
     ].sort(),
-    'un mesh por material y subconjunto (línea base: 6 meshes → 10; +4 draw calls)',
+    'un mesh por material y subconjunto (línea base: 6 meshes → 8)',
   );
+});
+
+test('no queda rastro de la pileta de acumulación (una sola pileta, con golpeador)', () => {
+  assert.ok(!/PILETA_ACUM|pileta_acumulacion/.test(circ));
+  assert.ok(!html.includes('pileta_acumulacion'));
 });
 
 test('los grupos DROPS PIL-1 y PIL-2 se conservan', () => {

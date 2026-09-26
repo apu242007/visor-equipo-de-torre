@@ -1527,16 +1527,7 @@
     const zc = -14.7 // eje longitudinal de pileta y bomba (lateral del layout ≈ 14,4 m)
     const BLACK = '#1B1D21' // patín de vigas y rodillos (foto de campo: patín negro)
     const WHITE_R = '#D3D6D0' // chapa lisa entre nervaduras (las nervaduras van en C.WHITE)
-    const BLUE_H = '#2B5F9E' // palanca de las válvulas mariposa (foto de la pileta de acumulación)
     const SUB = '#8E1F25' // rojo oscuro: bandas de soldadura y uniones
-
-    /**
-     * PILETA DE ACUMULACIÓN · subconjunto NUEVO del componente 10 (`circulacion`). PENDIENTE: el LAYOUT TKR-10 NO la muestra (solo
-     * una "planta de efluentes" sin cotas). Ubicación y dimensiones APROXIMADAS: se tomó el orden de magnitud de la pileta de ensayo
-     * (12 × 2,4 m) sin declararlo dato. cx, cz = centro en locación (m); L (eje X), W (eje Z), H = altura de cubierta.
-     * Colocada al lado −z de la pileta de ensayo (lado opuesto al pozo), con 3,2 m entre costados: no interfiere con nada.
-     */
-    const PILETA_ACUM = { cx: -2, cz: -19.4, L: 10, W: 2.4, H: 2.0 }
 
     const sub = (name) => {
       const s = new K.Group()
@@ -1869,109 +1860,6 @@
     hUnion(GB, gx + 0.55, 0.55, gz, 'x', 0.08)
     flange(GB, C.STEEL, C.DARK, gx + 0.82, 0.55, gz, 'x', 0.09)
     GB.flush(gG, m.paint, 'golpeador_pintura')
-
-    // ═════════════ PILETA DE ACUMULACIÓN (NUEVA · dimensiones y ubicación PENDIENTES) ═════════════
-    // Tipología: 3 fotos de campo (tanque contenedor blanco corrugado, barandas superiores, escalera vertical, bocas de descarga con
-    // válvula mariposa y cañerías rojas con válvulas y recipiente rojo). No es el equipo del TACKER 10.
-    {
-      const A = PILETA_ACUM
-      const ga = sub('pileta_acumulacion')
-      const PA = new Batch() // pileta_acumulacion_pintura
-      const MA = new Batch() // pileta_acumulacion_acero
-      const xl = A.cx - A.L / 2
-      const xr = A.cx + A.L / 2
-      const zn = A.cz - A.W / 2
-      const zp = A.cz + A.W / 2
-      skid(PA, A.cx, A.cz, A.L, A.W, [true, true])
-      tank(PA, A.cx, A.cz, A.L, A.W, A.H)
-      // barandas superiores con rodapié, abiertas junto a la escalera del extremo +x
-      PA.rail(
-        C.YEL,
-        [
-          [xr, A.cz + 0.45],
-          [xr, zn],
-          [xl, zn],
-          [xl, zp],
-          [xr, zp],
-          [xr, A.cz + 1.1],
-        ],
-        A.H,
-        1.05,
-      )
-      ladder(MA, xr + 0.14, A.cz + 0.775, 0.3, A.H + 1.0, false, -1)
-      // bocas de inspección en cubierta, tapas laterales y cajón blanco de cubierta (foto)
-      for (const x of [A.cx - 0.8, A.cx + 1.6]) hatch(MA, x, A.cz + 0.3, A.H)
-      PA.box(C.WHITE, 1.6, 1.0, 1.05, A.cx - 3.4, A.H + 0.55, A.cz + 0.25)
-      PA.box(C.GRAY_L, 1.66, 0.05, 1.11, A.cx - 3.4, A.H + 1.075, A.cz + 0.25)
-      plate(PA, MA, A.cx - 2.2, 0.48, zp, 1)
-      plate(PA, MA, A.cx + 3.0, 0.48, zn, -1)
-      // bocas de descarga (extremo +x): tubuladura, brida, válvula mariposa con palanca azul, brida, unión y tramo con brida ciega
-      for (const [k, zP] of [A.cz - 0.7, A.cz - 0.1].entries()) {
-        const y = 0.65
-        MA.cyl(C.STEEL, 0.09, 0.09, 0.24, xr + 0.12, y, zP, 'x', 12)
-        MA.cyl(C.GRAY_L, 0.155, 0.155, 0.035, xr + 0.25, y, zP, 'x', 12)
-        MA.cyl(C.DARK, 0.13, 0.13, 0.09, xr + 0.313, y, zP, 'x', 12) // cuerpo mariposa
-        MA.cyl(C.GRAY_L, 0.155, 0.155, 0.035, xr + 0.375, y, zP, 'x', 12)
-        MA.cyl(C.STEEL, 0.045, 0.045, 0.16, xr + 0.313, y + 0.17, zP, 'y', 8) // cuello
-        PA.box(BLUE_H, 0.05, 0.04, 0.32, xr + 0.313, y + 0.27, zP + 0.1) // palanca
-        if (k === 1) {
-          MA.rod(C.STEEL, [xr + 0.39, y, zP], [xr + 0.8, y, zP], 0.075, 10) // tramo con acople
-          MA.cyl(C.GRAY_L, 0.115, 0.115, 0.1, xr + 0.55, y, zP, 'x', 10)
-          MA.cyl(C.GRAY_L, 0.14, 0.14, 0.035, xr + 0.82, y, zP, 'x', 12)
-        }
-      }
-      // cañería roja de la boca 1: sube por fuera de la baranda, cruza sobre ella y baja al recipiente rojo de cubierta
-      {
-        const zP = A.cz - 0.7
-        const xv = xr - 1.3
-        pipe(
-          PA,
-          C.RED,
-          [
-            [xr + 0.4, 0.65, zP],
-            [xr + 0.62, 0.65, zP],
-            [xr + 0.62, 3.3, zP],
-          ],
-          0.075,
-        )
-        PA.loop(C.RED, xr + 0.34, 3.3, zP, 0.28, 'xy', 0, PI / 2, 0.075, 8)
-        PA.rod(C.RED, [xr + 0.34, 3.58, zP], [xv, 3.58, zP], 0.075, 8)
-        PA.rod(C.RED, [xv, 3.58, zP], [xv, 3.2, zP], 0.075, 8)
-        hUnion(PA, xr + 0.62, 1.6, zP, 'y')
-        PA.cyl(C.RED, 0.33, 0.33, 1.0, xv, A.H + 0.55, zP, 'y', 16) // recipiente rojo (PENDIENTE: función)
-        PA.cyl(C.RED, 0.12, 0.33, 0.28, xv, A.H + 1.19, zP, 'y', 16)
-        PA.cyl(SUB, 0.335, 0.335, 0.06, xv, A.H + 0.3, zP, 'y', 16)
-        PA.cyl(C.DARK, 0.4, 0.4, 0.06, xv, A.H + 0.03, zP, 'y', 16) // base
-      }
-      // colector rojo en el costado −z: codo, válvulas de compuerta, tés con unión y entrada al tanque
-      {
-        const zh = zn - 0.16
-        const xh0 = A.cx - 2.6
-        const xh1 = A.cx + 2.2
-        pipe(
-          PA,
-          C.RED,
-          [
-            [xh0, 1.55, zh],
-            [xh0, 1.05, zh],
-            [xh1, 1.05, zh],
-            [xh1, 1.05, zn - 0.02],
-          ],
-          0.055,
-        )
-        for (const x of [A.cx - 1.4, A.cx + 0.9]) {
-          gate(PA, C.RED, C.RED, x, 1.05, zh, 'x')
-          PA.rod(C.RED, [x + 0.45, 1.05, zh], [x + 0.45, 1.6, zh], 0.05, 8) // ramal ascendente
-          PA.cyl(C.RED, 0.08, 0.08, 0.12, x + 0.45, 1.64, zh, 'y', 8)
-        }
-        for (const x of [A.cx - 2.2, A.cx - 0.3, A.cx + 1.7]) hUnion(PA, x, 1.05, zh, 'x')
-        flange(PA, C.STEEL, C.DARK, xh1, 1.05, zn - 0.03, 'z', 0.12)
-        for (const x of [A.cx - 2.0, A.cx + 0.2, A.cx + 2.0])
-          PA.box(BLACK, 0.06, 0.06, 0.16, x, 0.97, zn - 0.09) // ménsulas
-      }
-      PA.flush(ga, m.paint, 'pileta_acumulacion_pintura')
-      MA.flush(ga, m.metal, 'pileta_acumulacion_acero')
-    }
 
     // ── bomba triplex 6×2,4 m (camisas 5", carrera 8", 3.000 psi, 12 bpm) en x −16…−10
     P.box(C.SKID, 6, 0.22, 2.4, -13, 0.11, zc) // patín

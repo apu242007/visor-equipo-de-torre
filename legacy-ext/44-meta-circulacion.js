@@ -3,8 +3,7 @@
  *
  * `__TACKER_META` es la tabla del módulo de producto del visor (se crea DESPUÉS del bundle, ver el parche en scripts/build-legacy.mjs),
  * por eso la ficha se aplica cuando arranca (`tacker:boot`) o, si ya arrancó, de inmediato. Grado B / Parcial se mantiene: lo nuevo
- * (pileta de acumulación, equipo de cubierta, golpeador) es PENDIENTE y no sube el grado. La geometría vive en `buildCirculacion`
- * (legacy-ext/40-wellsite.js); las dimensiones de PILETA_ACUM se repiten aquí como texto y tests/circulacion.test.mjs las cruza.
+ * (equipo de cubierta, golpeador) es PENDIENTE y no sube el grado. La geometría vive en `buildCirculacion` (legacy-ext/40-wellsite.js).
  */
 ;(() => {
   'use strict'
@@ -17,9 +16,7 @@
     note:
       'Confirmado: pileta de ensayo 12 × 2,4 m (40 m³), cubicador 3,5 m³ y bomba triplex 6 × 2,4 m. ' +
       'Aproximado: altura, corrugado, patín, escalera, tapas, cotas del golpeador y tendidos. ' +
-      'PENDIENTE: pileta de acumulación (no figura en el LAYOUT; 10 × 2,4 × 2,0 m en x −2 · z −19,4 son supuestos de referencia, ' +
-      'no dato), su capacidad, la función del equipo rojo de cubierta y de la rampa, y la presión de trabajo, conexiones y ruteo ' +
-      'del golpeador y de la pileta de acumulación.',
+      'PENDIENTE: la función del equipo rojo de cubierta y de la rampa, y la presión de trabajo, conexiones y ruteo del golpeador.',
   }
 
   const applyMeta = () => {
