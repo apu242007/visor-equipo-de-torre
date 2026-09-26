@@ -47,3 +47,9 @@ assets/source/**
 # documentos internos de Tacker (PDF fuente y sus capturas): quedan en el disco, no en el repo publico
 docs/fuentes/**/*.pdf
 docs/pdf-review/pages/
+
+# Fotos de referencia de terceros (origen/licencia sin verificar): solo en copia local
+docs/references/*/*.jpg
+docs/references/*/*.jpeg
+docs/references/*/*.webp
+docs/references/*/*.avif

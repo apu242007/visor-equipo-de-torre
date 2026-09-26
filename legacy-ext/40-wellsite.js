@@ -3,10 +3,11 @@
  *
  * Rediseña 5 componentes del visor V2 y agrega el entorno de locación:
  *   - aparejo      → bloque IDECO amarillo con gancho forjado (envuelve el original: conserva sus ramales y el estado interno del visor)
- *   - bop          → BOP Cameron 7 1/16" 5M anular + doble (azul), líneas de matar/ahogar, eslinga de anclaje y acumulador de 5 botellones
+ *   - bop          → BOP Cameron 7 1/16" 5M anular + doble (rojo, color PENDIENTE), choke manifold (posición confirmada, detalle aproximado),
+ *                    líneas de choke/matar, eslinga de anclaje y acumulador de 5 botellones
  *   - llave        → llave hidráulica de tubing, cuñas, línea de suspensión y poste de retenida (grampas + brazo)
  *   - caballetes   → planchada 12×2,4 m, plano inclinado (bandeja) y caballetes de 2 m con tubing/varillas
- *   - circulacion  → pileta de ensayo 12×2,4 m, cubicador, desgasificador, bomba triplex 6×2,4 m, manifold y cañerías al pozo
+ *   - circulacion  → pileta de ensayo 12×2,4 m, cubicador, desgasificador, bomba triplex 6×2,4 m, cañerías al pozo (el manifold de maniobra anterior es ahora el choke manifold del BOP)
  *   - entorno      → Group `locacion_entorno` (fuera de los 13 componentes: ni seleccionable ni en R.pickables): ripio, torres de luz,
  *                    vallado, conos, señalización, tráilers/tanques del LAYOUT TKR-10.
  *
@@ -46,7 +47,33 @@
     GLASS: '#1B2733',
     SKID: '#4B5159', // patines y bastidores (gris grafito, más claro que DARK para que se lea)
     POWER: '#5C636B',
+    BOP: '#B3262B', // rojo de las fotos de referencia de BOP/acumulador (unidades genéricas): color real del equipo PENDIENTE
+    BOP_L: '#D4494E', // acento del BOP rojo
   }
+
+  // ───────────────────────────── control de pozo: parámetros y ruteo ─────────────────────────────
+  /**
+   * Color de BOP y acumulador. 'RED' (referencias fotográficas genéricas) | 'BLUE' (azul original del visor).
+   * PENDIENTE: el color del equipo real no está confirmado.
+   */
+  const BOP_COLOR = 'RED'
+  const WELL_PAINT =
+    BOP_COLOR === 'BLUE' ? { main: C.BLUE, acc: C.BLUE_L } : { main: C.BOP, acc: C.BOP_L }
+
+  /**
+   * Choke manifold (subconjunto del componente 07, `bop`).
+   * cx, cz: posición en locación, CONFIRMADA por Jorge (x≈3,4 · z≈−4,3).
+   * L (eje X), W (eje Z), H: envolvente APROXIMADA (dato estampado en la foto de una unidad genérica: DIM 210×230×145 cm).
+   * Si interfiere con otros objetos, reducir W a 1,3 m (valor del patín anterior) sin mover el centro.
+   */
+  const CHOKE = { cx: 3.4, cz: -4.3, L: 2.3, W: 2.1, H: 1.45 }
+
+  /**
+   * Ruteo de las líneas de alta presión alrededor del BOP. PENDIENTE DE VALIDACIÓN (P&ID / procedimiento de control de pozo).
+   *   'choke'  → línea de choke del BOP (x=−0,2) → choke manifold → pileta; bomba → línea de matar (x=+0,2).
+   *   'legacy' → ruteo anterior (bomba → manifold de maniobra → BOP; retorno del BOP → pileta).
+   */
+  const CHOKE_ROUTING = 'choke'
 
   // ───────────────────────────── kit de geometría ─────────────────────────────
   /** Clases de three recuperadas de los helpers del visor (en `onPre`) o de `R.three` (en `onPost`). */
@@ -247,30 +274,207 @@
 
   const PI = Math.PI
 
-  // ═════════════════════════════════════════ BOP + ACUMULADOR ═════════════════════════════════════════
+  // ═════════════════════════════════════════ BOP + CHOKE MANIFOLD + ACUMULADOR ═════════════════════════════════════════
+  /** Anillo de `n` bulones (cilindros cortos, pocos segmentos) alrededor de un eje 'x' | 'y' | 'z' centrado en (cx,cy,cz). */
+  function boltRing(b, c, cx, cy, cz, axis, R, n, len, r = 0.015, seg = 5) {
+    for (let k = 0; k < n; k++) {
+      const a = (2 * PI * k) / n
+      const p = Math.cos(a) * R
+      const q = Math.sin(a) * R
+      if (axis === 'y') b.cyl(c, r, r, len, cx + p, cy, cz + q, 'y', seg)
+      else if (axis === 'x') b.cyl(c, r, r, len, cx, cy + p, cz + q, 'x', seg)
+      else b.cyl(c, r, r, len, cx + p, cy + q, cz, 'z', seg)
+    }
+  }
+
+  /** Volante horizontal: cubo, aro poligonal de `sides` barras y `spokes` rayos (en el plano XZ, a la altura y). */
+  function handwheel(b, c, x, y, z, R, spokes = 4, sides = 12, r = 0.012) {
+    b.cyl(c, 0.045, 0.045, 0.06, x, y, z, 'y', 8)
+    for (let k = 0; k < sides; k++) {
+      const a0 = (2 * PI * k) / sides
+      const a1 = (2 * PI * (k + 1)) / sides
+      b.rod(
+        c,
+        [x + R * Math.cos(a0), y, z + R * Math.sin(a0)],
+        [x + R * Math.cos(a1), y, z + R * Math.sin(a1)],
+        r,
+        4,
+        true,
+      )
+    }
+    for (let k = 0; k < spokes; k++) {
+      const a = (2 * PI * k) / spokes + PI / 4
+      b.rod(c, [x, y, z], [x + R * Math.cos(a), y, z + R * Math.sin(a)], r * 0.9, 4, true)
+    }
+  }
+
+  /**
+   * CHOKE MANIFOLD · subconjunto del componente 07 (`bop`). Tipología GENÉRICA tomada de fotos de referencia de unidades comerciales
+   * (no es el equipo del TACKER 10): entrada por la línea de choke del BOP → 2 válvulas en serie → cruz de distribución → 3 ramales
+   * (choke ajustable, choke fijo, línea directa/purga, cada uno con válvula aguas arriba) → colector de salida hacia la pileta.
+   * Confirmado: posición en locación (CHOKE.cx/cz). Aproximado: envolvente, cotas y detalle. PENDIENTE: presión de trabajo, tipo de
+   * válvula de entrada (manual / HCR) y ruteo real. Mallas fusionadas: `choke_pintura` (rojo) y `choke_acero` (bulones, vástagos, manómetros).
+   */
+  function buildChoke(g, m) {
+    const { cx, cz, L, W } = CHOKE
+    const hl = L / 2
+    const hw = W / 2
+    const gc = new K.Group()
+    gc.name = 'choke_manifold'
+    g.add(gc)
+    const P = new Batch() // choke_pintura
+    const M = new Batch() // choke_acero
+    const Y = 0.76 // eje de las cañerías
+    const R_PIPE = 0.055
+    const X = (u) => cx + u
+    const Z = (v) => cz + v
+
+    // patín: largueros y travesaños en perfil, piso de chapa, 4 orejas de izaje y 2 bolsillos para autoelevador (lado +z)
+    for (const s of [-1, 1]) P.box(C.SKID, L, 0.14, 0.1, cx, 0.09, cz + s * (hw - 0.05))
+    for (const u of [-(hl - 0.05), 0, hl - 0.05]) P.box(C.SKID, 0.1, 0.14, W - 0.2, X(u), 0.09, cz)
+    P.box(C.POWER, L - 0.1, 0.02, W - 0.1, cx, 0.17, cz)
+    for (const su of [-1, 1])
+      for (const sv of [-1, 1]) {
+        const px = X(su * (hl - 0.07))
+        const pz = Z(sv * (hw - 0.07))
+        M.box(C.STEEL, 0.03, 0.16, 0.14, px, 0.26, pz)
+        M.cyl(C.DARK, 0.035, 0.035, 0.045, px, 0.29, pz, 'x', 8) // ojo de la oreja
+      }
+    for (const u of [-0.55, 0.55]) P.box(C.DARK, 0.34, 0.09, 0.03, X(u), 0.09, Z(hw + 0.005))
+
+    const pipe = (u1, v1, u2, v2, r = R_PIPE) =>
+      P.rod(C.RED, [X(u1), Y, Z(v1)], [X(u2), Y, Z(v2)], r, 8, true)
+    const flangeDisc = (u, v, axis, R = 0.11) => {
+      P.cyl(C.RED, R, R, 0.04, X(u), Y, Z(v), axis, 14)
+    }
+    const bolts = (u, v, axis, R, n = 6) => boltRing(M, C.GRAY, X(u), Y, Z(v), axis, R, n, 0.07)
+
+    // cruz de distribución (bloque con 4 bridas): entra por el oeste, sale al este (línea directa) y a ±z (ramales con choke)
+    const cu = -0.02
+    P.box(C.RED, 0.3, 0.3, 0.3, X(cu), Y, cz)
+    for (const [du, dv, ax] of [
+      [-0.17, 0, 'x'],
+      [0.17, 0, 'x'],
+      [0, 0.17, 'z'],
+      [0, -0.17, 'z'],
+    ]) {
+      flangeDisc(cu + du, dv, ax)
+      bolts(cu + du * 1.1, dv * 1.1, ax, 0.08)
+    }
+
+    // válvula esclusa: cuerpo bloque con bridas y bulones, bonete con brida, vástago y volante Ø≈0,40 m (aproximado)
+    const gate = (u, v, axis, yw) => {
+      const ax = axis === 'x'
+      P.box(C.RED, ax ? 0.24 : 0.26, 0.3, ax ? 0.26 : 0.24, X(u), Y, Z(v))
+      for (const s of [-1, 1]) {
+        const du = ax ? s * 0.13 : 0
+        const dv = ax ? 0 : s * 0.13
+        flangeDisc(u + du, v + dv, axis, 0.125)
+        bolts(u + du * 1.1, v + dv * 1.1, axis, 0.095)
+      }
+      P.cyl(C.RED, 0.085, 0.085, 0.12, X(u), Y + 0.21, Z(v), 'y', 12) // bonete
+      P.cyl(C.RED, 0.12, 0.12, 0.03, X(u), Y + 0.28, Z(v), 'y', 14) // brida del bonete
+      boltRing(M, C.GRAY, X(u), Y + 0.29, Z(v), 'y', 0.095, 6, 0.06)
+      M.rod(C.STEEL, [X(u), Y + 0.29, Z(v)], [X(u), yw, Z(v)], 0.02, 5) // vástago
+      handwheel(P, C.RED, X(u), yw, Z(v), 0.2)
+    }
+
+    // choke en ángulo (cuerpo a 90°): entra por −v, sale hacia +u
+    const chokeBody = (v, adjustable) => {
+      const sv = Math.sign(v)
+      P.box(C.RED, 0.24, 0.24, 0.24, X(cu), Y, Z(v))
+      flangeDisc(cu, v - sv * 0.13, 'z', 0.115)
+      bolts(cu, v - sv * 0.145, 'z', 0.085)
+      flangeDisc(cu + 0.13, v, 'x', 0.115)
+      bolts(cu + 0.145, v, 'x', 0.085)
+      P.cyl(C.RED, 0.085, 0.085, 0.14, X(cu), Y + 0.19, Z(v), 'y', 12)
+      if (adjustable) {
+        // choke ajustable: vástago con volante chico e indicador de posición
+        P.cyl(C.RED, 0.06, 0.06, 0.1, X(cu), Y + 0.3, Z(v), 'y', 10)
+        M.rod(C.STEEL, [X(cu), Y + 0.32, Z(v)], [X(cu), 1.3, Z(v)], 0.018, 5)
+        handwheel(P, C.RED, X(cu), 1.3, Z(v), 0.15, 4, 10)
+        M.box(C.WHITE, 0.03, 0.14, 0.012, X(cu) + 0.09, Y + 0.3, Z(v) + 0.07)
+      } else {
+        // choke positivo/fijo: capuchón
+        P.cyl(C.RED, 0.075, 0.075, 0.16, X(cu), Y + 0.32, Z(v), 'y', 10)
+        M.cyl(C.GRAY, 0.09, 0.09, 0.05, X(cu), Y + 0.44, Z(v), 'y', 6)
+      }
+    }
+
+    // manómetro (esfera blanca con bisel) sobre un pie, mirando a +z
+    const gauge = (u, v, yTop, yBase) => {
+      M.rod(C.STEEL, [X(u), yBase, Z(v)], [X(u), yTop, Z(v)], 0.022, 5)
+      M.cyl(C.STEEL, 0.088, 0.088, 0.04, X(u), yTop + 0.05, Z(v) + 0.02, 'z', 12) // bisel
+      M.cyl(C.WHITE, 0.072, 0.072, 0.03, X(u), yTop + 0.05, Z(v) + 0.04, 'z', 12) // esfera
+    }
+
+    // ── tuberías (eje x: entrada → cruz → línea directa; eje z: ramales; colector de salida)
+    const cuW = cu - 0.15 // cara oeste de la cruz
+    const cuE = cu + 0.15
+    const bufU = 0.95 // eje del colector de salida
+    const bufV = 0.78 // semiancho del colector = posición de los ramales con choke
+    pipe(-hl + 0.05, 0, cuW, 0) // entrada
+    pipe(cuE, 0, bufU, 0) // línea directa/purga
+    pipe(cu, 0.15, cu, bufV - 0.12) // ramal +z (choke ajustable)
+    pipe(cu, -0.15, cu, -(bufV - 0.12)) // ramal −z (choke fijo)
+    pipe(cu + 0.12, bufV, bufU, bufV) // descarga del ajustable
+    pipe(cu + 0.12, -bufV, bufU, -bufV) // descarga del fijo
+    P.cyl(C.RED, 0.075, 0.075, 2 * bufV, X(bufU), Y, cz, 'z', 14) // colector (buffer)
+    pipe(bufU, -bufV, bufU, -hw + 0.02) // salida hacia la pileta
+    // uniones de golpe: entrada (oeste) y salida (−z)
+    P.cyl(C.RED, 0.095, 0.095, 0.1, X(-hl + 0.07), Y, cz, 'x', 12)
+    P.cyl(C.RED, 0.095, 0.095, 0.1, X(bufU), Y, Z(-hw + 0.06), 'z', 12)
+
+    // ── válvulas (5): 2 en serie en la entrada (manual + manual/HCR: PENDIENTE), 1 por ramal
+    gate(-0.82, 0, 'x', 1.4)
+    gate(-0.45, 0, 'x', 1.34)
+    gate(0.45, 0, 'x', 1.4) // línea directa
+    gate(cu, 0.4, 'z', 1.3) // aguas arriba del choke ajustable
+    gate(cu, -0.4, 'z', 1.36) // aguas arriba del choke fijo
+    chokeBody(bufV, true)
+    chokeBody(-bufV, false)
+
+    // ── manómetros: aguas arriba (sobre la cruz) y aguas abajo (sobre el colector)
+    gauge(cu, 0, 1.12, Y + 0.15)
+    gauge(bufU, 0.35, 1.0, Y + 0.075)
+
+    // ── apoyos bajo tuberías y cuerpos
+    for (const [u, v] of [
+      [bufU, 0.5],
+      [bufU, -0.5],
+      [cu, bufV],
+      [cu, -bufV],
+      [-0.95, 0],
+      [0.7, 0],
+    ])
+      P.box(C.SKID, 0.08, Y - 0.2, 0.08, X(u), 0.18 + (Y - 0.2) / 2, Z(v))
+
+    P.flush(gc, m.paint, 'choke_pintura')
+    M.flush(gc, m.metal, 'choke_acero')
+  }
+
   function buildBop(g, api) {
     const m = mats(api)
     const P = new Batch() // pintura
     const M = new Batch() // acero / mecanizado
     const H = new Batch() // mangueras
+    const { main: BC, acc: BA } = WELL_PAINT
 
-    const bolts = (b, y, r, n) => {
-      for (let k = 0; k < n; k++)
-        b.cyl(
-          C.GRAY,
-          0.03,
-          0.03,
-          0.1,
-          r * Math.cos((2 * PI * k) / n),
-          y,
-          r * Math.sin((2 * PI * k) / n),
-          'y',
-          6,
-        )
-    }
-    const flange = (y) => {
-      M.cyl(C.STEEL, 0.46, 0.46, 0.07, 0, y, 0, 'y', 20)
-      bolts(M, y + 0.02, 0.38, 12)
+    /**
+     * Brida doble: dos discos con espárragos que las atraviesan (tuerca arriba y abajo). Reemplaza al disco simple con bulones
+     * sueltos. Dimensiones aproximadas.
+     */
+    const flange = (y, R = 0.46, n = 10) => {
+      M.cyl(C.STEEL, R, R, 0.05, 0, y - 0.03, 0, 'y', 20)
+      M.cyl(C.STEEL, R, R, 0.05, 0, y + 0.03, 0, 'y', 20)
+      for (let k = 0; k < n; k++) {
+        const a = (2 * PI * k) / n
+        const x = (R - 0.07) * Math.cos(a)
+        const z = (R - 0.07) * Math.sin(a)
+        M.cyl(C.GRAY, 0.013, 0.013, 0.14, x, y, z, 'y', 4)
+        M.cyl(C.GRAY, 0.026, 0.026, 0.03, x, y + 0.075, z, 'y', 5)
+        M.cyl(C.GRAY, 0.026, 0.026, 0.03, x, y - 0.075, z, 'y', 5)
+      }
     }
 
     // losa de boca de pozo + cabezal y carretel (a nivel de terreno)
@@ -280,39 +484,45 @@
     P.cyl(C.GRAY, 0.28, 0.28, 0.2, 0, 0.55, 0, 'y', 18)
     flange(0.685)
 
-    // BOP doble de ariete (Cameron, cierre parcial y total): cuerpo azul + 2 bonetes con cilindro operador por lado
-    P.box(C.BLUE, 0.72, 0.62, 0.62, 0, 1.03, 0)
+    // BOP doble de ariete (Cameron, cierre parcial y total): cuerpo de 2 niveles; por lado y nivel, bonete rectangular abulonado
+    // con placa de identificación, cilindro operador hidráulico coaxial y vástago de traba que sobresale
+    const RAM_Y = [0.87, 1.19]
+    for (const y of RAM_Y) P.box(BC, 0.74, 0.31, 0.64, 0, y, 0)
+    P.box(BA, 0.76, 0.03, 0.66, 0, 1.03, 0) // banda entre niveles
     for (const s of [-1, 1]) {
-      for (const y of [0.87, 1.19]) {
-        P.cyl(C.BLUE, 0.15, 0.15, 0.3, s * 0.51, y, 0, 'x', 14) // bonete
-        P.cyl(C.BLUE_L, 0.1, 0.1, 0.3, s * 0.81, y, 0, 'x', 12) // cilindro operador hidráulico
-        M.cyl(C.STEEL, 0.045, 0.045, 0.14, s * 1.0, y, 0, 'x', 8) // vástago de cierre manual
+      for (const y of RAM_Y) {
+        P.box(BC, 0.16, 0.3, 0.34, s * 0.44, y, 0) // bonete
+        for (const dy of [-0.09, 0.09])
+          for (const dz of [-0.12, 0, 0.12])
+            M.cyl(C.GRAY, 0.017, 0.017, 0.05, s * 0.525, y + dy, dz, 'x', 5)
+        M.box(C.WHITE, 0.12, 0.07, 0.012, s * 0.44, y, 0.176) // placa de identificación
+        P.cyl(BA, 0.105, 0.105, 0.28, s * 0.67, y, 0, 'x', 14) // cilindro operador hidráulico
+        P.cyl(BC, 0.115, 0.115, 0.04, s * 0.83, y, 0, 'x', 14) // tapa
+        M.rod(C.STEEL, [s * 0.85, y, 0], [s * 1.06, y, 0], 0.02, 5) // vástago de traba
+        M.cyl(C.GRAY, 0.035, 0.035, 0.04, s * 1.05, y, 0, 'x', 6)
       }
     }
     flange(1.375)
     P.cyl(C.GRAY, 0.27, 0.27, 0.16, 0, 1.49, 0, 'y', 18)
     flange(1.605)
 
-    // BOP anular (azul) con anillos de acento y cabeza cónica
-    P.cyl(C.BLUE, 0.38, 0.38, 0.36, 0, 1.82, 0, 'y', 24)
-    P.cyl(C.BLUE_L, 0.395, 0.395, 0.04, 0, 1.68, 0, 'y', 24)
-    P.cyl(C.BLUE_L, 0.395, 0.395, 0.04, 0, 1.96, 0, 'y', 24)
-    P.cyl(C.BLUE, 0.3, 0.38, 0.1, 0, 2.05, 0, 'y', 24)
-    P.cyl(C.BLUE, 0.2, 0.3, 0.07, 0, 2.135, 0, 'y', 20)
-    for (let k = 0; k < 8; k++)
-      M.cyl(
-        C.GRAY,
-        0.022,
-        0.022,
-        0.04,
-        0.34 * Math.cos((k * PI) / 4),
-        2.09,
-        0.34 * Math.sin((k * PI) / 4),
-        'y',
-        6,
-      )
+    // BOP anular: cuerpo robusto, anillos de acento, cabeza con corona de 16 espárragos y tuercas, tapa central
+    P.cyl(BC, 0.4, 0.4, 0.3, 0, 1.79, 0, 'y', 24)
+    P.cyl(BA, 0.41, 0.41, 0.035, 0, 1.665, 0, 'y', 24)
+    P.cyl(BA, 0.41, 0.41, 0.035, 0, 1.94, 0, 'y', 24)
+    P.cyl(BC, 0.385, 0.385, 0.1, 0, 1.99, 0, 'y', 24)
+    for (let k = 0; k < 16; k++) {
+      const a = (2 * PI * k) / 16
+      M.cyl(C.GRAY, 0.016, 0.016, 0.1, 0.35 * Math.cos(a), 2.09, 0.35 * Math.sin(a), 'y', 5)
+      M.cyl(C.GRAY, 0.028, 0.028, 0.03, 0.35 * Math.cos(a), 2.14, 0.35 * Math.sin(a), 'y', 6)
+    }
+    P.cyl(BC, 0.2, 0.24, 0.08, 0, 2.08, 0, 'y', 20)
+    P.cyl(BA, 0.14, 0.14, 0.05, 0, 2.145, 0, 'y', 16)
+    M.box(C.WHITE, 0.16, 0.1, 0.012, 0, 1.79, 0.404) // placa de identificación
+    for (const s of [-1, 1]) M.cyl(C.STEEL, 0.03, 0.03, 0.1, s * 0.25, 1.8, 0.36, 'z', 8) // puertos hidráulicos (abrir/cerrar)
 
-    // salidas laterales: línea de ahogar (x=−0,2, ruedas amarillas) y de matar (x=+0,2, ruedas rojas), 2 válvulas c/u
+    // salidas laterales bridadas en el cuerpo de arietes: línea de choke (x=−0,2, ruedas amarillas) y línea de matar/kill (x=+0,2,
+    // ruedas rojas), 2 válvulas c/u. La asignación de lados choke/kill queda PENDIENTE de validación.
     const valve = (x, z, wheel) => {
       P.box(C.GRAY, 0.2, 0.26, 0.2, x, 0.6, z)
       M.cyl(C.STEEL, 0.05, 0.05, 0.3, x, 0.86, z, 'y', 8)
@@ -322,8 +532,9 @@
       [-0.2, C.YEL],
       [0.2, C.RED],
     ]) {
-      M.cyl(C.STEEL, 0.07, 0.07, 0.14, x, 1.03, -0.38, 'z', 8)
-      M.cyl(C.STEEL, 0.11, 0.11, 0.04, x, 1.03, -0.46, 'z', 12)
+      M.cyl(C.STEEL, 0.08, 0.08, 0.14, x, 1.03, -0.38, 'z', 8) // cuello de la salida
+      P.cyl(BC, 0.15, 0.15, 0.05, x, 1.03, -0.47, 'z', 14) // brida de la salida
+      boltRing(M, C.GRAY, x, 1.03, -0.5, 'z', 0.115, 6, 0.04)
       M.rod(C.STEEL, [x, 1.03, -0.46], [x, 1.03, -0.66], 0.055)
       M.rod(C.STEEL, [x, 1.03, -0.66], [x, 0.6, -0.66], 0.055)
       M.rod(C.STEEL, [x, 0.6, -0.66], [x, 0.6, -2.3], 0.055)
@@ -341,10 +552,10 @@
       [-0.6, 0.25, 1.9],
       [-0.6, 0.5, 1.0],
     ]
-    H.tube(C.HOSE, [...trunk, [-0.8, 0.75, 0.35], [-0.85, 0.87, 0.2]], 0.022)
-    H.tube(C.HOSE, [...trunk, [-0.8, 0.95, 0.4], [-0.85, 1.19, 0.2]], 0.022)
-    H.tube(C.HOSE, [...trunk, [0, 0.6, 0.7], [0.85, 0.8, 0.4], [0.85, 0.87, 0.2]], 0.022)
-    H.tube(C.HOSE, [...trunk, [0, 0.6, 0.7], [0, 1.6, 0.55], [0.25, 1.82, 0.4]], 0.022)
+    H.tube(C.HOSE, [...trunk, [-0.8, 0.75, 0.35], [-0.67, 0.87, 0.11]], 0.022)
+    H.tube(C.HOSE, [...trunk, [-0.8, 0.95, 0.4], [-0.67, 1.19, 0.11]], 0.022)
+    H.tube(C.HOSE, [...trunk, [0, 0.6, 0.7], [0.85, 0.8, 0.4], [0.67, 0.87, 0.11]], 0.022)
+    H.tube(C.HOSE, [...trunk, [0, 0.6, 0.7], [0, 1.6, 0.55], [0.25, 1.8, 0.41]], 0.022)
 
     P.flush(g, m.paint, 'bop_pintura')
     M.flush(g, m.metal, 'bop_acero')
@@ -386,7 +597,18 @@
     S4.flush(bp4, m.metal, 'bp4_acero')
     O4.flush(bp4, m.paint, 'bp4_seguridad')
 
-    // acumulador (8×2,4 m, 5 botellones) — misma posición que el visor: x −18…−10, z=4,2
+    buildChoke(g, m)
+    buildAcumulador(g, m)
+  }
+
+  /**
+   * Acumulador (8×2,4 m, 5 botellones, LAYOUT TKR-10 / folleto) — misma posición que el visor: x −18…−10, z=4,2. Se afina el detalle con
+   * fotos de referencia de unidades genéricas: botellones con casquetes y etiqueta, bastidor/jaula, colector con válvulas, tablero de
+   * control de acero inoxidable, orejas de izaje y bolsillos para autoelevador. Color PENDIENTE (ver BOP_COLOR).
+   * Nota: el acta de prueba funcional TK-10 (06/10/2023) registra "abiertos 4 líneas"; se mantienen los 5 botellones del folleto.
+   */
+  function buildAcumulador(g, m) {
+    const { main: BC, acc: BA } = WELL_PAINT
     const ga = new K.Group()
     ga.name = 'acumulador_5_botellas'
     g.add(ga)
@@ -395,23 +617,49 @@
     const zc = 4.2
     AP.box(C.SKID, 8, 0.18, 2.4, -14, 0.15, zc) // patín 8×2,4 m (LAYOUT TKR-10)
     for (const dz of [-1.1, 1.1]) AM.box(C.GRAY, 8, 0.1, 0.12, -14, 0.27, zc + dz)
+    for (let k = 0; k < 6; k++) AP.box(C.SKID, 0.1, 0.1, 2.1, -17.6 + k * 1.44, 0.27, zc) // travesaños
+    for (const x of [-16, -12]) AP.box(C.DARK, 0.42, 0.1, 0.03, x, 0.15, zc + 1.21) // bolsillos de autoelevador
+    for (const sx of [-1, 1])
+      for (const sz of [-1, 1]) {
+        AM.box(C.STEEL, 0.14, 0.03, 0.16, -14 + sx * 3.9, 0.3, zc + sz * 1.1) // orejas de izaje
+        AM.cyl(C.DARK, 0.035, 0.035, 0.05, -14 + sx * 3.9, 0.3, zc + sz * 1.1, 'y', 8)
+      }
     for (let n = 0; n < 5; n++) {
       const x = -16 + n * 0.9
-      AP.cyl(C.BLUE, 0.24, 0.24, 1.4, x, 0.95, zc, 'y', 18) // botellón
-      AP.cyl(C.BLUE, 0.11, 0.24, 0.14, x, 1.72, zc, 'y', 18)
-      AM.cyl(C.STEEL, 0.07, 0.07, 0.16, x, 1.87, zc, 'y', 8)
-      for (const y of [0.6, 1.3]) AM.cyl(C.GRAY_L, 0.25, 0.25, 0.05, x, y, zc, 'y', 14)
+      AP.cyl(BC, 0.24, 0.13, 0.12, x, 0.31, zc, 'y', 18) // casquete inferior
+      AP.cyl(BC, 0.24, 0.24, 1.26, x, 1.0, zc, 'y', 18) // botellón
+      AP.cyl(BC, 0.1, 0.24, 0.14, x, 1.7, zc, 'y', 18) // casquete superior
+      AM.cyl(C.STEEL, 0.07, 0.07, 0.1, x, 1.82, zc, 'y', 8)
+      AP.box(C.RED, 0.1, 0.1, 0.1, x, 1.95, zc) // válvula de aislación sobre el botellón
+      AM.rod(C.STEEL, [x, 2.0, zc], [x, 2.09, zc], 0.012, 4)
+      AP.cyl(C.RED, 0.06, 0.06, 0.02, x, 2.1, zc, 'y', 10) // volante de la válvula
+      AM.box(C.WHITE, 0.15, 0.24, 0.012, x, 1.0, zc + 0.245) // etiqueta
+      for (const y of [0.6, 1.3]) AM.cyl(C.GRAY_L, 0.25, 0.25, 0.05, x, y, zc, 'y', 14) // zunchos
     }
-    AM.rod(C.STEEL, [-16.2, 2.0, zc], [-11.2, 2.0, zc], 0.04)
+    // jaula de sujeción de los botellones: parantes y barras en ambos lados
+    for (const x of [-16.45, -12.1])
+      for (const dz of [-0.3, 0.3]) AM.box(C.GRAY, 0.06, 1.5, 0.06, x, 0.9, zc + dz)
+    for (const dz of [-0.3, 0.3])
+      for (const y of [0.4, 1.5]) AM.box(C.GRAY, 4.4, 0.05, 0.05, -14.28, y, zc + dz)
+    AM.rod(C.STEEL, [-16.2, 2.0, zc], [-11.2, 2.0, zc], 0.04) // colector superior
     AM.rod(C.STEEL, [-11.2, 2.0, zc], [-11.2, 1.5, zc], 0.04)
-    AP.box(C.GRAY, 1.3, 1.25, 0.55, -11.4, 0.865, zc) // unidad de control
-    AP.box(C.BLUE_L, 1.1, 0.7, 0.03, -11.4, 0.95, zc + 0.29)
-    for (const x of [-11.7, -11.4, -11.1])
-      AM.cyl(C.WHITE, 0.09, 0.09, 0.03, x, 1.2, zc + 0.32, 'z', 14) // manómetros
-    for (const x of [-11.8, -11.6, -11.2, -11.0])
-      AM.cyl(C.RED, 0.045, 0.045, 0.06, x, 0.75, zc + 0.33, 'z', 8) // válvulas
+    AM.rod(C.STEEL, [-16.1, 0.44, zc - 0.38], [-12.2, 0.44, zc - 0.38], 0.04, 8) // colector inferior
+    // tablero de control (acero inoxidable): manómetros con bisel, válvulas selectoras y regulador
+    AP.box(C.GRAY_L, 1.3, 1.25, 0.55, -11.4, 0.865, zc)
+    AP.box(BA, 1.1, 0.7, 0.03, -11.4, 0.95, zc + 0.29)
+    for (const x of [-11.7, -11.4, -11.1]) {
+      AM.cyl(C.STEEL, 0.105, 0.105, 0.03, x, 1.2, zc + 0.31, 'z', 14) // bisel
+      AM.cyl(C.WHITE, 0.09, 0.09, 0.03, x, 1.2, zc + 0.33, 'z', 14) // manómetro
+    }
+    for (const x of [-11.8, -11.6, -11.2, -11.0]) {
+      AM.cyl(C.RED, 0.045, 0.045, 0.06, x, 0.75, zc + 0.33, 'z', 8) // válvula selectora
+      AM.rod(C.STEEL, [x, 0.75, zc + 0.36], [x + 0.06, 0.82, zc + 0.36], 0.012, 4) // palanca
+    }
+    AP.cyl(C.RED, 0.06, 0.06, 0.03, -11.4, 0.55, zc + 0.31, 'z', 10) // regulador
+    AP.box(C.GRAY_L, 0.3, 0.32, 0.2, -10.4, 0.5, zc - 0.65) // caja de conexiones
     AP.box(C.DARK, 1.3, 0.9, 1.0, -17.3, 0.69, zc) // depósito/bomba de carga
     AM.cyl(C.STEEL, 0.18, 0.18, 0.55, -17.3, 1.4, zc, 'x', 12)
+    AM.cyl(C.STEEL, 0.04, 0.04, 0.1, -17.6, 1.19, zc + 0.3, 'y', 8) // tapón de llenado
     AP.rail(
       C.YEL,
       [
@@ -864,15 +1112,18 @@
     LP.flush(pil1, m.paint, 'PIL-1_luminarias')
     LM.flush(pil1, m.metal, 'PIL-1_soportes')
 
-    // ── manifold de maniobra 2" 5.000 psi junto a la subestructura (x≈3,4, z≈−4,3)
-    P.box(C.DARK, 2.8, 0.18, 1.3, 3.4, 0.09, -4.3)
-    for (const y of [0.5, 0.82]) M.rod(C.STEEL, [2.3, y, -4.3], [4.5, y, -4.3], 0.07, 8)
-    for (const x of [2.6, 3.4, 4.2]) {
-      M.rod(C.STEEL, [x, 0.5, -4.3], [x, 0.82, -4.3], 0.06)
-      P.box(C.GRAY, 0.22, 0.24, 0.22, x, 1.0, -4.3)
-      P.cyl(C.RED, 0.12, 0.12, 0.03, x, 1.27, -4.3, 'y', 12)
+    // ── manifold de maniobra 2" 5.000 psi (SOLO ruteo 'legacy'). Con CHOKE_ROUTING='choke' ese lugar (x≈3,4, z≈−4,3, confirmado) lo
+    // ocupa el choke manifold del BOP (`buildChoke`, grupo `bop`).
+    if (CHOKE_ROUTING === 'legacy') {
+      P.box(C.DARK, 2.8, 0.18, 1.3, 3.4, 0.09, -4.3)
+      for (const y of [0.5, 0.82]) M.rod(C.STEEL, [2.3, y, -4.3], [4.5, y, -4.3], 0.07, 8)
+      for (const x of [2.6, 3.4, 4.2]) {
+        M.rod(C.STEEL, [x, 0.5, -4.3], [x, 0.82, -4.3], 0.06)
+        P.box(C.GRAY, 0.22, 0.24, 0.22, x, 1.0, -4.3)
+        P.cyl(C.RED, 0.12, 0.12, 0.03, x, 1.27, -4.3, 'y', 12)
+      }
+      M.cyl(C.WHITE, 0.09, 0.09, 0.05, 3.0, 1.0, -3.9, 'z', 12)
     }
-    M.cyl(C.WHITE, 0.09, 0.09, 0.05, 3.0, 1.0, -3.9, 'z', 12)
 
     // ── cañerías al pozo (acero r=5,5 cm) con uniones de martillo y soportes. Todo estético; nomenclatura sin validar.
     const line = (pts) => {
@@ -880,35 +1131,80 @@
       pts.slice(1, -1).forEach((p) => M.cyl(C.GRAY_L, 0.07, 0.07, 0.07, p[0], p[1], p[2], 'y', 8)) // codos
     }
     const union = (x, y, z, axis) => M.cyl(C.RED, 0.095, 0.095, 0.1, x, y, z, axis, 10)
-    // A · descarga bomba → manifold → línea de matar del BOP
-    line([
-      [-10.65, 0.9, zc],
-      [-9.2, 0.9, zc],
-      [-9.2, 0.5, zc],
-      [-9.2, 0.5, -12.9],
-      [3.4, 0.5, -12.9],
-      [3.4, 0.5, -5.0],
-    ])
-    line([
-      [2.3, 0.55, -4.3],
-      [0.2, 0.55, -4.3],
-      [0.2, 0.6, -2.4],
-    ])
-    for (const x of [-6, -2.5, 1]) union(x, 0.5, -12.9, 'x')
-    union(3.4, 0.5, -8.6, 'z')
-    union(1.2, 0.55, -4.3, 'x')
-    // B · retorno: línea de ahogar del BOP → pileta (elevada 1,25 m, cruza sobre A)
-    line([
-      [-0.2, 0.6, -2.4],
-      [-0.2, 0.6, -3.0],
-      [-0.2, 1.25, -3.0],
-      [-0.2, 1.25, -13.5],
-    ])
-    union(-0.2, 1.25, -5.5, 'z')
-    union(-0.2, 1.25, -9.5, 'z')
-    for (const z of [-5.5, -8.4, -11.3]) {
-      M.rod(C.GRAY, [-0.2, 0, z], [-0.2, 1.2, z], 0.05, 6)
-      M.box(C.GRAY, 0.28, 0.04, 0.16, -0.2, 1.19, z)
+    if (CHOKE_ROUTING === 'legacy') {
+      // A · descarga bomba → manifold de maniobra → línea de matar del BOP
+      line([
+        [-10.65, 0.9, zc],
+        [-9.2, 0.9, zc],
+        [-9.2, 0.5, zc],
+        [-9.2, 0.5, -12.9],
+        [3.4, 0.5, -12.9],
+        [3.4, 0.5, -5.0],
+      ])
+      line([
+        [2.3, 0.55, -4.3],
+        [0.2, 0.55, -4.3],
+        [0.2, 0.6, -2.4],
+      ])
+      for (const x of [-6, -2.5, 1]) union(x, 0.5, -12.9, 'x')
+      union(3.4, 0.5, -8.6, 'z')
+      union(1.2, 0.55, -4.3, 'x')
+      // B · retorno: línea de choke del BOP → pileta (elevada 1,25 m, cruza sobre A)
+      line([
+        [-0.2, 0.6, -2.4],
+        [-0.2, 0.6, -3.0],
+        [-0.2, 1.25, -3.0],
+        [-0.2, 1.25, -13.5],
+      ])
+      union(-0.2, 1.25, -5.5, 'z')
+      union(-0.2, 1.25, -9.5, 'z')
+      for (const z of [-5.5, -8.4, -11.3]) {
+        M.rod(C.GRAY, [-0.2, 0, z], [-0.2, 1.2, z], 0.05, 6)
+        M.box(C.GRAY, 0.28, 0.04, 0.16, -0.2, 1.19, z)
+      }
+    } else {
+      // Ruteo con choke manifold (PENDIENTE de validación: lados choke/kill y tendidos, según P&ID / procedimiento de control de pozo).
+      // K · bomba → línea de matar (kill) del BOP, lado x=+0,2: rodea por z=−12,9 y sube por x=+0,2 (bajo la línea de choke).
+      line([
+        [-10.65, 0.9, zc],
+        [-9.2, 0.9, zc],
+        [-9.2, 0.5, zc],
+        [-9.2, 0.5, -12.9],
+        [0.2, 0.5, -12.9],
+        [0.2, 0.6, -2.4],
+      ])
+      for (const x of [-6, -2.5]) union(x, 0.5, -12.9, 'x')
+      union(0.2, 0.55, -7.6, 'z')
+      union(0.2, 0.58, -3.6, 'z')
+      // C · línea de choke del BOP (lado x=−0,2) → entrada del choke manifold; sube a 1,25 m para cruzar sobre la línea de matar.
+      const inletX = CHOKE.cx - CHOKE.L / 2 + 0.05
+      line([
+        [-0.2, 0.6, -2.4],
+        [-0.2, 0.6, -3.0],
+        [-0.2, 1.25, -3.0],
+        [1.7, 1.25, -3.0],
+        [1.7, 0.76, -3.0],
+        [1.7, 0.76, CHOKE.cz],
+        [inletX, 0.76, CHOKE.cz],
+      ])
+      union(0.8, 1.25, -3.0, 'x')
+      union(1.7, 0.76, -3.7, 'z')
+      // D · salida del choke manifold (colector) → pileta
+      const outX = CHOKE.cx + 0.95
+      const outZ = CHOKE.cz - CHOKE.W / 2 + 0.05
+      line([
+        [outX, 0.76, outZ],
+        [outX, 0.76, -12.7],
+        [3.0, 0.76, -12.7],
+        [3.0, 1.25, -12.7],
+        [3.0, 1.25, -13.5],
+      ])
+      union(outX, 0.76, -6.4, 'z')
+      union(outX, 0.76, -10.4, 'z')
+      for (const z of [-7.6, -9.6, -11.6]) {
+        M.rod(C.GRAY, [outX, 0, z], [outX, 0.7, z], 0.05, 6)
+        M.box(C.GRAY, 0.28, 0.04, 0.16, outX, 0.69, z)
+      }
     }
     // succión pileta → bomba
     line([
@@ -1450,4 +1746,24 @@
     document.addEventListener('click', sync)
     sync()
   })
+
+  /**
+   * Ficha de confiabilidad (`__TACKER_META`, tabla del módulo de producto que se crea DESPUÉS del bundle) del componente 07:
+   * BOP + acumulador + choke manifold. Grado B / Parcial. Se aplica cuando el módulo de producto arranca (`tacker:boot`).
+   */
+  const META_BOP = {
+    grade: 'B',
+    status: 'Parcial',
+    basis: 'Folleto + referencia fotográfica genérica + posición del choke confirmada por Jorge',
+    note:
+      'BOP anular + doble 7 1/16" 5M (folleto). Choke manifold: posición confirmada; envolvente ' +
+      `${CHOKE.L.toString().replace('.', ',')} × ${CHOKE.W.toString().replace('.', ',')} × ${CHOKE.H.toString().replace('.', ',')} m aproximada (unidad genérica). ` +
+      'Pendientes: color del BOP/acumulador, presión de trabajo del choke, tipo de válvula de entrada y ruteo choke/kill.',
+  }
+  const applyMeta = () => {
+    const meta = window.__TACKER_META
+    if (meta && meta.bop) Object.assign(meta.bop, META_BOP)
+  }
+  if (window.__tackerBooted) applyMeta()
+  else document.addEventListener('tacker:boot', applyMeta, { once: true })
 })()
