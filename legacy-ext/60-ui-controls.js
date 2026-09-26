@@ -10,7 +10,8 @@
  *  5. Ventana chica (< 1100 px de ancho): el árbol de componentes y la card de referencia arrancan colapsados
  *     (solo el valor inicial: el usuario puede reabrirlos).
  *  6. El aviso de controles (#hint) se atenúa mientras algún panel lo tape (detalle, selección, referencia, leyenda…).
- *     La ficha #v2-selection se corre a la izquierda del panel de detalle (lo tapaba: Enfocar/Volver quedaban ocultos).
+ *     La ficha #v2-selection (confiabilidad A/B/C) se integra DENTRO del panel de detalle (#detail), entre la descripción
+ *     y las acciones Enfocar/Volver: así las dos cards de la derecha nunca se superponen, a ningún tamaño.
  *  7. Despiece: la perilla y la etiqueta coinciden mientras está apagado (0 / "0 %"); al activarlo despieza al valor
  *     recordado (60 % por defecto), como antes.
  *  8. La foto de referencia del diálogo (#ref-full) no se embebe dos veces: el build deja el <img> sin src y acá se
@@ -38,9 +39,11 @@ window.__rigExt.onPost(() => {
     header.glass{-webkit-backdrop-filter:none;backdrop-filter:none}
     html.v2-embedded header .title{display:none!important}
     html.v2-embedded header{padding:6px 12px!important;gap:6px 12px!important}
-    /* La ficha de selección (#v2-selection) tapaba las acciones "Enfocar / Volver" del panel de detalle (#detail):
-       se coloca a su izquierda (detalle 300 px + márgenes). En ≤700 px ya está oculta. */
-    #stage #v2-selection{right:326px}
+    /* La ficha de selección (#v2-selection) vive dentro del panel de detalle (#detail), en el flujo normal:
+       no flota sobre la escena ni sobre otras cards. El !important gana a la regla original que la oculta en ≤700 px. */
+    #detail #v2-selection{position:static;right:auto;bottom:auto;width:auto;margin:0 18px 12px;padding:10px 12px;
+      box-shadow:none;background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.1);flex:none;max-height:38%;overflow:auto}
+    #detail #v2-selection.show{display:block!important}
     #hint{transition:opacity .15s}
     #hint.hint-covered{opacity:0;visibility:hidden}
     #cad-inspector{transition:transform .3s cubic-bezier(.16,1,.3,1)}
@@ -129,15 +132,7 @@ window.__rigExt.onPost(() => {
   const hint = $('hint')
   const stage = $('stage')
   if (hint && stage) {
-    const COVERS = [
-      'tree',
-      'detail',
-      'v2-selection',
-      'cad-inspector',
-      'v2-qhse',
-      'legend',
-      'cad-status',
-    ]
+    const COVERS = ['tree', 'detail', 'cad-inspector', 'v2-qhse', 'legend', 'cad-status']
     const overlaps = (a, b) =>
       a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
     const updateHint = () => {
@@ -167,9 +162,18 @@ window.__rigExt.onPost(() => {
         }
       }
     }
+    // La ficha #v2-selection la crea el módulo de producto un instante después: se muda al panel de detalle.
+    const adoptSelection = () => {
+      const sel = $('v2-selection')
+      const detail = $('detail')
+      const actions = detail?.querySelector('.d-actions')
+      if (sel && actions && sel.parentElement !== detail) detail.insertBefore(sel, actions)
+    }
+    adoptSelection()
     attach()
     // #v2-selection y #v2-qhse los crea el módulo de producto un instante después: se enganchan al aparecer.
     new MutationObserver(() => {
+      adoptSelection()
       attach()
       schedule()
     }).observe(stage, { childList: true })
