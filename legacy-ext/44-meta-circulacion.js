@@ -13,7 +13,7 @@
     grade: 'B',
     status: 'Parcial',
     basis:
-      'Folleto + LAYOUT TKR-10 (pileta de ensayo, bomba) + fotos de campo genéricas (tipología) + aclaración de Jorge (golpeador = recipiente rojo de la pileta de ensayo)',
+      'Folleto + LAYOUT TKR-10 (pileta de ensayo, bomba) + fotos de campo genéricas (tipología) + aclaración de Jorge (la pileta de ensayo es la pileta con golpeador; golpeador = recipiente rojo de la foto: interpretación pendiente de confirmar)',
     note:
       'Confirmado: pileta de ensayo 12 × 2,4 m (40 m³), cubicador 3,5 m³ y bomba triplex 6 × 2,4 m. ' +
       'Aproximado: altura, corrugado, patín, escalera, tapas, cotas del golpeador y tendidos. ' +

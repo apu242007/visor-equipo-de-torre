@@ -69,7 +69,8 @@ Distribución (triángulos): BOP 8.244 (pintura 1.672 · acero 5.036 · manguera
 `CHOKE MANIFOLD TKR05 2376-2111.PDF` y `P&DI Diagram Workover Rig TACKER TKR10.pdf` (carpeta `diagramas equipos`): la lectura
 fue denegada. Con ellos se podría cerrar el ruteo y afinar la tipología del choke con un equipo Tacker real.
 
-## Imágenes recibidas para otros componentes (sin usar)
+## Otros componentes
 
-Gancho/bloque viajero, elevadores (Y-series, de varillas), eslabón/bail, llave hidráulica y pileta de ensayo (3 fotos reales con
-desgasificador) están en la raíz del repo sin trackear; quedan para el ajuste de esos componentes.
+Bloque viajero y elevadores, llaves hidráulicas, piso del enganchador y piletas se documentan en `docs/references/bloque-viajero-elevadores/`,
+`docs/references/llaves/`, `docs/references/enganche/` y `docs/references/piletas/`. `choke-manifold-3d-valvulas.webp` (modelo 3D de válvulas) queda
+como referencia adicional para afinar el choke manifold.

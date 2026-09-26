@@ -11,7 +11,7 @@ export default [
     name: 'componente 10: función con golpeador y pileta de acumulación (pendiente)',
     find: String.raw`at.circulacion.funcion="Folleto: pileta de ensayo 40 m\xB3 con desgasificador y cubicador 3,5 m\xB3;`,
     replace:
-      "at.circulacion.funcion=\"Folleto: pileta de ensayo 40 m³ con cubicador 3,5 m³ y desgasificador ('golpeador': recipiente vertical rojo, confirmado como el de la foto de la pileta de ensayo; es el mismo equipo, no otro adicional). " +
+      "at.circulacion.funcion=\"Folleto: pileta de ensayo 40 m³ con cubicador 3,5 m³ y desgasificador ('golpeador': recipiente vertical rojo de la foto de la pileta de ensayo, interpretación pendiente de confirmar; es el mismo equipo, no otro adicional). " +
       'Pileta de acumulación: subconjunto NUEVO con tipología tomada de fotos de campo (tanque contenedor corrugado, barandas, escalera y bocas de descarga); el layout no la muestra: dimensiones y ubicación PENDIENTES;',
   },
   {
