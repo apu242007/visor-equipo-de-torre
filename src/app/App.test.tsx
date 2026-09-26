@@ -14,7 +14,14 @@ vi.mock('@/components/viewer/Viewport', () => ({
 afterEach(() => {
   cleanup()
   useModeStore.setState({ mode: DEFAULT_MODE })
-  useViewerStore.setState({ engine: DEFAULT_ENGINE, selectedComponentId: null })
+  useViewerStore.setState({
+    engine: DEFAULT_ENGINE,
+    selectedComponentId: null,
+    legacyReady: false,
+    view: null,
+    layers: null,
+    selection: null,
+  })
 })
 
 describe('App', () => {
@@ -35,7 +42,9 @@ describe('App', () => {
     render(<App />)
     fireEvent.click(screen.getByRole('button', { name: /R3F nativo/ }))
     expect(await screen.findByTestId('native-viewport')).toBeTruthy()
-    expect(screen.queryByTitle(/Visor TACKER 10 V2/)).toBeNull()
+    // El iframe NO se desmonta (conserva estado y evita re-descargar 1,3 MB): solo se oculta.
+    const frame = screen.getByTitle(/Visor TACKER 10 V2/)
+    expect(frame.parentElement?.className).toContain('hidden')
     expect(screen.getByRole('button', { name: /R3F nativo/ }).getAttribute('aria-pressed')).toBe(
       'true',
     )
@@ -72,17 +81,32 @@ describe('App', () => {
     expect(bar.textContent).toContain('(sin efecto visual aún)')
   })
 
-  it('el modo de la app se reenvía al visor V2 embebido por postMessage', () => {
+  it('el modo de la app se reenvía al visor V2 embebido por postMessage una vez que está listo', () => {
     render(<App />)
     const frame = screen.getByTitle(/Visor TACKER 10 V2/) as HTMLIFrameElement
     const postMessage = vi.fn()
-    Object.defineProperty(frame, 'contentWindow', { value: { postMessage }, configurable: true })
+    const contentWindow = { postMessage } as unknown as Window
+    Object.defineProperty(frame, 'contentWindow', { value: contentWindow, configurable: true })
 
+    // Antes de ready no se envía nada (el visor aún no escucha).
     act(() => useModeStore.getState().setMode('qhse'))
+    expect(postMessage).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'tacker:setMode' }),
+      '*',
+    )
+
+    act(() => {
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: { type: 'tacker:ready', version: 1 },
+          source: contentWindow,
+        }),
+      )
+    })
     expect(postMessage).toHaveBeenLastCalledWith({ type: 'tacker:setMode', mode: 'qhse' }, '*')
 
-    fireEvent.load(frame)
-    expect(postMessage).toHaveBeenLastCalledWith({ type: 'tacker:setMode', mode: 'qhse' }, '*')
+    act(() => useModeStore.getState().setMode('training'))
+    expect(postMessage).toHaveBeenLastCalledWith({ type: 'tacker:setMode', mode: 'training' }, '*')
   })
 
   it('el iframe usa sandbox real: sin allow-same-origin', () => {

@@ -1,20 +1,48 @@
 /*
  * 60-ui-controls.js — ajustes de interfaz del visor V2.
  *  1. Elimina el cartel de modo inferior (#v2-hud: "EXPLORAR · Inspección libre…").
- *  2. Botón "Ocultar opciones" / "Mostrar opciones" en la cabecera: oculta las barras de botones
- *     (Vista, Despiece, Etiquetas, Zonas de riesgo, Reset, la fila Inspección y la barra de modos) para dejar la escena libre.
+ *  2. Botón "Ocultar opciones" / "Mostrar opciones" en la cabecera: oculta la barra de menús (65-toolbar-menus.js)
+ *     y la barra de modos para dejar la escena libre.
  *  3. La card "Referencia del conjunto" (#cad-inspector) se oculta deslizándose hacia la derecha con su propia
  *     pestaña (chevron), sin depender de "Ocultar opciones".
+ *  4. Modo embebido (?embedded, iframe de la app): se oculta el bloque de título propio (la app ya tiene cabecera)
+ *     y la cabecera se compacta. Standalone conserva el título.
+ *  5. Ventana chica (< 1100 px de ancho): el árbol de componentes y la card de referencia arrancan colapsados
+ *     (solo el valor inicial: el usuario puede reabrirlos).
+ *  6. El aviso de controles (#hint) se atenúa mientras algún panel lo tape (detalle, selección, referencia, leyenda…).
+ *     La ficha #v2-selection se corre a la izquierda del panel de detalle (lo tapaba: Enfocar/Volver quedaban ocultos).
+ *  7. Despiece: la perilla y la etiqueta coinciden mientras está apagado (0 / "0 %"); al activarlo despieza al valor
+ *     recordado (60 % por defecto), como antes.
+ *  8. La foto de referencia del diálogo (#ref-full) no se embebe dos veces: el build deja el <img> sin src y acá se
+ *     copia el de la miniatura (#ref-thumb) la primera vez que se abre el diálogo.
  * No toca el estado del visor: solo CSS + botones. Sin persistencia (el iframe corre en origen opaco).
  */
 window.__rigExt.onPost(() => {
+  const $ = (id) => document.getElementById(id)
+  const embedded = new URLSearchParams(location.search).has('embedded')
+  const smallWindow = window.innerWidth < 1100
+  if (embedded) document.documentElement.classList.add('v2-embedded')
+
   const style = document.createElement('style')
   style.id = 'ui-controls-style'
   style.textContent = `
     #v2-hud{display:none!important}
     body.opts-hidden header .group,
     body.opts-hidden #cadbar,
+    body.opts-hidden #v2-toolbar,
     body.opts-hidden #v2-modebar{display:none!important}
+    /* La barra de 3 filas (#cadbar) y los grupos sueltos de la cabecera pasaron a los menús de 65-toolbar-menus.js. */
+    #cadbar,header > .group{display:none!important}
+    /* La cabecera queda por encima del escenario para que los menús desplegables no queden tapados. */
+    header{position:relative;z-index:30}
+    header.glass{-webkit-backdrop-filter:none;backdrop-filter:none}
+    html.v2-embedded header .title{display:none!important}
+    html.v2-embedded header{padding:6px 12px!important;gap:6px 12px!important}
+    /* La ficha de selección (#v2-selection) tapaba las acciones "Enfocar / Volver" del panel de detalle (#detail):
+       se coloca a su izquierda (detalle 300 px + márgenes). En ≤700 px ya está oculta. */
+    #stage #v2-selection{right:326px}
+    #hint{transition:opacity .15s}
+    #hint.hint-covered{opacity:0;visibility:hidden}
     #cad-inspector{transition:transform .3s cubic-bezier(.16,1,.3,1)}
     #cad-inspector.collapsed{transform:translateX(calc(100% + 14px))}
     #cad-inspector.collapsed > :not(#inspector-toggle){visibility:hidden;transition:visibility 0s .3s}
@@ -34,7 +62,14 @@ window.__rigExt.onPost(() => {
   `
   document.head.appendChild(style)
 
-  const card = document.getElementById('cad-inspector')
+  // ───────── árbol de componentes: colapsado por defecto en ventanas chicas ─────────
+  // Se usa el propio botón del visor (así también actualiza la posición de #legend).
+  const tree = $('tree')
+  const treeToggle = $('tree-toggle')
+  if (smallWindow && tree && treeToggle && !tree.classList.contains('collapsed')) treeToggle.click()
+
+  // ───────── card de referencia: pestaña propia, colapsada por defecto en ventanas chicas ─────────
+  const card = $('cad-inspector')
   if (card) {
     const tab = document.createElement('button')
     tab.id = 'inspector-toggle'
@@ -51,16 +86,107 @@ window.__rigExt.onPost(() => {
     }
     tab.addEventListener('click', () => setCollapsed(!card.classList.contains('collapsed')))
     card.appendChild(tab)
-    setCollapsed(false)
+    setCollapsed(smallWindow)
   }
 
+  // ───────── despiece: perilla y etiqueta coherentes mientras está apagado ─────────
+  const tExplode = $('t-explode')
+  const explode = $('explode')
+  if (tExplode && explode) {
+    const DEFAULT_EXPLODE = 60
+    let remembered = Number(explode.value) > 0 ? Number(explode.value) : DEFAULT_EXPLODE
+    const setKnob = (v) => {
+      explode.value = String(v)
+      explode.style.setProperty('--p', explode.value + '%')
+    }
+    setKnob(0) // apagado: perilla en 0, igual que la etiqueta "0 %"
+    explode.addEventListener('input', () => {
+      if (Number(explode.value) > 0) remembered = Number(explode.value)
+    })
+    // Fase de captura: corre ANTES del manejador del visor, que al activar lee `explode.value / 100`.
+    tExplode.addEventListener(
+      'click',
+      () => setKnob(tExplode.classList.contains('on') ? 0 : remembered),
+      true,
+    )
+    // Reset también apaga el despiece (sin tocar la perilla): se vuelve a 0.
+    $('b-reset')?.addEventListener('click', () => setKnob(0), true)
+  }
+
+  // ───────── foto de referencia: una sola copia embebida ─────────
+  const refThumb = $('ref-thumb')
+  const refFull = $('ref-full')
+  const refDialog = $('ref-dialog')
+  if (refThumb && refFull && refDialog) {
+    const showModal = refDialog.showModal.bind(refDialog)
+    refDialog.showModal = () => {
+      if (!refFull.getAttribute('src')) refFull.src = refThumb.currentSrc || refThumb.src
+      showModal()
+    }
+  }
+
+  // ───────── aviso de controles (#hint): nunca tapado por los paneles ─────────
+  const hint = $('hint')
+  const stage = $('stage')
+  if (hint && stage) {
+    const COVERS = [
+      'tree',
+      'detail',
+      'v2-selection',
+      'cad-inspector',
+      'v2-qhse',
+      'legend',
+      'cad-status',
+    ]
+    const overlaps = (a, b) =>
+      a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+    const updateHint = () => {
+      const h = hint.getBoundingClientRect()
+      if (!h.width) return
+      const covered = COVERS.some((id) => {
+        const el = $(id)
+        if (!el) return false
+        const cs = getComputedStyle(el)
+        if (cs.display === 'none' || Number(cs.opacity) < 0.05) return false
+        return overlaps(h, el.getBoundingClientRect())
+      })
+      hint.classList.toggle('hint-covered', covered)
+    }
+    const schedule = () => {
+      setTimeout(updateHint, 0)
+      setTimeout(updateHint, 380) // tras la animación de los paneles (.3 s)
+    }
+    const mo = new MutationObserver(schedule)
+    const watched = new Set()
+    const attach = () => {
+      for (const id of COVERS) {
+        const el = $(id)
+        if (el && !watched.has(el)) {
+          watched.add(el)
+          mo.observe(el, { attributes: true, attributeFilter: ['class', 'style', 'hidden'] })
+        }
+      }
+    }
+    attach()
+    // #v2-selection y #v2-qhse los crea el módulo de producto un instante después: se enganchan al aparecer.
+    new MutationObserver(() => {
+      attach()
+      schedule()
+    }).observe(stage, { childList: true })
+    mo.observe(document.body, { attributes: true, attributeFilter: ['class'] })
+    stage.addEventListener('transitionend', updateHint)
+    window.addEventListener('resize', schedule)
+    schedule()
+  }
+
+  // ───────── botón "Ocultar opciones" ─────────
   const header = document.querySelector('header')
   if (!header) return
 
   const btn = document.createElement('button')
   btn.id = 'opts-toggle'
   btn.type = 'button'
-  btn.setAttribute('aria-controls', 'cadbar')
+  btn.setAttribute('aria-controls', 'v2-toolbar')
   btn.innerHTML =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg><span></span>'
   const label = btn.querySelector('span')

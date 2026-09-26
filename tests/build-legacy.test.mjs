@@ -72,3 +72,59 @@ test('60-ui-controls: sin cartel de modo y con botón para ocultar las barras de
   assert.match(html, /#cad-inspector\.collapsed\{transform:translateX\(/);
   assert.match(html, /inspector-toggle/);
 });
+
+test('foto de referencia: el original la embebe 2 veces idénticas y el build deja una sola copia', () => {
+  const uris = [...read('reference', 'legacy', 'TACKER10_Digital_Rig_V2.html').toString('utf8').matchAll(/data:image\/jpeg;base64,([A-Za-z0-9+/=]+)/g)];
+  assert.equal(uris.length, 2);
+  assert.equal(uris[0][1], uris[1][1], 'las dos data-URI del original deben ser idénticas');
+
+  const html = build().toString('utf8');
+  const built = [...html.matchAll(/data:image\/jpeg;base64,([A-Za-z0-9+/=]+)/g)];
+  assert.equal(built.length, 1, 'debe quedar una sola data-URI JPEG');
+  assert.equal(built[0][1], uris[0][1]);
+  assert.match(html, /<img id="ref-thumb"[^>]* src="data:image\/jpeg;base64,/);
+  assert.match(html, /<img id="ref-full" alt="Torre TACKER 10 de referencia">/);
+  // el src se restituye al abrir el diálogo (60-ui-controls)
+  assert.match(html, /refDialog\.showModal = \(\) =>/);
+  assert.match(html, /refFull\.src = refThumb/);
+});
+
+test('modo embebido: se oculta el título propio del visor y standalone lo conserva', () => {
+  const html = build().toString('utf8');
+  assert.match(html, /html\.v2-embedded header \.title\{display:none!important\}/);
+  assert.match(html, /classList\.add\('v2-embedded'\)/);
+  // la regla depende de una clase que solo se agrega con ?embedded: el título del HTML sigue estando
+  assert.match(html, /<div class="title"><h1>TACKER /);
+  assert.match(html, /const smallWindow = window\.innerWidth < 1100/);
+});
+
+test('barra agrupada: 4 menús accesibles con los controles existentes movidos (no clonados)', () => {
+  const html = build().toString('utf8');
+  assert.match(html, /\/\* 65-toolbar-menus\.js \*\//);
+  for (const id of ['vista', 'capas', 'medicion', 'exportar']) assert.match(html, new RegExp(`id: '${id}'`));
+  for (const a of ['aria-haspopup', 'aria-expanded', 'aria-controls']) assert.match(html, new RegExp(`'${a}'`));
+  assert.match(html, /Recomendado en modo/);
+  const ext = read('legacy-ext', '65-toolbar-menus.js').toString('utf8');
+  assert.doesNotMatch(ext, /cloneNode/, 'los controles se mueven, no se clonan');
+  for (const id of ['views', 'c-ortho', 't-labels', 't-zones', 'c-drops', 't-explode', 'explode', 'c-wire', 'c-dims', 'c-measure', 'c-clear', 'c-cut', 'cut-pos', 'c-isolate', 'c-png', 'c-glb', 'c-info'])
+    assert.ok(ext.includes(`'${id}'`), `falta ${id} en el reparto de menús`);
+  // la barra vieja de 3 filas ya no se muestra y "Ocultar opciones" sigue ocultando la nueva
+  assert.match(html, /#cadbar,header > \.group\{display:none!important\}/);
+  assert.match(html, /body\.opts-hidden #v2-toolbar/);
+});
+
+test('despiece: la perilla arranca en 0 y se restituye el valor recordado en fase de captura', () => {
+  const src = read('legacy-ext', '60-ui-controls.js').toString('utf8');
+  assert.match(src, /DEFAULT_EXPLODE = 60/);
+  assert.match(src, /setKnob\(0\)/);
+  assert.match(src, /tExplode\.addEventListener\(\s*'click',[\s\S]*?true,\s*\)/, 'el listener debe ir en fase de captura');
+});
+
+test('sin <meta> vacíos en el <head> (visor generado ni index.html)', () => {
+  for (const file of [['public', 'legacy', 'TACKER10_Digital_Rig_V2.html'], ['index.html']]) {
+    const html = read(...file).toString('utf8');
+    const head = html.slice(0, html.indexOf('</head>'));
+    assert.doesNotMatch(head, /<meta\s*\/?>/i, `${file.join('/')}: <meta> sin atributos`);
+    assert.doesNotMatch(head, /<meta\b(?![^>]*\b(?:charset|name|content|property|http-equiv)=)[^>]*>/i, `${file.join('/')}: <meta> sin atributos útiles`);
+  }
+});

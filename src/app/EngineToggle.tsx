@@ -1,6 +1,7 @@
 import { Boxes, HardHat, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { isNativeEngineEnabled } from '@/lib/urlState'
 import {
   ENGINE_LABELS,
   VIEWER_ENGINES,
@@ -18,9 +19,15 @@ const ENGINE_HINTS: Record<ViewerEngine, string> = {
   native: 'Escena React Three Fiber: en migración, sin paridad con V2.',
 }
 
+/**
+ * El motor nativo aún no tiene paridad (canvas vacío): en la versión publicada no se ofrece.
+ * Solo aparece en desarrollo (`npm run dev`) o abriendo la app con `?dev=1`.
+ */
 export function EngineToggle() {
   const engine = useViewerStore((s) => s.engine)
   const setEngine = useViewerStore((s) => s.setEngine)
+
+  if (!isNativeEngineEnabled(location.search, import.meta.env.DEV)) return null
 
   return (
     <div

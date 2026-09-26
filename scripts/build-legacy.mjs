@@ -7,6 +7,7 @@
 //        --only limita los módulos legacy-ext incluidos (siempre entra 00-runtime.js y el bloque de datos).
 //
 // Cada parche exige EXACTAMENTE 1 coincidencia: si el original cambia, el build falla en vez de corromper.
+// Además deduplica la foto de referencia embebida dos veces (ver dedupeRefImage).
 import fs from 'node:fs'
 import path from 'node:path'
 
@@ -90,10 +91,21 @@ const patches = [
       '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%230b0d12%27/%3E%3Cpath d=%27M16 4v24M10 28h12M12 10h8M13 16h6%27 stroke=%27%23f2b632%27 stroke-width=%272.5%27 stroke-linecap=%27round%27 fill=%27none%27/%3E%3C/svg%3E">\n<title>TACKER 10',
   },
   {
-    name: 'puente de modo embebido (?embedded + postMessage tacker:setMode)',
+    name: 'tabla META de la capa de producto → window.__TACKER_META',
+    find: 'const MODE={',
+    replace: 'window.__TACKER_META=META;const MODE={',
+  },
+  {
+    name: 'puente de modo (?embedded oculta la barra; setMode envuelto → evento tacker:mode; tacker:boot)',
     find: "mb.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if(b)setMode(b.dataset.m)});setMode('explore');",
     replace:
-      "mb.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if(b)setMode(b.dataset.m)});setMode('explore');\n    // Modo embebido (iframe de la app TACKER DIGITAL RIG): la app controla el modo por postMessage y se oculta la barra propia.\n    if(new URLSearchParams(location.search).has('embedded')){mb.style.display='none';window.addEventListener('message',e=>{if(e.source!==window.parent)return;const d=e.data;if(d&&d.type==='tacker:setMode'&&Object.prototype.hasOwnProperty.call(MODE,d.mode))setMode(d.mode)})}",
+      "mb.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if(b)setMode(b.dataset.m)});setMode('explore');\n" +
+      '    // Modo embebido (iframe de la app TACKER DIGITAL RIG): la app controla el modo por postMessage (legacy-ext/70-bridge.js) y se oculta la barra propia.\n' +
+      "    if(new URLSearchParams(location.search).has('embedded'))mb.style.display='none';\n" +
+      '    // `setMode` (barra interna Y postMessage) emite `tacker:mode` DESPUÉS de terminar: 75-mode-presets.js aplica ahí los presets de capas.\n' +
+      "    const __setMode0=setMode;setMode=function(m){__setMode0(m);try{document.dispatchEvent(new CustomEvent('tacker:mode',{detail:m}))}catch(e){console.error(e)}};\n" +
+      '    window.__tackerMode={set:m=>{if(Object.prototype.hasOwnProperty.call(MODE,m))setMode(m)},get:()=>mode,list:Object.keys(MODE)};\n' +
+      "    window.__tackerBooted=true;document.dispatchEvent(new Event('tacker:boot'));",
   },
   {
     name: 'hook PRE: antes de construir los componentes',
@@ -110,6 +122,29 @@ const patches = [
       `window.__rigExt&&window.__rigExt.runPost(window.__rig);`,
   },
 ]
+
+/**
+ * La foto de referencia (~309 KB en base64) viene embebida DOS veces en el original: `img#ref-thumb` (card) y el <img>
+ * del diálogo `#ref-dialog`. Se conserva la primera y la segunda queda sin `src` con `id="ref-full"`;
+ * `legacy-ext/60-ui-controls.js` le copia el `src` de la miniatura al abrir el diálogo por primera vez.
+ * Exige EXACTAMENTE 2 data-URI JPEG y que sean idénticas byte a byte; si no, el build falla.
+ */
+function dedupeRefImage(html) {
+  const uris = [...html.matchAll(/ src="(data:image\/jpeg;base64,[A-Za-z0-9+/=]+)"/g)]
+  if (uris.length !== 2)
+    throw new Error(`Dedupe foto de referencia: se esperaban 2 data-URI JPEG y hay ${uris.length}`)
+  const [first, second] = uris
+  if (first[1] !== second[1])
+    throw new Error('Dedupe foto de referencia: las dos imágenes embebidas no son idénticas')
+  if (!html.slice(Math.max(0, first.index - 80), first.index).includes('id="ref-thumb"'))
+    throw new Error('Dedupe foto de referencia: la primera imagen no es #ref-thumb')
+  const dialogAt = html.lastIndexOf('<dialog id="ref-dialog"', second.index)
+  if (dialogAt < 0 || html.indexOf('</dialog>', dialogAt) < second.index)
+    throw new Error('Dedupe foto de referencia: la segunda imagen no está dentro de #ref-dialog')
+  return (
+    html.slice(0, second.index) + ' id="ref-full"' + html.slice(second.index + second[0].length)
+  )
+}
 
 const BUNDLE_ANCHOR = '<script>\n(()=>{/**\n * @license\n * Copyright 2010-2026 Three.js Authors'
 
@@ -131,6 +166,7 @@ function build() {
     if (n !== 1) throw new Error(`Parche "${p.name}": se esperaba 1 coincidencia y hay ${n}`)
     html = html.replace(p.find, () => p.replace)
   }
+  html = dedupeRefImage(html)
 
   const blocks = []
   const runtimeFile = '00-runtime.js'

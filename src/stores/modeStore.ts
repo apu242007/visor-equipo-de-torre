@@ -1,9 +1,8 @@
 import { create } from 'zustand'
+import { APP_MODES, DEFAULT_MODE, isAppMode, type AppMode } from '@/types/mode'
 
-export const APP_MODES = ['explore', 'operation', 'qhse', 'training'] as const
-export type AppMode = (typeof APP_MODES)[number]
-
-export const DEFAULT_MODE: AppMode = 'explore'
+export { APP_MODES, DEFAULT_MODE, isAppMode }
+export type { AppMode }
 
 export const MODE_LABELS: Record<AppMode, string> = {
   explore: 'EXPLORE',
@@ -12,8 +11,15 @@ export const MODE_LABELS: Record<AppMode, string> = {
   training: 'TRAINING',
 }
 
-export function isAppMode(value: unknown): value is AppMode {
-  return typeof value === 'string' && (APP_MODES as readonly string[]).includes(value)
+/**
+ * Qué cambia cada modo en el visor V2 (presets de capas de `legacy-ext/75-mode-presets.js`).
+ * Son presets VISUALES sobre capas existentes: no son cálculos ni requisitos operativos.
+ */
+export const MODE_SUMMARIES: Record<AppMode, string> = {
+  explore: 'Vista limpia: inspección libre del modelo, sin capas activas.',
+  operation: 'Aparejo y malacate aislados, con cotas.',
+  qhse: 'Zonas ilustrativas de riesgo y puntos DROPS (sin validar; no son controles aprobados).',
+  training: 'Etiquetas de componentes y despiece.',
 }
 
 interface ModeState {

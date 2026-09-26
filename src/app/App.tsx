@@ -4,6 +4,7 @@ import { LegacyRigViewer } from '@/components/viewer/LegacyRigViewer'
 import { useViewerStore } from '@/stores/viewerStore'
 import { StatusBar } from './StatusBar'
 import { TopBar } from './TopBar'
+import { useUrlSync } from './urlSync'
 
 // three + r3f + drei pesan ~1 MB: se cargan aparte para que la UI pinte primero.
 // Con el motor legacy (por defecto) este chunk ni siquiera se descarga.
@@ -13,15 +14,16 @@ const Viewport = lazy(() =>
 
 export function App() {
   const engine = useViewerStore((s) => s.engine)
+  useUrlSync()
 
   return (
     <TooltipProvider>
       <div className="dark bg-background text-foreground flex h-dvh flex-col">
         <TopBar />
         <main className="relative min-h-0 flex-1">
-          {engine === 'legacy' ? (
-            <LegacyRigViewer />
-          ) : (
+          {/* El iframe del V2 queda montado aunque el motor sea el nativo: se oculta, no se destruye. */}
+          <LegacyRigViewer active={engine === 'legacy'} />
+          {engine === 'native' && (
             <>
               <Suspense fallback={null}>
                 <Viewport />

@@ -34,7 +34,7 @@ no calculan geometría (usan `src/lib/geometry`). Alias `@/` → `src/`.
 - **Stores** (`src/stores`): `modeStore` (EXPLORE / OPERATION / QHSE / TRAINING) y `viewerStore`
   (`engine`: `legacy` | `native`, `selectedComponentId`). Los modos son estado derivado, no mutan materiales.
   Con el motor `legacy`, `LegacyRigViewer` reenvía el modo al V2 por `postMessage` (`tacker:setMode`,
-  URL `?embedded` que oculta la barra de modos propia del V2): `modeStore` es la única fuente de verdad.
+  URL `?embedded` que oculta la barra de modos propia del V2): `modeStore` es la única fuente de verdad. Contrato completo (ready/state/select, capas, URL) en `docs/LEGACY_BRIDGE.md`.
 - **Escena** (`src/scene`): `cameras/presets.ts` (vistas estándar), `controls/CameraRig.tsx`,
   `lighting/Lighting.tsx` (entorno procedural), `loaders/gltf.ts` (Draco + Meshopt + KTX2 con decoders
   locales) y `loaders/RigModel.tsx`. `scene/effects` existe vacío (`.gitkeep`).

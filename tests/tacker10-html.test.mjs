@@ -19,6 +19,12 @@ test('TACKER10 HTML keeps its core controls and modes', () => {
   }
 });
 
+test('TACKER10 HTML embeds the reference photo once (ref-full gets its src lazily)', () => {
+  assert.equal((html.match(/data:image\/jpeg;base64,/g) ?? []).length, 1);
+  assert.match(html, /id=["']ref-full["']/);
+  assert.match(html, /id=["']ref-thumb["']/);
+});
+
 test('TACKER10 HTML does not use the deprecated PCFSoftShadowMap', () => {
   assert.match(html, /shadowMap\.type=1;/);
   assert.doesNotMatch(html, /shadowMap\.type=Mo;/);
@@ -27,7 +33,10 @@ test('TACKER10 HTML does not use the deprecated PCFSoftShadowMap', () => {
 test('TACKER10 HTML accepts the embedded-mode bridge from the host app', () => {
   assert.match(html, /has\('embedded'\)/);
   assert.match(html, /tacker:setMode/);
-  assert.match(html, /e\.source!==window\.parent/);
+  assert.match(html, /e\.source\s*!==\s*window\.parent/);
+  for (const t of ['tacker:ready', 'tacker:state', 'tacker:select', 'tacker:setView', 'tacker:setLayers']) {
+    assert.ok(html.includes(t), t);
+  }
 });
 
 test('double-click launcher opens the HTML directly', async () => {
