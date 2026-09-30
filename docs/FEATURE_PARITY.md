@@ -59,3 +59,4 @@ Funciones agregadas al V2 mediante `legacy-ext/` que el motor nativo deberá igu
 | Detalle de puntos DROPS en la geometría (`userData.dropsId`, 65/66) | operativo (`20-mast`, `30-carrier`, `40-wellsite`) | pendiente | inventario de ids de escena = ids del JSON (excepto BP-2 "NA") |
 | Rediseño visual (mástil, enganche, carrier, BOP, locación) | operativo; 366 draw calls (antes ~982) | pendiente | comparar capturas y `renderer.info` |
 | Interfaz: sin cartel de modo inferior y botón "Ocultar/Mostrar opciones" | operativo (`60-ui-controls.js`) | pendiente | manual: barras ocultas y escena a pantalla completa |
+| Capa CAD (referencia dimensional: carrier, piso, layout, mástil ilustrativo) | operativa (`77-capa-cad.js`, botón `Capa CAD` en Capas; datos de `cad/` → `src/data/cad/capa-cad.json`) | pendiente | test de datos (`tests/capa-cad.test.mjs`) + manual: coincide con las cotas del folleto y el layout |

@@ -13,3 +13,4 @@ src/index.css
 
 # generado por cad/build.py (json.dump); prettier lo reformatearía en cada corrida
 cad/data/
+src/data/cad/

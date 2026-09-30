@@ -23,6 +23,7 @@ PDF = dict(
     pileta=(808.6, 829.3, 382.6, 486.1),
     planchada=(682.1, 702.8, 478.6, 582.0),
     equipo=(670.7, 705.1, 287.8, 443.0),
+    piso=(663.5, 687.3, 459.1, 482.9),  # piso de trabajo dibujado (3 × 3 nominal; folleto 2,6 × 3,3)
 )
 
 
@@ -42,7 +43,13 @@ def rect(x0, x1, y0, y1):
 
 
 def medidas():
-    return {k: a_metros(v) for k, v in PDF.items()}
+    return {k: a_metros(v) for k, v in PDF.items() if k != "piso"}
+
+
+def centro_piso():
+    """Centro (x, y) CAD del piso de trabajo según el layout (medido del vector, confianza C)."""
+    x0, x1, y0, y1 = a_metros(PDF["piso"])
+    return (x0 + x1) / 2, (y0 + y1) / 2
 
 
 def ecuaciones(spec):

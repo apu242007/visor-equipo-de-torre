@@ -87,6 +87,16 @@ check("carrier termina a 1,3 m de la boca", bb["xmin"] + bb["x"], -1.3)
 path, bb, m = layout_tkr10.main(spec)  # las ecuaciones asertan tamaños y cotas rotuladas (5 m, 3 m, 1,3 m)
 print("layout_tkr10 ->", path.name, {k: [round(v, 2) for v in vals] for k, vals in m.items()})
 
+import capa  # noqa: E402
+
+# ───────── capa CAD para el visor V2 ─────────
+dest, n_tris, n_segs = capa.generar(
+    spec, parametros("mastil")[0], parametros("piso_trabajo")[0], parametros("carrier_huella")[0]
+)
+print("capa CAD ->", dest.relative_to(dest.parents[3]), "| %d vértices de malla, %d barras de línea, %d KB" % (n_tris, n_segs, dest.stat().st_size // 1024))
+if dest.stat().st_size > 400_000:
+    fallas.append("capa CAD demasiado pesada")
+
 import trimesh  # noqa: E402
 
 for cid in ("mastil", "piso_trabajo", "carrier_huella", "layout_tkr10"):
