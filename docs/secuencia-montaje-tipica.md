@@ -48,3 +48,10 @@ No se anima el izamiento del mástil ni se inventan tiempos, cargas o distancias
 - **Pistones:** se dibujan con la fijación y el punto de empuje del V2; carrera ≈ 3,4 m (2,6 → 6,0 m), relación 2,3: más que un cilindro simple típico,
   lo que se anota como aproximación (podría ser telescópico). El pistón de extensión del 2.º tramo es interno y aproximado.
 - No se copia geometría ni marcas de las fotos; los esquemas de mástil izado por cable con marco en A (Branham) no aplican a un izaje por pistones.
+
+### Ajuste de la secuencia (2026-09-30)
+
+Con las imágenes de referencia (concepto, no el equipo): el mástil sube **hasta 90° (vertical)**; con el mástil vertical el 2.º pistón **extiende el tramo embutido**;
+al final **los vientos se tensan** (de un tendido flojo con catenaria a cable recto) y el mástil toma su **plomo final** (la leve inclinación del V2). Antes el mástil
+llegaba a su inclinación final antes de extender. Los vientos usan los puntos del V2 (4 anclajes a ±25 m, dos cables por anclaje desde los niveles 26 y 18,5 del
+mástil y dos cables traseros cortos). Sin cargas, presiones ni tiempos; `pendingValidation`.
