@@ -38,3 +38,13 @@ No se anima el izamiento del mástil ni se inventan tiempos, cargas o distancias
   `legacy-ext/81-izamiento-mastil.js` (sin cargas, presiones ni tiempos). Carreras y pistón interno del 2.º tramo: aproximados.
 - Referencias fotográficas de equipos similares (otras marcas, no TACKER 10) confirman la cinemática: el mástil viaja acostado sobre el carrier hacia la
   cabina, pivota por la parte trasera con pistones en la base y termina vertical con vientos a los anclajes. No se copia geometría ni marcas de esas fotos.
+
+### Decisiones tomadas de las imágenes de referencia (equipos similares de otras marcas; `pendingValidation`)
+
+- **Posición de transporte:** en las fotos el mástil viaja acostado sobre el carrier hacia la cabina, apoyado sobre un soporte de traslado. En el V2
+  el motor y el malacate quedan bajo el mástil acostado: `cad/izamiento.py` calcula el ángulo mínimo con margen libre (≈ 22° sobre la horizontal) sobre
+  el perfil medido del equipo (`scripts/dump-corredor-mastil.mjs` → `cad/data/v2_corredor_mastil.json`) y dimensiona el soporte de traslado (CadQuery).
+  El izamiento se anima desde ese ángulo; el piso del "0°" no es posible en este layout.
+- **Pistones:** se dibujan con la fijación y el punto de empuje del V2; carrera ≈ 3,4 m (2,6 → 6,0 m), relación 2,3: más que un cilindro simple típico,
+  lo que se anota como aproximación (podría ser telescópico). El pistón de extensión del 2.º tramo es interno y aproximado.
+- No se copia geometría ni marcas de las fotos; los esquemas de mástil izado por cable con marco en A (Branham) no aplican a un izaje por pistones.

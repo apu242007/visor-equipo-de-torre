@@ -25,6 +25,12 @@ window.__rigExt.onPost((R) => {
   if (!T || !P || !R.mast) return
 
   const { bx, by, a: aFinal, scale: S } = R.mast
+  // Datos de cad/izamiento.py (medidos del V2): ángulo mínimo de transporte, largo de camisa y soporte de traslado.
+  const D = window.__TACKER_IZAMIENTO || {}
+  const EPS0 = Number.isFinite(D.elevacion_transporte) ? D.elevacion_transporte : 22 // ° sobre la horizontal en transporte
+  const THETA0 = -(Math.PI / 2) + (EPS0 * Math.PI) / 180 // eje respecto de la vertical (− = hacia la cabina)
+  const CAMISA =
+    D.pistones && Number.isFinite(D.pistones.largo_camisa) ? D.pistones.largo_camisa : 3.0
   const E = 14.0 // m locales: cuánto queda embutido el tramo superior en el transporte (ilustrativo)
   const PHASE = { raiseEnd: 0.55, extendEnd: 0.85 }
   const ease = (x) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x))
@@ -82,6 +88,22 @@ window.__rigExt.onPost((R) => {
     izaje.push({ z, barrel, rod })
   }
   mastG.add(gDyn)
+  // soporte de traslado sobre la cabina (visible solo con el mástil apoyado en transporte)
+  const gSop = new T.Group()
+  gSop.name = 'soporte_traslado'
+  gSop.visible = false
+  if (D.soporte_traslado) {
+    const s = D.soporte_traslado
+    const caja = (sx, sy, sz, x, y, z) => {
+      const m = new T.Mesh(new T.BoxGeometry(sx, sy, sz), matOscuro)
+      m.position.set(x, y, z)
+      m.castShadow = true
+      gSop.add(m)
+    }
+    for (const z of [-0.55, 0.55]) caja(0.18, s.alto, 0.18, s.x, s.y0 + s.alto / 2, z)
+    caja(1.0, 0.14, 1.6, s.x, s.y1 - 0.07, 0)
+    mastG.add(gSop)
+  }
   const pistonesEstaticos = mastG.children.find((c) => c.name === 'pistones_izaje')
 
   // pistón interno del 2.º tramo (en el marco del mástil; se ve a través del reticulado)
@@ -113,7 +135,7 @@ window.__rigExt.onPost((R) => {
   function fase(pp) {
     if (pp >= 1) return 'Montado. Pose final del modelo.'
     if (pp < PHASE.raiseEnd) {
-      const elev = Math.min(90, ease(pp / PHASE.raiseEnd) * (90 + deg(aFinal)) * 1)
+      const elev = Math.min(90, EPS0 + ease(pp / PHASE.raiseEnd) * (90 + deg(aFinal) - EPS0))
       return `Fase 1 · pistón de izaje del 1.er tramo: ${elev.toFixed(0)}° de 90°`
     }
     if (pp < PHASE.extendEnd) {
@@ -129,7 +151,7 @@ window.__rigExt.onPost((R) => {
     const raise = ease(p / PHASE.raiseEnd)
     const ext = ease((p - PHASE.raiseEnd) / (PHASE.extendEnd - PHASE.raiseEnd))
     // θ: ángulo del eje respecto de la vertical (+ hacia la boca de pozo). Acostado hacia atrás: −90°. Final: el del V2.
-    const theta = completo ? aFinal : -Math.PI / 2 + raise * (Math.PI / 2 + aFinal)
+    const theta = completo ? aFinal : THETA0 + raise * (aFinal - THETA0)
     P.rotation.z = -theta
     sup.position.y = completo ? 0 : -E * (1 - ext)
     if (conducto) conducto.visible = completo || p >= PHASE.extendEnd
@@ -137,6 +159,7 @@ window.__rigExt.onPost((R) => {
     if (cableMalacate) cableMalacate.visible = completo || p >= PHASE.extendEnd
 
     gDyn.visible = !completo
+    gSop.visible = p < 0.05
     if (pistonesEstaticos) pistonesEstaticos.visible = completo
     gExt.visible = !completo
     if (!completo) {
@@ -144,7 +167,7 @@ window.__rigExt.onPost((R) => {
       for (const { z, barrel, rod } of izaje) {
         const [x0, y0] = B0(z)
         const l = Math.hypot(mx - x0, my - y0)
-        const lb = Math.min(l, 3.0)
+        const lb = Math.min(l, CAMISA)
         const ux = (mx - x0) / l
         const uy = (my - y0) / l
         between(barrel, x0, y0, x0 + ux * lb, y0 + uy * lb, z)
@@ -205,7 +228,7 @@ window.__rigExt.onPost((R) => {
       <input type="range" id="er-range" min="0" max="100" step="1" value="100" aria-label="Avance del izamiento (100 = montado)">
     </div>
     <div id="er-fase" aria-live="polite"></div>
-    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div>`
+    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. En el V2 el mástil parte apoyado en un soporte de traslado sobre la cabina (el equipo del carrier le impide acostarse a 0°; ángulo calculado en cad/izamiento.py). Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div>`
   document.body.appendChild(box)
   const ui = {
     update() {

@@ -40,3 +40,16 @@ test('no hay cargas, presiones ni tiempos reales en los textos de la UI', () => 
   const note = erect.match(/er-note">([^<]+)</)[1]
   assert.ok(!/\b\d+\s*(kg|t|psi|bar|s|min|h)\b/.test(note), note)
 })
+
+test('cinemática del izamiento (cad/izamiento.py): datos inyectados y coherentes', () => {
+  const d = JSON.parse(fs.readFileSync(path.join(root, 'src', 'data', 'cad', 'izamiento.json'), 'utf8'))
+  assert.ok(html.includes('window.__TACKER_IZAMIENTO='))
+  assert.equal(d.estado, 'pendingValidation')
+  assert.ok(d.elevacion_transporte > 0 && d.elevacion_transporte < 45, 'el mástil no puede acostarse a 0° sobre el equipo del V2')
+  assert.ok(d.margen_libre >= 0.14, 'margen mínimo entre el mástil y el equipo')
+  assert.ok(Math.abs(d.elevacion_final - 94.24) < 0.1, 'la pose final es la del V2')
+  const l = d.pistones.tabla.map((t) => t.longitud)
+  assert.ok(l.every((x, i) => i === 0 || x >= l[i - 1] - 1e-6), 'el pistón se extiende de forma monótona')
+  assert.ok(d.soporte_traslado.alto > 0.3 && d.soporte_traslado.valido)
+  assert.ok(d.notas.some((n) => /0°/.test(n)), 'se explica por qué no se parte de 0°')
+})
