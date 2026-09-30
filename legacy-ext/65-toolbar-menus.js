@@ -1,5 +1,5 @@
 /*
- * 65-toolbar-menus.js — barra de opciones agrupada en 4 menús desplegables (Vista · Capas · Medición · Exportar).
+ * 65-toolbar-menus.js — barra de opciones agrupada en 4 menús desplegables (Vista · Capas · Animar · Montaje · Medición · Exportar).
  *
  * Reemplaza la mezcla plana de la cabecera + la barra #cadbar de 3 filas por UNA sola fila:
  *   [Vista ▾] [Capas ▾] [Medición ▾] [Exportar ▾] [Reset]   …   [Ocultar opciones]
@@ -53,6 +53,12 @@ window.__rigExt.onPost(() => {
       items: [{ row: ['c-play', 'hoist', 'hoist-out'] }],
     },
     {
+      id: 'montaje',
+      label: 'Montaje',
+      icon: svg('<path d="M4 20h16"/><path d="M6 20V8l6-4 6 4v12"/><path d="M10 20v-6h4v6"/>'),
+      items: [], // los módulos 76 (secuencia) y 81 (izamiento) agregan su contenido con __rigToolbar.add
+    },
+    {
       id: 'medicion',
       label: 'Medición',
       icon: svg(
@@ -79,8 +85,8 @@ window.__rigExt.onPost(() => {
     training: 'Entrenamiento',
   }
   const RELEVANT = {
-    explore: ['vista', 'capas', 'animar', 'medicion', 'exportar'],
-    operation: ['vista', 'animar', 'medicion'],
+    explore: ['vista', 'capas', 'animar', 'montaje', 'medicion', 'exportar'],
+    operation: ['vista', 'animar', 'montaje', 'medicion'],
     qhse: ['capas', 'vista'],
     training: ['capas', 'vista'],
   }

@@ -4,7 +4,7 @@
  *  1. Las cartas laterales (árbol de componentes y "Referencia del conjunto") arrancan COLAPSADAS en cualquier tamaño de ventana
  *     (se reabren con su pestaña o con el botón "Paneles").
  *  2. Los comandos sueltos de la carta de referencia pasaron a la barra: "Vista nocturna" en Vista y "Animar aparejo" + posición del
- *     aparejo en el menú Animar (65-toolbar-menus.js). La secuencia de montaje se abre con el botón "Montaje".
+ *     aparejo en el menú Animar (65-toolbar-menus.js). La secuencia de montaje y el izamiento viven en el menú "Montaje" (65-toolbar-menus.js): ningún panel flotante.
  *  3. MODO ENFOQUE: mientras algo esté activo (un paso del montaje, el izamiento reproduciéndose, la capa CAD, medición, corte, cotas,
  *     malla, despiece, etiquetas o aislamiento) se ocultan TODAS las cartas (árbol, referencia, detalle, aviso de controles, leyenda
  *     de la capa CAD). Quedan la barra de menús y los controles de lo que se está usando. "Paneles" las muestra de nuevo a pedido.
@@ -57,7 +57,7 @@ window.__rigExt.onPost(() => {
   `
   document.head.appendChild(style)
 
-  // ───────── 2. botones "Montaje" y "Paneles" en la barra ─────────
+  // ───────── 2. botón "Paneles" en la barra ─────────
   const toolbar = $('v2-toolbar')
   const svg = (paths) =>
     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px;flex:none">${paths}</svg>`
@@ -72,31 +72,12 @@ window.__rigExt.onPost(() => {
     if (toolbar) toolbar.appendChild(b)
     return b
   }
-  const bMontaje = tool(
-    'c-montaje',
-    'Montaje',
-    svg('<path d="M4 20h16"/><path d="M6 20V8l6-4 6 4v12"/><path d="M10 20v-6h4v6"/>'),
-    'Secuencia de montaje ilustrativa (paso a paso, con el izamiento del mástil)',
-  )
   const bPaneles = tool(
     'c-paneles',
     'Paneles',
     svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>'),
     'Mostrar u ocultar las cartas laterales (componentes y referencia)',
   )
-
-  bMontaje.addEventListener('click', () => {
-    const seq = window.__tackerSeq
-    if (!seq) return
-    if (seq.isOpen()) seq.close()
-    else seq.open()
-  })
-  document.addEventListener('tacker:seq-panel', (e) =>
-    bMontaje.setAttribute('aria-pressed', String(!!e.detail)),
-  )
-  document.addEventListener('tacker:seq-step', (e) => {
-    if (e.detail > 0) bMontaje.setAttribute('aria-pressed', 'true')
-  })
 
   // ───────── 3. modo enfoque ─────────
   const ACTIVABLES = [

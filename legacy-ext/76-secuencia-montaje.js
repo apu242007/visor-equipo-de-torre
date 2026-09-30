@@ -98,14 +98,11 @@ window.__rigExt.onPost(() => {
     return set
   }
 
-  // ───────── UI: dock compacto, cerrado por defecto (se abre con el botón "Montaje" de la barra) ─────────
+  // ───────── UI: contenido del menú "Montaje" de la barra (sin paneles flotantes sobre la escena) ─────────
   const style = document.createElement('style')
   style.id = 'seq-style'
   style.textContent = `
-    #rig-seq{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:20;max-width:calc(100vw - 32px);
-      background:rgba(20,27,38,.95);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:13px;padding:6px 8px;
-      box-shadow:0 10px 30px rgba(0,0,0,.45)}
-    #rig-seq[hidden]{display:none}
+    #rig-seq{width:min(340px,calc(100vw - 32px));color:#DDE3EC;font-size:13px}
     #rig-seq .sq-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
     #rig-seq .sq-title{font-weight:600;color:#DDBB65;letter-spacing:.02em;padding:0 4px}
     #rig-seq button{font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
@@ -113,35 +110,33 @@ window.__rigExt.onPost(() => {
     #rig-seq button:hover{background:rgba(255,255,255,.1)}
     #rig-seq button[aria-pressed="true"]{border-color:#DDBB65;color:#DDBB65}
     #rig-seq button:focus-visible{outline:none;box-shadow:0 0 0 2px #05060A,0 0 0 4px rgba(139,92,246,.7)}
-    #rig-seq .sq-steps{display:flex;gap:4px}
+    #rig-seq .sq-steps{display:flex;gap:4px;flex-wrap:wrap}
     #rig-seq .sq-steps button{min-width:28px;padding:2px 0}
-    #rig-seq .sq-line{flex:1 1 200px;min-width:0;max-width:440px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
-    #rig-seq .sq-detail{margin-top:6px;max-width:720px;font-size:12.5px;line-height:1.4}
-    #rig-seq .sq-detail[hidden]{display:none}
+    #rig-seq .sq-line{flex:1 1 100%;font-size:12px;font-weight:600}
+    #rig-seq .sq-detail{margin-top:6px;font-size:12.5px;line-height:1.4}
     #rig-seq .sq-step-title{font-weight:600;margin-bottom:2px}
     #rig-seq .sq-text{opacity:.9}
     #rig-seq .sq-meta{margin-top:6px;font-size:12px;opacity:.8}
     #rig-seq .sq-warn{margin-top:6px;font-size:11.5px;color:#E0B870}
-    body.opts-hidden #rig-seq{display:none}
   `
   document.head.appendChild(style)
 
   const panel = document.createElement('section')
   panel.id = 'rig-seq'
-  panel.hidden = true
   panel.setAttribute('aria-label', 'Secuencia de montaje ilustrativa (pendiente de validar)')
   panel.innerHTML = `
     <div class="sq-row">
-      <span class="sq-title" title="Ilustrativa · pendiente de validar">Montaje</span>
-      <div class="sq-steps" id="sq-steps"></div>
+      <span class="sq-title" title="Ilustrativa · pendiente de validar">Secuencia de montaje</span>
       <button type="button" id="sq-prev" aria-label="Paso anterior">‹</button>
       <button type="button" id="sq-next" aria-label="Paso siguiente">›</button>
+      <button type="button" id="sq-close" aria-label="Volver a mostrar todos los componentes">Todo</button>
+      <div class="sq-steps" id="sq-steps"></div>
       <span class="sq-line" id="sq-line"></span>
-      <button type="button" id="sq-info" aria-expanded="false" aria-controls="sq-status">Detalle</button>
-      <button type="button" id="sq-close" aria-label="Cerrar la secuencia de montaje">×</button>
     </div>
-    <div class="sq-detail" id="sq-status" aria-live="polite" hidden></div>`
-  document.body.appendChild(panel)
+    <div class="sq-detail" id="sq-status" aria-live="polite"></div>`
+  // Vive dentro del menú "Montaje" de la barra (65-toolbar-menus.js); sin barra, queda al final del body.
+  if (window.__rigToolbar) window.__rigToolbar.add('montaje', panel)
+  else document.body.appendChild(panel)
 
   const stepsBox = $('sq-steps')
   STEPS.forEach((s) => {
@@ -184,7 +179,6 @@ window.__rigExt.onPost(() => {
     line.textContent = `${s.n}/8 · ${s.titulo}`
     line.title = s.titulo
     status.innerHTML =
-      `<div class="sq-step-title">${s.n}/8 · ${s.titulo}</div>` +
       `<div class="sq-text">${s.texto}</div>` +
       `<div class="sq-meta" title="${names.join(' · ')}">${s.geo ? 'Se suma en este paso: ' + (s.add.join(', ') || '—') : 'Paso documental: sin geometría propia.'}` +
       `${vis.length ? ' · Visibles: ' + names.length + ' de ' + ALL.length : ' · Sin componentes visibles'}${s.nota ? ' · ' + s.nota : ''}</div>` +
@@ -194,29 +188,21 @@ window.__rigExt.onPost(() => {
   function go(n) {
     const k = Math.max(0, Math.min(STEPS.length, Number(n) || 0))
     current = k
-    if (k > 0) panel.hidden = false
     setVisible(k === 0 ? null : visibleAt(k - 1))
     render()
     document.dispatchEvent(new CustomEvent('tacker:seq-step', { detail: k }))
   }
+  const pop = () => document.getElementById('tm-pop-montaje')
   function open() {
-    panel.hidden = false
-    document.dispatchEvent(new CustomEvent('tacker:seq-panel', { detail: true }))
+    if (pop() && pop().hidden) document.getElementById('tm-btn-montaje').click()
   }
   function close() {
     if (current !== 0) go(0)
-    panel.hidden = true
-    document.dispatchEvent(new CustomEvent('tacker:seq-panel', { detail: false }))
   }
 
   $('sq-prev').addEventListener('click', () => go(current - 1))
   $('sq-next').addEventListener('click', () => go(current + 1))
   $('sq-close').addEventListener('click', close)
-  $('sq-info').addEventListener('click', () => {
-    const st = $('sq-status')
-    st.hidden = !st.hidden
-    $('sq-info').setAttribute('aria-expanded', String(!st.hidden))
-  })
 
   // Un cambio de modo aplica su propio preset de componentes: la secuencia deja de mandar.
   document.addEventListener('tacker:mode', () => {
@@ -233,6 +219,6 @@ window.__rigExt.onPost(() => {
     open,
     close,
     current: () => current,
-    isOpen: () => !panel.hidden,
+    isOpen: () => !!pop() && !pop().hidden,
   }
 })

@@ -54,8 +54,9 @@ test('cinemática del izamiento (cad/izamiento.py): datos inyectados y coherente
   assert.ok(d.notas.some((n) => /0°/.test(n)), 'se explica por qué no se parte de 0°')
 })
 
-test('durante la reproducción se ocultan el panel de secuencia y la nota (barra compacta)', () => {
-  assert.match(erect, /body\.erect-playing #rig-seq\{display:none\}/)
+test('el izamiento vive en el menú Montaje (sin panel flotante) y oculta la nota al reproducir', () => {
+  assert.match(erect, /__rigToolbar\.add\('montaje', box\)/)
+  assert.doesNotMatch(erect, /position:fixed/)
   assert.match(erect, /body\.erect-playing #rig-erect \.er-note\{display:none\}/)
   assert.match(erect, /classList\.toggle\('erect-playing'/)
   assert.match(erect, /raf = 0 \/\/ terminó/, 'al terminar vuelven los carteles y el botón dice Reproducir')
