@@ -36,9 +36,9 @@ test('comandos reubicados en la barra: Vista nocturna en Vista y Animar aparejo 
   assert.match(menus, /row: \['c-play', 'hoist', 'hoist-out'\]/)
 })
 
-test('la secuencia de montaje es un dock compacto cerrado por defecto con detalle plegable', () => {
-  assert.match(seq, /panel\.hidden = true/)
-  assert.match(seq, /id="sq-info"/)
-  assert.match(seq, /id="sq-status" aria-live="polite" hidden/)
+test('la secuencia de montaje y el izamiento viven en el menú Montaje de la barra, sin panel flotante', () => {
+  assert.match(menus, /id: 'montaje'/)
+  assert.match(seq, /__rigToolbar\.add\('montaje', panel\)/)
+  assert.doesNotMatch(seq, /position:fixed/)
   assert.match(seq, /open,\s*close/)
 })

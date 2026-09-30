@@ -268,19 +268,15 @@ window.__rigExt.onPost((R) => {
   const style = document.createElement('style')
   style.id = 'erect-style'
   style.textContent = `
-    #rig-erect{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:21;width:min(760px,calc(100vw - 32px));
-      background:rgba(20,27,38,.96);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:12.5px;padding:8px 12px;
-      box-shadow:0 10px 30px rgba(0,0,0,.45)}
-    #rig-erect .er-row{display:flex;gap:10px;align-items:center}
+    #rig-erect{width:min(340px,calc(100vw - 32px));color:#DDE3EC;font-size:12.5px;margin-top:6px;padding-top:8px;border-top:1px solid #2C3747}
+    #rig-erect[hidden]{display:none}
+    #rig-erect .er-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
     #rig-erect b{color:#DDBB65}
-    #rig-erect input[type=range]{flex:1}
+    #rig-erect input[type=range]{flex:1 1 120px;min-width:0}
     #rig-erect button{font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px 10px;cursor:pointer}
     #rig-erect button:hover{background:rgba(255,255,255,.1)}
     #rig-erect .er-note{margin-top:4px;font-size:11px;opacity:.75;line-height:1.35}
-    body.opts-hidden #rig-erect{display:none}
-    /* Durante la reproducción se despeja la escena: solo queda la barra compacta (Pausar, avance y fase) */
-    body.erect-playing #rig-seq{display:none}
-    body.erect-playing #rig-erect{bottom:16px}
+    /* Durante la reproducción se oculta la nota: solo Pausar, avance y fase */
     body.erect-playing #rig-erect .er-info{display:none}
     #rig-erect .er-info summary{cursor:pointer;font-size:11px;opacity:.75;margin-top:4px}
     body.erect-playing #rig-erect .er-note{display:none}
@@ -297,7 +293,9 @@ window.__rigExt.onPost((R) => {
     </div>
     <div id="er-fase" aria-live="polite"></div>
     <details class="er-info"><summary>Nota</summary>    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. En el V2 el mástil parte apoyado en un soporte de traslado sobre la cabina (el equipo del carrier le impide acostarse a 0°; ángulo calculado en cad/izamiento.py). Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div></details>`
-  document.body.appendChild(box)
+  // Vive dentro del menú "Montaje" de la barra, debajo de la secuencia (sin paneles flotantes).
+  if (window.__rigToolbar) window.__rigToolbar.add('montaje', box)
+  else document.body.appendChild(box)
   const ui = {
     update() {
       const r = document.getElementById('er-range')
