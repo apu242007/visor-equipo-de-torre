@@ -7238,7 +7238,7 @@ window.__rigExt.onPost(() => {
       icon: svg(
         '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
       ),
-      items: ['views', 'c-ortho'],
+      items: ['views', 'c-ortho', 'c-night'],
     },
     {
       id: 'capas',
@@ -7253,6 +7253,12 @@ window.__rigExt.onPost(() => {
         { row: ['t-explode', 'explode', 'explode-val'] },
         'c-wire',
       ],
+    },
+    {
+      id: 'animar',
+      label: 'Animar',
+      icon: svg('<path d="M6 4v16l13-8Z"/>'),
+      items: [{ row: ['c-play', 'hoist', 'hoist-out'] }],
     },
     {
       id: 'medicion',
@@ -7281,8 +7287,8 @@ window.__rigExt.onPost(() => {
     training: 'Entrenamiento',
   }
   const RELEVANT = {
-    explore: ['vista', 'capas', 'medicion', 'exportar'],
-    operation: ['vista', 'medicion'],
+    explore: ['vista', 'capas', 'animar', 'medicion', 'exportar'],
+    operation: ['vista', 'animar', 'medicion'],
     qhse: ['capas', 'vista'],
     training: ['capas', 'vista'],
   }
@@ -7958,60 +7964,49 @@ window.__rigExt.onPost(() => {
     return set
   }
 
-  // ───────── UI ─────────
+  // ───────── UI: dock compacto, cerrado por defecto (se abre con el botón "Montaje" de la barra) ─────────
   const style = document.createElement('style')
   style.id = 'seq-style'
   style.textContent = `
-    #rig-seq{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:20;width:min(760px,calc(100vw - 32px));
-      background:rgba(20,27,38,.95);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:13px;
+    #rig-seq{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:20;max-width:calc(100vw - 32px);
+      background:rgba(20,27,38,.95);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:13px;padding:6px 8px;
       box-shadow:0 10px 30px rgba(0,0,0,.45)}
-    #rig-seq .sq-head{display:flex;align-items:center;gap:10px;padding:8px 12px}
-    #rig-seq .sq-title{font-weight:600;color:#DDBB65;letter-spacing:.02em}
-    #rig-seq .sq-tag{font-size:11px;opacity:.75}
+    #rig-seq[hidden]{display:none}
+    #rig-seq .sq-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    #rig-seq .sq-title{font-weight:600;color:#DDBB65;letter-spacing:.02em;padding:0 4px}
     #rig-seq button{font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
-      border-radius:8px;padding:4px 10px;cursor:pointer}
+      border-radius:8px;padding:2px 9px;cursor:pointer}
     #rig-seq button:hover{background:rgba(255,255,255,.1)}
     #rig-seq button[aria-pressed="true"]{border-color:#DDBB65;color:#DDBB65}
-    #rig-seq button:focus-visible,#rig-seq input:focus-visible{outline:none;box-shadow:0 0 0 2px #05060A,0 0 0 4px rgba(139,92,246,.7)}
-    #rig-seq .sq-spacer{flex:1}
-    #rig-seq .sq-body{padding:0 12px 10px}
-    #rig-seq.collapsed .sq-body{display:none}
-    #rig-seq input[type=range]{width:100%;margin:4px 0 8px}
-    #rig-seq .sq-steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-    #rig-seq .sq-steps button{min-width:32px;padding:3px 0}
+    #rig-seq button:focus-visible{outline:none;box-shadow:0 0 0 2px #05060A,0 0 0 4px rgba(139,92,246,.7)}
+    #rig-seq .sq-steps{display:flex;gap:4px}
+    #rig-seq .sq-steps button{min-width:28px;padding:2px 0}
+    #rig-seq .sq-line{flex:1 1 200px;min-width:0;max-width:440px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+    #rig-seq .sq-detail{margin-top:6px;max-width:720px;font-size:12.5px;line-height:1.4}
+    #rig-seq .sq-detail[hidden]{display:none}
     #rig-seq .sq-step-title{font-weight:600;margin-bottom:2px}
-    #rig-seq .sq-text{opacity:.9;line-height:1.4}
-    #rig-seq .sq-meta{margin-top:6px;font-size:12px;opacity:.8;line-height:1.4}
+    #rig-seq .sq-text{opacity:.9}
+    #rig-seq .sq-meta{margin-top:6px;font-size:12px;opacity:.8}
     #rig-seq .sq-warn{margin-top:6px;font-size:11.5px;color:#E0B870}
     body.opts-hidden #rig-seq{display:none}
-    @media (max-width:700px){#rig-seq{bottom:38px}}
   `
   document.head.appendChild(style)
 
   const panel = document.createElement('section')
   panel.id = 'rig-seq'
-  panel.setAttribute('aria-label', 'Secuencia de montaje ilustrativa')
-  panel.className = window.innerWidth < 1100 ? 'collapsed' : ''
+  panel.hidden = true
+  panel.setAttribute('aria-label', 'Secuencia de montaje ilustrativa (pendiente de validar)')
   panel.innerHTML = `
-    <div class="sq-head">
-      <span class="sq-title">Secuencia de montaje</span>
-      <span class="sq-tag">ilustrativa · pendiente de validar</span>
-      <span class="sq-spacer"></span>
+    <div class="sq-row">
+      <span class="sq-title" title="Ilustrativa · pendiente de validar">Montaje</span>
+      <div class="sq-steps" id="sq-steps"></div>
       <button type="button" id="sq-prev" aria-label="Paso anterior">‹</button>
       <button type="button" id="sq-next" aria-label="Paso siguiente">›</button>
-      <button type="button" id="sq-toggle" aria-expanded="${panel_expanded()}" aria-controls="sq-body">Ocultar</button>
+      <span class="sq-line" id="sq-line"></span>
+      <button type="button" id="sq-info" aria-expanded="false" aria-controls="sq-status">Detalle</button>
+      <button type="button" id="sq-close" aria-label="Cerrar la secuencia de montaje">×</button>
     </div>
-    <div class="sq-body" id="sq-body">
-      <input type="range" id="sq-range" min="0" max="${STEPS.length}" step="1" value="0" aria-label="Paso del montaje (0 = sin secuencia)">
-      <div class="sq-steps" id="sq-steps"></div>
-      <div id="sq-status" aria-live="polite">
-        <div class="sq-step-title">Sin secuencia activa</div>
-        <div class="sq-text">Elegí un paso para ir armando el equipo. El 0 deja todos los componentes visibles.</div>
-      </div>
-    </div>`
-  function panel_expanded() {
-    return window.innerWidth < 1100 ? 'false' : 'true'
-  }
+    <div class="sq-detail" id="sq-status" aria-live="polite" hidden></div>`
   document.body.appendChild(panel)
 
   const stepsBox = $('sq-steps')
@@ -8036,46 +8031,58 @@ window.__rigExt.onPost(() => {
   }
 
   function render() {
-    $('sq-range').value = String(current)
     Array.from(stepsBox.children).forEach((b, i) =>
       b.setAttribute('aria-pressed', String(i + 1 === current)),
     )
     const status = $('sq-status')
+    const line = $('sq-line')
     if (current === 0) {
+      line.textContent = 'Elegí un paso para ir armando el equipo'
+      line.title = ''
       status.innerHTML =
-        '<div class="sq-step-title">Sin secuencia activa</div><div class="sq-text">Elegí un paso para ir armando el equipo. El 0 deja todos los componentes visibles.</div>'
+        '<div class="sq-text">Elegí un paso para ir armando el equipo. Al cerrar, todos los componentes vuelven a estar visibles.</div>' +
+        '<div class="sq-warn">Secuencia típica aportada por el usuario: no es el procedimiento de Tacker ni un requisito. Recorrido visual, no simulación.</div>'
       return
     }
     const s = STEPS[current - 1]
     const vis = [...visibleAt(current - 1)]
     const names = vis.map((id) => (R.COMPONENTS && R.COMPONENTS[id] && R.COMPONENTS[id].name) || id)
+    line.textContent = `${s.n}/8 · ${s.titulo}`
+    line.title = s.titulo
     status.innerHTML =
       `<div class="sq-step-title">${s.n}/8 · ${s.titulo}</div>` +
       `<div class="sq-text">${s.texto}</div>` +
-      `<div class="sq-meta">${s.geo ? 'Se suma en este paso: ' + (s.add.join(', ') || '—') : 'Paso documental: sin geometría propia.'}` +
+      `<div class="sq-meta" title="${names.join(' · ')}">${s.geo ? 'Se suma en este paso: ' + (s.add.join(', ') || '—') : 'Paso documental: sin geometría propia.'}` +
       `${vis.length ? ' · Visibles: ' + names.length + ' de ' + ALL.length : ' · Sin componentes visibles'}${s.nota ? ' · ' + s.nota : ''}</div>` +
       '<div class="sq-warn">Secuencia típica aportada por el usuario: no es el procedimiento de Tacker ni un requisito. Recorrido visual, no simulación.</div>'
-    const meta = status.querySelector('.sq-meta')
-    if (meta) meta.title = names.join(' · ')
   }
 
   function go(n) {
     const k = Math.max(0, Math.min(STEPS.length, Number(n) || 0))
     current = k
+    if (k > 0) panel.hidden = false
     setVisible(k === 0 ? null : visibleAt(k - 1))
     render()
     document.dispatchEvent(new CustomEvent('tacker:seq-step', { detail: k }))
   }
+  function open() {
+    panel.hidden = false
+    document.dispatchEvent(new CustomEvent('tacker:seq-panel', { detail: true }))
+  }
+  function close() {
+    if (current !== 0) go(0)
+    panel.hidden = true
+    document.dispatchEvent(new CustomEvent('tacker:seq-panel', { detail: false }))
+  }
 
-  $('sq-range').addEventListener('input', (e) => go(e.target.value))
   $('sq-prev').addEventListener('click', () => go(current - 1))
   $('sq-next').addEventListener('click', () => go(current + 1))
-  $('sq-toggle').addEventListener('click', () => {
-    const collapsed = panel.classList.toggle('collapsed')
-    $('sq-toggle').textContent = collapsed ? 'Mostrar' : 'Ocultar'
-    $('sq-toggle').setAttribute('aria-expanded', String(!collapsed))
+  $('sq-close').addEventListener('click', close)
+  $('sq-info').addEventListener('click', () => {
+    const st = $('sq-status')
+    st.hidden = !st.hidden
+    $('sq-info').setAttribute('aria-expanded', String(!st.hidden))
   })
-  $('sq-toggle').textContent = panel.classList.contains('collapsed') ? 'Mostrar' : 'Ocultar'
 
   // Un cambio de modo aplica su propio preset de componentes: la secuencia deja de mandar.
   document.addEventListener('tacker:mode', () => {
@@ -8084,8 +8091,16 @@ window.__rigExt.onPost(() => {
       render()
     }
   })
+  render()
 
-  window.__tackerSeq = { steps: STEPS, go, current: () => current }
+  window.__tackerSeq = {
+    steps: STEPS,
+    go,
+    open,
+    close,
+    current: () => current,
+    isOpen: () => !panel.hidden,
+  }
 })
 
 /* 77-capa-cad.js */
@@ -8944,7 +8959,7 @@ window.__rigExt.onPost((R) => {
   const style = document.createElement('style')
   style.id = 'erect-style'
   style.textContent = `
-    #rig-erect{position:fixed;left:50%;bottom:194px;transform:translateX(-50%);z-index:21;width:min(760px,calc(100vw - 32px));
+    #rig-erect{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:21;width:min(760px,calc(100vw - 32px));
       background:rgba(20,27,38,.96);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:12.5px;padding:8px 12px;
       box-shadow:0 10px 30px rgba(0,0,0,.45)}
     #rig-erect .er-row{display:flex;gap:10px;align-items:center}
@@ -8956,7 +8971,9 @@ window.__rigExt.onPost((R) => {
     body.opts-hidden #rig-erect{display:none}
     /* Durante la reproducción se despeja la escena: solo queda la barra compacta (Pausar, avance y fase) */
     body.erect-playing #rig-seq{display:none}
-    body.erect-playing #rig-erect{bottom:44px}
+    body.erect-playing #rig-erect{bottom:16px}
+    body.erect-playing #rig-erect .er-info{display:none}
+    #rig-erect .er-info summary{cursor:pointer;font-size:11px;opacity:.75;margin-top:4px}
     body.erect-playing #rig-erect .er-note{display:none}
   `
   document.head.appendChild(style)
@@ -8970,7 +8987,7 @@ window.__rigExt.onPost((R) => {
       <input type="range" id="er-range" min="0" max="100" step="1" value="100" aria-label="Avance del izamiento (100 = montado)">
     </div>
     <div id="er-fase" aria-live="polite"></div>
-    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. En el V2 el mástil parte apoyado en un soporte de traslado sobre la cabina (el equipo del carrier le impide acostarse a 0°; ángulo calculado en cad/izamiento.py). Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div>`
+    <details class="er-info"><summary>Nota</summary>    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. En el V2 el mástil parte apoyado en un soporte de traslado sobre la cabina (el equipo del carrier le impide acostarse a 0°; ángulo calculado en cad/izamiento.py). Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div></details>`
   document.body.appendChild(box)
   const ui = {
     update() {
@@ -9099,6 +9116,179 @@ window.__rigExt.onPost((R) => {
   })
 
   window.__tackerGatos = { set, get: () => d, posiciones }
+})
+
+/* 83-layout-escena.js */
+/*
+ * 83-layout-escena.js — la escena del equipo primero: menos cartas, más pantalla.
+ *
+ *  1. Las cartas laterales (árbol de componentes y "Referencia del conjunto") arrancan COLAPSADAS en cualquier tamaño de ventana
+ *     (se reabren con su pestaña o con el botón "Paneles").
+ *  2. Los comandos sueltos de la carta de referencia pasaron a la barra: "Vista nocturna" en Vista y "Animar aparejo" + posición del
+ *     aparejo en el menú Animar (65-toolbar-menus.js). La secuencia de montaje se abre con el botón "Montaje".
+ *  3. MODO ENFOQUE: mientras algo esté activo (un paso del montaje, el izamiento reproduciéndose, la capa CAD, medición, corte, cotas,
+ *     malla, despiece, etiquetas o aislamiento) se ocultan TODAS las cartas (árbol, referencia, detalle, aviso de controles, leyenda
+ *     de la capa CAD). Quedan la barra de menús y los controles de lo que se está usando. "Paneles" las muestra de nuevo a pedido.
+ *     La leyenda de zonas ilustrativas (`#legend`, "SIN VALIDAR") NO se oculta: es obligatoria mientras las zonas estén encendidas.
+ *  4. En modo embebido se oculta la barra de estado propia del V2 (la app ya muestra la suya con "no as-built").
+ *
+ * API para pruebas: `window.__tackerLayout = { focus(), paneles(mostrar) }`.
+ */
+window.__rigExt.onPost(() => {
+  const $ = (id) => document.getElementById(id)
+  const body = document.body
+
+  // ───────── 1. cartas colapsadas por defecto ─────────
+  const tree = $('tree')
+  const treeToggle = $('tree-toggle')
+  const card = $('cad-inspector')
+  const cardToggle = $('inspector-toggle')
+  const colapsar = () => {
+    if (tree && treeToggle && !tree.classList.contains('collapsed')) treeToggle.click()
+    if (card && cardToggle && !card.classList.contains('collapsed')) cardToggle.click()
+  }
+  const expandir = () => {
+    if (tree && treeToggle && tree.classList.contains('collapsed')) treeToggle.click()
+    if (card && cardToggle && card.classList.contains('collapsed')) cardToggle.click()
+  }
+  const colapsadas = () =>
+    (!tree || tree.classList.contains('collapsed')) &&
+    (!card || card.classList.contains('collapsed'))
+  colapsar()
+  // el título "Posición del aparejo" quedó huérfano: su control (Animar + posición) ahora está en el menú Animar
+  for (const h of card ? card.querySelectorAll('h2') : [])
+    if (/posici/i.test(h.textContent)) h.hidden = true
+
+  // ───────── estilos ─────────
+  const style = document.createElement('style')
+  style.id = 'layout-escena-style'
+  style.textContent = `
+    html.v2-embedded #cad-status{display:none!important}
+    /* cartas colapsadas: solo queda la pestaña, sin el fondo de la carta */
+    #tree.collapsed{height:auto!important;background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    #tree.collapsed #tree-body{display:none!important}
+    /* modo enfoque: sin cartas (excepto la leyenda obligatoria de zonas) */
+    body.focus-scene:not(.paneles-show) #tree,
+    body.focus-scene:not(.paneles-show) #cad-inspector,
+    body.focus-scene:not(.paneles-show) #detail,
+    body.focus-scene:not(.paneles-show) #hint,
+    body.focus-scene:not(.paneles-show) #cad-card,
+    body.focus-scene:not(.paneles-show) #inspector-toggle{display:none!important}
+    #v2-toolbar .tm-tool[aria-pressed="true"]{background:rgba(255,255,255,.09);border-color:#DAAE45;color:#fff}
+  `
+  document.head.appendChild(style)
+
+  // ───────── 2. botones "Montaje" y "Paneles" en la barra ─────────
+  const toolbar = $('v2-toolbar')
+  const svg = (paths) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:15px;height:15px;flex:none">${paths}</svg>`
+  const tool = (id, label, icon, title) => {
+    const b = document.createElement('button')
+    b.className = 'btn tm-btn tm-tool'
+    b.id = id
+    b.type = 'button'
+    b.setAttribute('aria-pressed', 'false')
+    b.title = title
+    b.innerHTML = icon + `<span>${label}</span>`
+    if (toolbar) toolbar.appendChild(b)
+    return b
+  }
+  const bMontaje = tool(
+    'c-montaje',
+    'Montaje',
+    svg('<path d="M4 20h16"/><path d="M6 20V8l6-4 6 4v12"/><path d="M10 20v-6h4v6"/>'),
+    'Secuencia de montaje ilustrativa (paso a paso, con el izamiento del mástil)',
+  )
+  const bPaneles = tool(
+    'c-paneles',
+    'Paneles',
+    svg('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>'),
+    'Mostrar u ocultar las cartas laterales (componentes y referencia)',
+  )
+
+  bMontaje.addEventListener('click', () => {
+    const seq = window.__tackerSeq
+    if (!seq) return
+    if (seq.isOpen()) seq.close()
+    else seq.open()
+  })
+  document.addEventListener('tacker:seq-panel', (e) =>
+    bMontaje.setAttribute('aria-pressed', String(!!e.detail)),
+  )
+  document.addEventListener('tacker:seq-step', (e) => {
+    if (e.detail > 0) bMontaje.setAttribute('aria-pressed', 'true')
+  })
+
+  // ───────── 3. modo enfoque ─────────
+  const ACTIVABLES = [
+    'c-measure',
+    'c-cut',
+    'c-dims',
+    'c-wire',
+    't-explode',
+    't-labels',
+    'c-isolate',
+    'c-cad',
+  ]
+  let seqActivo = false
+  const activo = () => {
+    if (seqActivo) return true
+    if (body.classList.contains('erect-playing')) return true
+    return ACTIVABLES.some((id) => {
+      const b = $(id)
+      return !!b && (b.classList.contains('on') || b.getAttribute('aria-pressed') === 'true')
+    })
+  }
+  const actualizar = () => {
+    const on = activo()
+    if (body.classList.contains('focus-scene') !== on) body.classList.toggle('focus-scene', on)
+    if (!on && body.classList.contains('paneles-show')) body.classList.remove('paneles-show') // solo si hay algo que quitar: remove() siempre escribe el atributo y el observador se dispararía en bucle
+    bPaneles.setAttribute(
+      'aria-pressed',
+      String(on ? body.classList.contains('paneles-show') : !colapsadas()),
+    )
+  }
+  document.addEventListener('tacker:seq-step', (e) => {
+    seqActivo = e.detail > 0
+    actualizar()
+  })
+  const obs = new MutationObserver(actualizar)
+  for (const id of ACTIVABLES) {
+    const b = $(id)
+    if (b) obs.observe(b, { attributes: true, attributeFilter: ['class', 'aria-pressed'] })
+  }
+  obs.observe(body, { attributes: true, attributeFilter: ['class'] }) // erect-playing
+  // #c-cad lo crea 77-capa-cad.js (antes de este módulo), pero por si se crea después se vuelve a buscar una vez
+  queueMicrotask(() => {
+    const b = $('c-cad')
+    if (b) obs.observe(b, { attributes: true, attributeFilter: ['class', 'aria-pressed'] })
+    actualizar()
+  })
+
+  // ───────── botón Paneles ─────────
+  bPaneles.addEventListener('click', () => {
+    if (body.classList.contains('focus-scene')) {
+      body.classList.toggle('paneles-show')
+    } else if (colapsadas()) {
+      expandir()
+    } else {
+      colapsar()
+    }
+    actualizar()
+  })
+  for (const t of [treeToggle, cardToggle])
+    t?.addEventListener('click', () => setTimeout(actualizar, 350))
+
+  window.__tackerLayout = {
+    focus: () => body.classList.contains('focus-scene'),
+    paneles: (mostrar) => {
+      if (body.classList.contains('focus-scene')) body.classList.toggle('paneles-show', !!mostrar)
+      else if (mostrar) expandir()
+      else colapsar()
+      actualizar()
+    },
+  }
+  actualizar()
 })
 
 </script>

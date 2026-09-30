@@ -98,60 +98,49 @@ window.__rigExt.onPost(() => {
     return set
   }
 
-  // ───────── UI ─────────
+  // ───────── UI: dock compacto, cerrado por defecto (se abre con el botón "Montaje" de la barra) ─────────
   const style = document.createElement('style')
   style.id = 'seq-style'
   style.textContent = `
-    #rig-seq{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:20;width:min(760px,calc(100vw - 32px));
-      background:rgba(20,27,38,.95);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:13px;
+    #rig-seq{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:20;max-width:calc(100vw - 32px);
+      background:rgba(20,27,38,.95);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:13px;padding:6px 8px;
       box-shadow:0 10px 30px rgba(0,0,0,.45)}
-    #rig-seq .sq-head{display:flex;align-items:center;gap:10px;padding:8px 12px}
-    #rig-seq .sq-title{font-weight:600;color:#DDBB65;letter-spacing:.02em}
-    #rig-seq .sq-tag{font-size:11px;opacity:.75}
+    #rig-seq[hidden]{display:none}
+    #rig-seq .sq-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    #rig-seq .sq-title{font-weight:600;color:#DDBB65;letter-spacing:.02em;padding:0 4px}
     #rig-seq button{font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
-      border-radius:8px;padding:4px 10px;cursor:pointer}
+      border-radius:8px;padding:2px 9px;cursor:pointer}
     #rig-seq button:hover{background:rgba(255,255,255,.1)}
     #rig-seq button[aria-pressed="true"]{border-color:#DDBB65;color:#DDBB65}
-    #rig-seq button:focus-visible,#rig-seq input:focus-visible{outline:none;box-shadow:0 0 0 2px #05060A,0 0 0 4px rgba(139,92,246,.7)}
-    #rig-seq .sq-spacer{flex:1}
-    #rig-seq .sq-body{padding:0 12px 10px}
-    #rig-seq.collapsed .sq-body{display:none}
-    #rig-seq input[type=range]{width:100%;margin:4px 0 8px}
-    #rig-seq .sq-steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
-    #rig-seq .sq-steps button{min-width:32px;padding:3px 0}
+    #rig-seq button:focus-visible{outline:none;box-shadow:0 0 0 2px #05060A,0 0 0 4px rgba(139,92,246,.7)}
+    #rig-seq .sq-steps{display:flex;gap:4px}
+    #rig-seq .sq-steps button{min-width:28px;padding:2px 0}
+    #rig-seq .sq-line{flex:1 1 200px;min-width:0;max-width:440px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+    #rig-seq .sq-detail{margin-top:6px;max-width:720px;font-size:12.5px;line-height:1.4}
+    #rig-seq .sq-detail[hidden]{display:none}
     #rig-seq .sq-step-title{font-weight:600;margin-bottom:2px}
-    #rig-seq .sq-text{opacity:.9;line-height:1.4}
-    #rig-seq .sq-meta{margin-top:6px;font-size:12px;opacity:.8;line-height:1.4}
+    #rig-seq .sq-text{opacity:.9}
+    #rig-seq .sq-meta{margin-top:6px;font-size:12px;opacity:.8}
     #rig-seq .sq-warn{margin-top:6px;font-size:11.5px;color:#E0B870}
     body.opts-hidden #rig-seq{display:none}
-    @media (max-width:700px){#rig-seq{bottom:38px}}
   `
   document.head.appendChild(style)
 
   const panel = document.createElement('section')
   panel.id = 'rig-seq'
-  panel.setAttribute('aria-label', 'Secuencia de montaje ilustrativa')
-  panel.className = window.innerWidth < 1100 ? 'collapsed' : ''
+  panel.hidden = true
+  panel.setAttribute('aria-label', 'Secuencia de montaje ilustrativa (pendiente de validar)')
   panel.innerHTML = `
-    <div class="sq-head">
-      <span class="sq-title">Secuencia de montaje</span>
-      <span class="sq-tag">ilustrativa · pendiente de validar</span>
-      <span class="sq-spacer"></span>
+    <div class="sq-row">
+      <span class="sq-title" title="Ilustrativa · pendiente de validar">Montaje</span>
+      <div class="sq-steps" id="sq-steps"></div>
       <button type="button" id="sq-prev" aria-label="Paso anterior">‹</button>
       <button type="button" id="sq-next" aria-label="Paso siguiente">›</button>
-      <button type="button" id="sq-toggle" aria-expanded="${panel_expanded()}" aria-controls="sq-body">Ocultar</button>
+      <span class="sq-line" id="sq-line"></span>
+      <button type="button" id="sq-info" aria-expanded="false" aria-controls="sq-status">Detalle</button>
+      <button type="button" id="sq-close" aria-label="Cerrar la secuencia de montaje">×</button>
     </div>
-    <div class="sq-body" id="sq-body">
-      <input type="range" id="sq-range" min="0" max="${STEPS.length}" step="1" value="0" aria-label="Paso del montaje (0 = sin secuencia)">
-      <div class="sq-steps" id="sq-steps"></div>
-      <div id="sq-status" aria-live="polite">
-        <div class="sq-step-title">Sin secuencia activa</div>
-        <div class="sq-text">Elegí un paso para ir armando el equipo. El 0 deja todos los componentes visibles.</div>
-      </div>
-    </div>`
-  function panel_expanded() {
-    return window.innerWidth < 1100 ? 'false' : 'true'
-  }
+    <div class="sq-detail" id="sq-status" aria-live="polite" hidden></div>`
   document.body.appendChild(panel)
 
   const stepsBox = $('sq-steps')
@@ -176,46 +165,58 @@ window.__rigExt.onPost(() => {
   }
 
   function render() {
-    $('sq-range').value = String(current)
     Array.from(stepsBox.children).forEach((b, i) =>
       b.setAttribute('aria-pressed', String(i + 1 === current)),
     )
     const status = $('sq-status')
+    const line = $('sq-line')
     if (current === 0) {
+      line.textContent = 'Elegí un paso para ir armando el equipo'
+      line.title = ''
       status.innerHTML =
-        '<div class="sq-step-title">Sin secuencia activa</div><div class="sq-text">Elegí un paso para ir armando el equipo. El 0 deja todos los componentes visibles.</div>'
+        '<div class="sq-text">Elegí un paso para ir armando el equipo. Al cerrar, todos los componentes vuelven a estar visibles.</div>' +
+        '<div class="sq-warn">Secuencia típica aportada por el usuario: no es el procedimiento de Tacker ni un requisito. Recorrido visual, no simulación.</div>'
       return
     }
     const s = STEPS[current - 1]
     const vis = [...visibleAt(current - 1)]
     const names = vis.map((id) => (R.COMPONENTS && R.COMPONENTS[id] && R.COMPONENTS[id].name) || id)
+    line.textContent = `${s.n}/8 · ${s.titulo}`
+    line.title = s.titulo
     status.innerHTML =
       `<div class="sq-step-title">${s.n}/8 · ${s.titulo}</div>` +
       `<div class="sq-text">${s.texto}</div>` +
-      `<div class="sq-meta">${s.geo ? 'Se suma en este paso: ' + (s.add.join(', ') || '—') : 'Paso documental: sin geometría propia.'}` +
+      `<div class="sq-meta" title="${names.join(' · ')}">${s.geo ? 'Se suma en este paso: ' + (s.add.join(', ') || '—') : 'Paso documental: sin geometría propia.'}` +
       `${vis.length ? ' · Visibles: ' + names.length + ' de ' + ALL.length : ' · Sin componentes visibles'}${s.nota ? ' · ' + s.nota : ''}</div>` +
       '<div class="sq-warn">Secuencia típica aportada por el usuario: no es el procedimiento de Tacker ni un requisito. Recorrido visual, no simulación.</div>'
-    const meta = status.querySelector('.sq-meta')
-    if (meta) meta.title = names.join(' · ')
   }
 
   function go(n) {
     const k = Math.max(0, Math.min(STEPS.length, Number(n) || 0))
     current = k
+    if (k > 0) panel.hidden = false
     setVisible(k === 0 ? null : visibleAt(k - 1))
     render()
     document.dispatchEvent(new CustomEvent('tacker:seq-step', { detail: k }))
   }
+  function open() {
+    panel.hidden = false
+    document.dispatchEvent(new CustomEvent('tacker:seq-panel', { detail: true }))
+  }
+  function close() {
+    if (current !== 0) go(0)
+    panel.hidden = true
+    document.dispatchEvent(new CustomEvent('tacker:seq-panel', { detail: false }))
+  }
 
-  $('sq-range').addEventListener('input', (e) => go(e.target.value))
   $('sq-prev').addEventListener('click', () => go(current - 1))
   $('sq-next').addEventListener('click', () => go(current + 1))
-  $('sq-toggle').addEventListener('click', () => {
-    const collapsed = panel.classList.toggle('collapsed')
-    $('sq-toggle').textContent = collapsed ? 'Mostrar' : 'Ocultar'
-    $('sq-toggle').setAttribute('aria-expanded', String(!collapsed))
+  $('sq-close').addEventListener('click', close)
+  $('sq-info').addEventListener('click', () => {
+    const st = $('sq-status')
+    st.hidden = !st.hidden
+    $('sq-info').setAttribute('aria-expanded', String(!st.hidden))
   })
-  $('sq-toggle').textContent = panel.classList.contains('collapsed') ? 'Mostrar' : 'Ocultar'
 
   // Un cambio de modo aplica su propio preset de componentes: la secuencia deja de mandar.
   document.addEventListener('tacker:mode', () => {
@@ -224,6 +225,14 @@ window.__rigExt.onPost(() => {
       render()
     }
   })
+  render()
 
-  window.__tackerSeq = { steps: STEPS, go, current: () => current }
+  window.__tackerSeq = {
+    steps: STEPS,
+    go,
+    open,
+    close,
+    current: () => current,
+    isOpen: () => !panel.hidden,
+  }
 })

@@ -30,7 +30,7 @@ window.__rigExt.onPost(() => {
       icon: svg(
         '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
       ),
-      items: ['views', 'c-ortho'],
+      items: ['views', 'c-ortho', 'c-night'],
     },
     {
       id: 'capas',
@@ -45,6 +45,12 @@ window.__rigExt.onPost(() => {
         { row: ['t-explode', 'explode', 'explode-val'] },
         'c-wire',
       ],
+    },
+    {
+      id: 'animar',
+      label: 'Animar',
+      icon: svg('<path d="M6 4v16l13-8Z"/>'),
+      items: [{ row: ['c-play', 'hoist', 'hoist-out'] }],
     },
     {
       id: 'medicion',
@@ -73,8 +79,8 @@ window.__rigExt.onPost(() => {
     training: 'Entrenamiento',
   }
   const RELEVANT = {
-    explore: ['vista', 'capas', 'medicion', 'exportar'],
-    operation: ['vista', 'medicion'],
+    explore: ['vista', 'capas', 'animar', 'medicion', 'exportar'],
+    operation: ['vista', 'animar', 'medicion'],
     qhse: ['capas', 'vista'],
     training: ['capas', 'vista'],
   }

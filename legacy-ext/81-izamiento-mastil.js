@@ -268,7 +268,7 @@ window.__rigExt.onPost((R) => {
   const style = document.createElement('style')
   style.id = 'erect-style'
   style.textContent = `
-    #rig-erect{position:fixed;left:50%;bottom:194px;transform:translateX(-50%);z-index:21;width:min(760px,calc(100vw - 32px));
+    #rig-erect{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:21;width:min(760px,calc(100vw - 32px));
       background:rgba(20,27,38,.96);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:12.5px;padding:8px 12px;
       box-shadow:0 10px 30px rgba(0,0,0,.45)}
     #rig-erect .er-row{display:flex;gap:10px;align-items:center}
@@ -280,7 +280,9 @@ window.__rigExt.onPost((R) => {
     body.opts-hidden #rig-erect{display:none}
     /* Durante la reproducción se despeja la escena: solo queda la barra compacta (Pausar, avance y fase) */
     body.erect-playing #rig-seq{display:none}
-    body.erect-playing #rig-erect{bottom:44px}
+    body.erect-playing #rig-erect{bottom:16px}
+    body.erect-playing #rig-erect .er-info{display:none}
+    #rig-erect .er-info summary{cursor:pointer;font-size:11px;opacity:.75;margin-top:4px}
     body.erect-playing #rig-erect .er-note{display:none}
   `
   document.head.appendChild(style)
@@ -294,7 +296,7 @@ window.__rigExt.onPost((R) => {
       <input type="range" id="er-range" min="0" max="100" step="1" value="100" aria-label="Avance del izamiento (100 = montado)">
     </div>
     <div id="er-fase" aria-live="polite"></div>
-    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. En el V2 el mástil parte apoyado en un soporte de traslado sobre la cabina (el equipo del carrier le impide acostarse a 0°; ángulo calculado en cad/izamiento.py). Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div>`
+    <details class="er-info"><summary>Nota</summary>    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. En el V2 el mástil parte apoyado en un soporte de traslado sobre la cabina (el equipo del carrier le impide acostarse a 0°; ángulo calculado en cad/izamiento.py). Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div></details>`
   document.body.appendChild(box)
   const ui = {
     update() {
