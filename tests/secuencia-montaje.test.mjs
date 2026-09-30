@@ -16,7 +16,7 @@ test('el módulo entra en el HTML generado', () => {
 })
 
 test('8 pasos numerados, cada uno con título', () => {
-  const titles = [...src.matchAll(/n: (\d),\s*titulo: '([^']+)'/g)]
+  const titles = [...src.matchAll(/n: (\d),\s*titulo:\s*'([^']+)'/g)]
   assert.equal(titles.length, 8)
   assert.deepEqual(titles.map((m) => Number(m[1])), [1, 2, 3, 4, 5, 6, 7, 8])
 })
