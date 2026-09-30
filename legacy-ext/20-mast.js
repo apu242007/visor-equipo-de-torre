@@ -297,11 +297,18 @@
         W.box(M.red, 0.45, 1.2, 0.25, gt.bx, 1.72, s)
         W.cyl(M.steelL, 0.15, 0.15, 0.35, gt.bx, 2.02, s, 'z', 14)
       }
-      for (const s of [-0.62, 0.62]) {
-        W.line(M.red, D(-5, 1.45, s), ni(5, -0.5, s), 0.11, 12)
-        W.line(M.steelL, D(-4, 2.7, s), ni(5, -0.5, s), 0.063, 12)
-      }
       W.flush(g, 'base_pivote')
+      // Pistones de izaje del 1.er tramo (0 → 90°): grupo aparte para que 81-izamiento-mastil.js los sustituya por pistones
+      // dinámicos durante el izamiento. En reposo se ven igual que antes (cuerpo rojo y vástago galvanizado).
+      const Wp = makeBatch()
+      for (const s of [-0.62, 0.62]) {
+        Wp.line(M.red, D(-5, 1.45, s), ni(5, -0.5, s), 0.11, 12)
+        Wp.line(M.steelL, D(-4, 2.7, s), ni(5, -0.5, s), 0.063, 12)
+      }
+      const gp = new Group()
+      gp.name = 'pistones_izaje'
+      g.add(gp)
+      Wp.flush(gp, 'pistones_izaje')
 
       // Conducto eléctrico vertical (línea negra fina) por la arista posterior de la cara +z, hasta la última luminaria.
       const C = makeBatch()

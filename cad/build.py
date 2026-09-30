@@ -88,6 +88,7 @@ path, bb, m = layout_tkr10.main(spec)  # las ecuaciones asertan tamaños y cotas
 print("layout_tkr10 ->", path.name, {k: [round(v, 2) for v in vals] for k, vals in m.items()})
 
 import capa  # noqa: E402
+import izamiento  # noqa: E402
 
 # ───────── capa CAD para el visor V2 ─────────
 dest, n_tris, n_segs = capa.generar(
@@ -96,6 +97,17 @@ dest, n_tris, n_segs = capa.generar(
 print("capa CAD ->", dest.relative_to(dest.parents[3]), "| %d vértices de malla, %d barras de línea, %d KB" % (n_tris, n_segs, dest.stat().st_size // 1024))
 if dest.stat().st_size > 400_000:
     fallas.append("capa CAD demasiado pesada")
+
+# ───────── cinemática del izamiento del mástil ─────────
+if izamiento.PERFIL.exists():
+    iz = izamiento.generar()
+    pi = iz["pistones"]
+    print("izamiento -> transporte a %.1f° (margen %.2f m), pistón %.2f–%.2f m (carrera %.2f m, relación %.2f), soporte de traslado %.2f m de alto" % (
+        iz["elevacion_transporte"], iz["margen_libre"], pi["largo_min"], pi["largo_max"], pi["carrera"], pi["relacion"], iz["soporte_traslado"]["alto"]))
+    check("margen libre >= %.2f m" % izamiento.MARGEN, min(iz["margen_libre"], izamiento.MARGEN), izamiento.MARGEN, 0.02)
+    check("pose final del V2 = 90° + inclinación", iz["elevacion_final"], 94.24, 0.05)
+else:
+    print("izamiento: falta cad/data/v2_corredor_mastil.json (node scripts/dump-corredor-mastil.mjs)")
 
 import trimesh  # noqa: E402
 

@@ -214,6 +214,17 @@ function build() {
         ';',
     )
   }
+  const izJson = path.join(root, 'src', 'data', 'cad', 'izamiento.json')
+  if (fs.existsSync(izJson)) {
+    const safeIz = JSON.stringify(JSON.parse(fs.readFileSync(izJson, 'utf8')))
+      .replace(/<\//g, '<\\/')
+      .replace(/<!--/g, '<\\!--')
+    blocks.push(
+      '/* datos del izamiento del mástil (src/data/cad/izamiento.json) */\nwindow.__TACKER_IZAMIENTO=' +
+        safeIz +
+        ';',
+    )
+  }
   for (const f of readExtModules().filter((f) => f !== runtimeFile)) {
     blocks.push(`/* ${f} */\n` + fs.readFileSync(path.join(extDir, f), 'utf8'))
   }
