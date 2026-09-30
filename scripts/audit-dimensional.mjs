@@ -1,3 +1,4 @@
+/* global window */
 // Auditoría dimensional del visor V2: mide objetos de la escena (caja envolvente en metros) y los compara con
 // las cotas documentadas (technical-spec.js) y con el LAYOUT TKR-10 (cad/data/layout_tkr10.json, generado por cad/build.py).
 //
