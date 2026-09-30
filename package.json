@@ -21,7 +21,8 @@
     "gltf:optimize": "node scripts/gltf-optimize.mjs",
     "assets:decoders": "node scripts/copy-decoders.mjs",
     "build:legacy": "node scripts/build-legacy.mjs",
-    "snap": "node scripts/snap.mjs"
+    "snap": "node scripts/snap.mjs",
+    "audit:dim": "node scripts/audit-dimensional.mjs --out docs/audit-dimensional-2026-09-30.md"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.3.0",

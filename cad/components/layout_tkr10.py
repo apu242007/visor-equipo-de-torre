@@ -6,7 +6,9 @@ Escala calibrada con la cota de anclajes 25 m (215,5 pt) y comprobada con los tr
 Cotas rotuladas en el plano (confirmadas): tamaños, 5 m bomba-pileta, 3 m acumulador-eje, 1,3 m equipo-boca.
 Posiciones no rotuladas: medidas del vector (confianza C).
 Asunción de signo lateral (PENDIENTE): este del plano = +Y (CAD). Solo espeja el lado; el largo (X) no depende de ella."""
+import json
 import cadquery as cq
+from lib.tk10 import ROOT
 from lib.tk10 import Arbol, dato, export_glb, bbox
 
 ID = "layout_tkr10"
@@ -94,6 +96,12 @@ def main(spec):
                  note="Ya registrado en el proyecto; no se modelan anclajes."),
         ],
         tree=A.filas,
+    )
+    # datos para scripts/audit-dimensional.mjs (versionado: la auditoría corre sin Python)
+    dest = ROOT / "cad" / "data"
+    dest.mkdir(exist_ok=True)
+    (dest / "layout_tkr10.json").write_text(
+        json.dumps({k: [round(v, 2) for v in vals] for k, vals in m.items()}, indent=2), encoding="utf-8"
     )
     colores = {"acumulador": "#3E7896", "bomba": "#A72A32", "pileta": "#6F767C", "planchada": "#F2B632"}
     parts = {k: (v, "main", colores[k]) for k, v in partes.items()}
