@@ -8990,7 +8990,11 @@ window.__rigExt.onPost((R) => {
       if (b) b.textContent = raf ? 'Pausar' : p >= 1 ? 'Reproducir' : 'Continuar'
     },
   }
-  document.getElementById('er-play').addEventListener('click', () => (raf ? pause() : play()))
+  document.getElementById('er-play').addEventListener('click', () => {
+    if (raf) return pause()
+    window.__rigToolbar?.closeAll() // el menú Montaje no tapa la escena mientras se reproduce
+    play()
+  })
   document.getElementById('er-range').addEventListener('input', (e) => {
     pause()
     set(Number(e.target.value) / 100)

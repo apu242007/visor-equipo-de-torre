@@ -15,6 +15,14 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 900,
+    chunkSizeWarningLimit: 1500, // el chunk de three (~1,5 MB) es irreducible
+    // three + R3F en su propio chunk: cambian poco entre deploys y así el navegador los reutiliza de caché.
+    rolldownOptions: {
+      output: {
+        codeSplitting: {
+          groups: [{ name: 'three', test: /node_modules[\/](three|@react-three)[\/]/ }],
+        },
+      },
+    },
   },
 })
