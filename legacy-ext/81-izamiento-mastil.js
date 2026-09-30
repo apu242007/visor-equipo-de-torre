@@ -2,6 +2,7 @@
  * 81-izamiento-mastil.js — izamiento del mástil, ILUSTRATIVO (paso 6 de la secuencia de montaje, 76-secuencia-montaje.js).
  *
  * SECUENCIA (aportada por el usuario, experto del equipo; estatus `pendingValidation`, no es el procedimiento de Tacker):
+ *   0. Se bajan los gatos de nivelación del carrier (82-gatos-carrier.js).
  *   1. Pistón de izaje del 1.er tramo: el mástil gira de 0° (acostado sobre el carrier) a 90° (vertical).
  *   2. Izaje del 2.º tramo: un segundo pistón extiende el tramo que va EMBUTIDO dentro del 1.º.
  *   3. Se tensan los vientos.
@@ -32,7 +33,7 @@ window.__rigExt.onPost((R) => {
   const CAMISA =
     D.pistones && Number.isFinite(D.pistones.largo_camisa) ? D.pistones.largo_camisa : 3.0
   const E = 14.0 // m locales: cuánto queda embutido el tramo superior en el transporte (ilustrativo)
-  const PHASE = { raiseEnd: 0.5, extendEnd: 0.8 }
+  const PHASE = { jacksEnd: 0.1, raiseEnd: 0.5, extendEnd: 0.8 }
   const ease = (x) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x))
   const deg = (r) => (r * 180) / Math.PI
 
@@ -182,8 +183,11 @@ window.__rigExt.onPost((R) => {
 
   function fase(pp) {
     if (pp >= 1) return 'Montado. Pose final del modelo.'
+    if (pp < PHASE.jacksEnd)
+      return `Fase 0 · se bajan los gatos de nivelación del carrier (${(ease(pp / PHASE.jacksEnd) * 100).toFixed(0)} %)`
     if (pp < PHASE.raiseEnd) {
-      const elev = EPS0 + ease(pp / PHASE.raiseEnd) * (90 - EPS0)
+      const elev =
+        EPS0 + ease((pp - PHASE.jacksEnd) / (PHASE.raiseEnd - PHASE.jacksEnd)) * (90 - EPS0)
       return `Fase 1 · pistón de izaje del 1.er tramo: ${elev.toFixed(0)}° de 90°`
     }
     if (pp < PHASE.extendEnd) {
@@ -196,8 +200,9 @@ window.__rigExt.onPost((R) => {
   function set(value) {
     p = Math.max(0, Math.min(1, Number(value)))
     const completo = p >= 1
-    const raise = ease(p / PHASE.raiseEnd)
+    const raise = ease((p - PHASE.jacksEnd) / (PHASE.raiseEnd - PHASE.jacksEnd))
     const ext = ease((p - PHASE.raiseEnd) / (PHASE.extendEnd - PHASE.raiseEnd))
+    if (window.__tackerGatos) window.__tackerGatos.set(completo ? 1 : ease(p / PHASE.jacksEnd))
     // θ: ángulo del eje respecto de la vertical (+ hacia la boca de pozo). Acostado hacia atrás: −90°. Final: el del V2.
     const tens = ease((p - PHASE.extendEnd) / (1 - PHASE.extendEnd))
     // Fase 1: de la posición de transporte a 90° (vertical). Fase 2: vertical. Fase 3: los vientos tensos llevan el mástil a su plomo final.
@@ -213,7 +218,7 @@ window.__rigExt.onPost((R) => {
     if (cableMalacate) cableMalacate.visible = completo || p >= PHASE.extendEnd
 
     gDyn.visible = !completo
-    gSop.visible = p < 0.05
+    gSop.visible = p < PHASE.jacksEnd + 0.03
     if (pistonesEstaticos) pistonesEstaticos.visible = completo
     gExt.visible = !completo
     if (!completo) {

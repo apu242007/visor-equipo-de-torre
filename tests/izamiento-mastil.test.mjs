@@ -60,3 +60,13 @@ test('durante la reproducción se ocultan el panel de secuencia y la nota (barra
   assert.match(erect, /classList\.toggle\('erect-playing'/)
   assert.match(erect, /raf = 0 \/\/ terminó/, 'al terminar vuelven los carteles y el botón dice Reproducir')
 })
+
+test('gatos de nivelación del carrier (82): 3 por lado, hijos de camion, se bajan antes de izar', () => {
+  const gatos = fs.readFileSync(path.join(root, 'legacy-ext', '82-gatos-carrier.js'), 'utf8')
+  assert.ok(html.includes('/* 82-gatos-carrier.js */') && html.includes('__tackerGatos'))
+  assert.match(gatos, /const XS = \[-15\.2, -9\.8, -1\.9\]/)
+  assert.match(gatos, /camion\.add\(raiz\)/)
+  assert.match(gatos, /pendingValidation/)
+  assert.match(erect, /Fase 0 · se bajan los gatos de nivelación del carrier/)
+  assert.match(erect, /__tackerGatos\.set\(/)
+})
