@@ -1,35 +1,17 @@
-import { ContactShadows, Environment, Lightformer } from '@react-three/drei'
+import { ContactShadows, Environment } from '@react-three/drei'
+import { useEffect, useMemo } from 'react'
+import { createSkyTexture } from './sky'
 
 /**
- * Iluminación PBR sin HDRI remoto: entorno procedural con Lightformers + una luz direccional
- * con sombra. Los HDRI reales irán en public/environments/ cuando existan.
+ * Iluminación PBR sin HDRI remoto: cielo procedural (canvas equirectangular → PMREM vía <Environment map>)
+ * + una luz direccional con sombra. Los HDRI reales irán en public/environments/ cuando existan.
  */
 export function Lighting() {
+  const sky = useMemo(() => createSkyTexture(), [])
+  useEffect(() => () => sky.dispose(), [sky])
   return (
     <>
-      <Environment resolution={256} frames={1}>
-        <Lightformer
-          form="rect"
-          intensity={2}
-          position={[0, 8, 0]}
-          rotation-x={Math.PI / 2}
-          scale={[20, 20, 1]}
-        />
-        <Lightformer
-          form="rect"
-          intensity={1}
-          position={[-12, 4, 6]}
-          rotation-y={Math.PI / 2}
-          scale={[10, 6, 1]}
-        />
-        <Lightformer
-          form="rect"
-          intensity={0.6}
-          position={[12, 3, -6]}
-          rotation-y={-Math.PI / 2}
-          scale={[10, 6, 1]}
-        />
-      </Environment>
+      <Environment map={sky} environmentIntensity={0.9} />
       <directionalLight
         castShadow
         intensity={1.6}

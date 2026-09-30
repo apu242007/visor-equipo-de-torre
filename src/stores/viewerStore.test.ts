@@ -8,7 +8,13 @@ import {
 } from './viewerStore'
 
 describe('viewerStore', () => {
-  beforeEach(() => useViewerStore.setState({ engine: DEFAULT_ENGINE, selectedComponentId: null }))
+  beforeEach(() =>
+    useViewerStore.setState({
+      engine: DEFAULT_ENGINE,
+      selectedComponentId: null,
+      hoveredComponentId: null,
+    }),
+  )
 
   it('arranca en motor legacy y sin selección', () => {
     expect(VIEWER_ENGINES).toEqual(['legacy', 'native'])
@@ -30,6 +36,15 @@ describe('viewerStore', () => {
     expect(useViewerStore.getState().selectedComponentId).toBe('mast')
     useViewerStore.getState().selectComponent(null)
     expect(useViewerStore.getState().selectedComponentId).toBeNull()
+  })
+
+  it('hover es independiente de la selección y se limpia', () => {
+    useViewerStore.getState().selectComponent('mastil')
+    useViewerStore.getState().hoverComponent('piso_trabajo')
+    expect(useViewerStore.getState().hoveredComponentId).toBe('piso_trabajo')
+    expect(useViewerStore.getState().selectedComponentId).toBe('mastil')
+    useViewerStore.getState().hoverComponent(null)
+    expect(useViewerStore.getState().hoveredComponentId).toBeNull()
   })
 
   it('isViewerEngine rechaza valores inválidos', () => {
