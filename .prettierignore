@@ -10,3 +10,6 @@ src/components/ui
 src/index.css
 
 .claude/worktrees
+
+# generado por cad/build.py (json.dump); prettier lo reformatearía en cada corrida
+cad/data/
