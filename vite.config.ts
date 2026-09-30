@@ -20,7 +20,7 @@ export default defineConfig({
     rolldownOptions: {
       output: {
         codeSplitting: {
-          groups: [{ name: 'three', test: /node_modules[\/](three|@react-three)[\/]/ }],
+          groups: [{ name: 'three', test: /node_modules[/\\](three|@react-three)[/\\]/ }],
         },
       },
     },
