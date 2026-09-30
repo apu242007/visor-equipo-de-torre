@@ -4,19 +4,18 @@ import cadquery as cq
 from lib.tk10 import Arbol, dato, export_glb, bbox
 
 ID = "piso_trabajo"
-ESPESOR = 0.10  # m — PLACEHOLDER pendiente (no documentado)
 
 
-def ecuaciones(spec, h=None):
+def ecuaciones(spec, P):
+    q = dict(P)
     w = spec["workFloor"]
-    q = dict(largo=w["sizeM"][0], ancho=w["sizeM"][1], hmin=w["minHeightM"], hmax=w["maxHeightM"], hmod=w["modelHeightM"], esp=ESPESOR)
-    q["h"] = q["hmod"] if h is None else h
+    q["hmin"], q["hmax"], q["hmod"] = w["minHeightM"], w["maxHeightM"], w["modelHeightM"]
     assert q["hmin"] <= q["h"] <= q["hmax"], "altura %s fuera del rango documentado %s–%s m" % (q["h"], q["hmin"], q["hmax"])
     return q
 
 
-def build(spec, h=None):
-    q = ecuaciones(spec, h)
+def build(spec, P):
+    q = ecuaciones(spec, P)
     A = Arbol()
     placa = A.op(
         "Base-Extruir placa",
@@ -26,8 +25,8 @@ def build(spec, h=None):
     return placa, A, q
 
 
-def main(spec):
-    placa, A, q = build(spec)
+def main(spec, P, sfx=""):
+    placa, A, q = build(spec, P)
     meta = dict(
         id=ID, family="workfloor", confidence="C", units="m", up="Y",
         frame="origen bajo el centro de la placa, a nivel de terreno",
@@ -47,4 +46,4 @@ def main(spec):
         configurations={"h%g" % v: v for v in (q["hmin"], q["hmod"], q["hmax"])},
         tree=A.filas,
     )
-    return export_glb(ID, {"placa": (placa, "main", "#F2B632")}, meta), bbox(placa), q
+    return export_glb(ID, {"placa": (placa, "main", "#F2B632")}, meta, name=ID + sfx), bbox(placa), q

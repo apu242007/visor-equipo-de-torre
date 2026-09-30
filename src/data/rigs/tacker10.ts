@@ -57,7 +57,7 @@ export const TACKER10_RIG: Rig = {
       confidence: 'C',
       sourceIds: ['src-folleto'],
       scope:
-        'Envolvente de dos tramos macizos. Sin reticulado, corona, poleas ni interior; secciones transversales sin documentar. No se ubica en la escena hasta fijar su base.',
+        'Celosía ILUSTRATIVA de barras tubulares (patas, travesaños y diagonales) con la altura y los tramos documentados. Ancho de base/tope, paneles y diámetros sin plano del fabricante (PENDIENTE); sin corona, poleas ni balcón. No se ubica en la escena hasta fijar su base.',
       model: '/models/tacker10/mastil.glb',
       specifications: [
         {

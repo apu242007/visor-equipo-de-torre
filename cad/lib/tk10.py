@@ -77,3 +77,15 @@ def export_glb(comp_id, parts, meta, name=None):
 def bbox(wp):
     b = wp.val().BoundingBox()
     return dict(x=b.xlen, y=b.ylen, z=b.zlen, xmin=b.xmin, ymin=b.ymin, zmin=b.zmin)
+
+
+def bbox_malla(wp, tol=0.001):
+    """Caja envolvente AJUSTADA (de la malla): BoundingBox() de OCC es conservadora en cilindros inclinados."""
+    xs, ys, zs = [], [], []
+    for s in wp.val().Solids():
+        verts, _ = s.tessellate(tol, 0.1)
+        for v in verts:
+            xs.append(v.x)
+            ys.append(v.y)
+            zs.append(v.z)
+    return dict(x=max(xs) - min(xs), y=max(ys) - min(ys), z=max(zs) - min(zs), xmin=min(xs), ymin=min(ys), zmin=min(zs))

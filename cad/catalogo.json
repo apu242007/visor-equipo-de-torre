@@ -1,0 +1,131 @@
+{
+  "_leyenda": {
+    "estados": {
+      "REF_OEM": "cota del equipo concreto, de la ficha del fabricante",
+      "REPRESENTATIVO": "valor típico de la clase de equipo",
+      "DERIVADO": "calculado de otros datos",
+      "PENDIENTE": "no hay dato: no se inventa"
+    },
+    "unidades": "m salvo indicación"
+  },
+  "TACKER10-mastil": {
+    "nombre": "Mástil Service King SK104-330",
+    "aplica_a_tacker10": true,
+    "fuente": "src-folleto",
+    "datos": {
+      "heightM": {
+        "valor": "@spec:mast.heightM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "104 ft"
+      },
+      "h_inf": {
+        "valor": "@spec:mast.lowerSectionM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "tramo inferior"
+      },
+      "h_sup": {
+        "valor": "@spec:mast.upperSectionM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "tramo superior"
+      },
+      "capacityLb": {
+        "valor": "@spec:mast.capacityLb",
+        "unidad": "lb",
+        "estado": "REF_OEM",
+        "nota": "330.000 lb (≈149,7 t)"
+      },
+      "Db": {
+        "valor": null,
+        "unidad": "m",
+        "estado": "PENDIENTE",
+        "nota": "ancho de la base del reticulado: falta plano del fabricante"
+      },
+      "Dt": { "valor": null, "unidad": "m", "estado": "PENDIENTE", "nota": "ancho del tope" },
+      "n_pan_inf": {
+        "valor": null,
+        "unidad": "u",
+        "estado": "PENDIENTE",
+        "nota": "paneles del tramo inferior"
+      },
+      "n_pan_sup": {
+        "valor": null,
+        "unidad": "u",
+        "estado": "PENDIENTE",
+        "nota": "paneles del tramo superior"
+      },
+      "d_pata": {
+        "valor": null,
+        "unidad": "m",
+        "estado": "PENDIENTE",
+        "nota": "diámetro de las patas"
+      },
+      "cara_abierta": {
+        "valor": null,
+        "unidad": "-",
+        "estado": "PENDIENTE",
+        "nota": "el V2 usa el lado de la boca de pozo; sin confirmar"
+      }
+    }
+  },
+  "TACKER10-piso-trabajo": {
+    "nombre": "Piso de trabajo telescópico",
+    "aplica_a_tacker10": true,
+    "fuente": "src-folleto",
+    "datos": {
+      "largo": {
+        "valor": "@spec:workFloor.sizeM.0",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "2,6 m (ancho 3,3 m); el layout TKR-10 dibuja 3 × 3 (conflicto)"
+      },
+      "h_min": {
+        "valor": "@spec:workFloor.minHeightM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": ""
+      },
+      "h_max": {
+        "valor": "@spec:workFloor.maxHeightM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": ""
+      },
+      "h_modelo": {
+        "valor": "@spec:workFloor.modelHeightM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "3 m; el V2 procedural usa 2,30 m (conflicto)"
+      },
+      "esp": { "valor": null, "unidad": "m", "estado": "PENDIENTE", "nota": "espesor de la placa" }
+    }
+  },
+  "TACKER10-carrier": {
+    "nombre": "Carrier Service King SK-575",
+    "aplica_a_tacker10": true,
+    "fuente": "src-layout",
+    "datos": {
+      "largo": {
+        "valor": "@spec:carrier.operatingLengthM",
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "envolvente operativa 18 m (folleto: cuerpo 15,5 m)"
+      },
+      "ancho": { "valor": "@spec:carrier.widthM", "unidad": "m", "estado": "REF_OEM", "nota": "" },
+      "x_inicio": {
+        "valor": -1.3,
+        "unidad": "m",
+        "estado": "REF_OEM",
+        "nota": "cota 1,3 m a la boca de pozo, rotulada en LAYOUT - TKR-10"
+      },
+      "y_centro": {
+        "valor": -0.5,
+        "unidad": "m",
+        "estado": "DERIVADO",
+        "nota": "medido del vector del PDF (confianza C)"
+      }
+    }
+  }
+}

@@ -20,6 +20,21 @@ npm run gltf:optimize -- mastil.glb                     # → public/models/tack
 - Cada operación pasa por `Arbol` (cambia el volumen y deja un sólido válido). `build.py` verifica las
   cotas contra el spec, regenera las configuraciones y comprueba los nombres del GLB.
 
+## Parámetros, presets y overrides (skill `diseno-cad-solidworks`)
+
+Cada componente tiene su JSON en `cad/parametros/<equipo>.json` (`base`, `rangos`, `presets`). Precedencia: **base < preset < `--set`**.
+Los valores documentados se leen de `technical-spec.js` con `"@spec:mast.heightM"` (fuente única). Nunca se inventan datos:
+
+```
+python cad/build.py                                         # genera y verifica todo
+python cad/cli.py mastil --set n_pan_inf=10 --set Db=1.8    # otras medidas (salida mastil_mod.glb)
+python cad/cli.py piso_trabajo minimo                       # preset (h = 1 m)
+python cad/cli.py mastil tacker10                           # falla: PENDIENTE (falta plano del fabricante)
+```
+
+`cad/catalogo.json` guarda la procedencia por dato (`REF_OEM`, `REPRESENTATIVO`, `DERIVADO`, `PENDIENTE`) y `catalogo.dato()` falla ante un
+PENDIENTE. `build.py` comprueba que los presets con `null`, los parámetros desconocidos y los valores fuera de rango fallen como corresponde.
+
 ## Componentes actuales (confianza C — envolventes, no as-built)
 
 | Componente       | Qué es                                          | Dato documentado                                              | Pendiente                                                             |
