@@ -245,7 +245,10 @@ window.__rigExt.onPost((R) => {
       const next = (now - t0) / DURACION
       set(Math.min(1, next))
       if (next < 1) raf = requestAnimationFrame(step)
-      else ui.update()
+      else {
+        raf = 0 // terminó: el botón vuelve a "Reproducir" y reaparecen los carteles
+        ui.update()
+      }
     }
     raf = requestAnimationFrame(step)
     ui.update()
@@ -270,6 +273,10 @@ window.__rigExt.onPost((R) => {
     #rig-erect button:hover{background:rgba(255,255,255,.1)}
     #rig-erect .er-note{margin-top:4px;font-size:11px;opacity:.75;line-height:1.35}
     body.opts-hidden #rig-erect{display:none}
+    /* Durante la reproducción se despeja la escena: solo queda la barra compacta (Pausar, avance y fase) */
+    body.erect-playing #rig-seq{display:none}
+    body.erect-playing #rig-erect{bottom:44px}
+    body.erect-playing #rig-erect .er-note{display:none}
   `
   document.head.appendChild(style)
   const box = document.createElement('section')
@@ -290,6 +297,7 @@ window.__rigExt.onPost((R) => {
       if (r) r.value = String(Math.round(p * 100))
       const f = document.getElementById('er-fase')
       if (f) f.textContent = fase(p)
+      document.body.classList.toggle('erect-playing', !!raf)
       const b = document.getElementById('er-play')
       if (b) b.textContent = raf ? 'Pausar' : p >= 1 ? 'Reproducir' : 'Continuar'
     },

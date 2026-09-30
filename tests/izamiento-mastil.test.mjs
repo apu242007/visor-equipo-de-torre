@@ -53,3 +53,10 @@ test('cinemática del izamiento (cad/izamiento.py): datos inyectados y coherente
   assert.ok(d.soporte_traslado.alto > 0.3 && d.soporte_traslado.valido)
   assert.ok(d.notas.some((n) => /0°/.test(n)), 'se explica por qué no se parte de 0°')
 })
+
+test('durante la reproducción se ocultan el panel de secuencia y la nota (barra compacta)', () => {
+  assert.match(erect, /body\.erect-playing #rig-seq\{display:none\}/)
+  assert.match(erect, /body\.erect-playing #rig-erect \.er-note\{display:none\}/)
+  assert.match(erect, /classList\.toggle\('erect-playing'/)
+  assert.match(erect, /raf = 0 \/\/ terminó/, 'al terminar vuelven los carteles y el botón dice Reproducir')
+})
