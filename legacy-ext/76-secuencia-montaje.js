@@ -61,7 +61,7 @@ window.__rigExt.onPost(() => {
       add: ['malacate', 'motor', 'cabina', 'bop', 'llave', 'caballetes'],
       geo: true,
       texto:
-        'Se suman malacate, motor y transmisión, cabina, BOP con acumulador y choke manifold, llave y caballetes.',
+        'Se suman malacate, motor y transmisión, cabina, BOP con acumulador y choke manifold, llave y caballetes. La cabina del maquinista es desmontable: se monta fuera del carrier, entre las dos escaleras.',
     },
     {
       n: 6,
@@ -70,7 +70,7 @@ window.__rigExt.onPost(() => {
       add: ['mastil', 'aparejo', 'enganche', 'vientos'],
       geo: true,
       texto:
-        'Aparece el mástil con aparejo, piso del enganchador y vientos. El izamiento NO se anima: no hay secuencia ni ángulos documentados. Plomo y verificación estructural no se representan.',
+        'Aparece el mástil con aparejo, piso del enganchador y vientos. Izamiento (secuencia indicada por el usuario): pistón de izaje del 1.er tramo de 0 a 90°, el 2.º pistón extiende el tramo embutido y se tensan los vientos. Usá el control de abajo; plomo y verificación estructural no se representan.',
     },
     {
       n: 7,
@@ -204,6 +204,7 @@ window.__rigExt.onPost(() => {
     current = k
     setVisible(k === 0 ? null : visibleAt(k - 1))
     render()
+    document.dispatchEvent(new CustomEvent('tacker:seq-step', { detail: k }))
   }
 
   $('sq-range').addEventListener('input', (e) => go(e.target.value))

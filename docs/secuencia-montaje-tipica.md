@@ -27,3 +27,14 @@ y líneas asociadas.
 Cada paso muestra componentes acumulativos del V2 (asignación visual orientativa, no ingeniería). Los pasos 1, 2 y 8 son documentales.
 No se anima el izamiento del mástil ni se inventan tiempos, cargas o distancias. No están modelados: antorcha, separador, rotación
 (power swivel "NA" en el Libro DROPS), desanders/desilters ni stand pipe.
+
+## Aportes del experto del equipo (2026-09-30) — `pendingValidation`
+
+- **Cabina del maquinista:** es **desmontable** y en operación va **montada fuera del carrier, entre las dos escaleras**. El modelo la ubica en
+  el lado +Z (el de la escalera lateral PT-1), entre SUB-2 y PT-1, sobre ménsulas del chasis y apoyos al terreno (`legacy-ext/79-cabina-desmontable.js`).
+  El lado y la separación son una lectura del modelo, no una cota.
+- **Izamiento del mástil (paso 6):** el mástil tiene **dos pistones**: (1) el de **izaje del primer tramo**, que lo lleva de **0° a 90°**; (2) el de
+  **izaje del segundo tramo**, que **extiende el tramo embutido en el primero**. **Después se tensan los vientos.** Animado de forma ilustrativa en
+  `legacy-ext/81-izamiento-mastil.js` (sin cargas, presiones ni tiempos). Carreras y pistón interno del 2.º tramo: aproximados.
+- Referencias fotográficas de equipos similares (otras marcas, no TACKER 10) confirman la cinemática: el mástil viaja acostado sobre el carrier hacia la
+  cabina, pivota por la parte trasera con pistones en la base y termina vertical con vientos a los anclajes. No se copia geometría ni marcas de esas fotos.

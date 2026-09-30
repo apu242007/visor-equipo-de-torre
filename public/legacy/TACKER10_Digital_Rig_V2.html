@@ -620,11 +620,18 @@ window.__TACKER_CAD={"version":1,"unidades":"m","marco":"V2: +X hacia el mástil
         W.box(M.red, 0.45, 1.2, 0.25, gt.bx, 1.72, s)
         W.cyl(M.steelL, 0.15, 0.15, 0.35, gt.bx, 2.02, s, 'z', 14)
       }
-      for (const s of [-0.62, 0.62]) {
-        W.line(M.red, D(-5, 1.45, s), ni(5, -0.5, s), 0.11, 12)
-        W.line(M.steelL, D(-4, 2.7, s), ni(5, -0.5, s), 0.063, 12)
-      }
       W.flush(g, 'base_pivote')
+      // Pistones de izaje del 1.er tramo (0 → 90°): grupo aparte para que 81-izamiento-mastil.js los sustituya por pistones
+      // dinámicos durante el izamiento. En reposo se ven igual que antes (cuerpo rojo y vástago galvanizado).
+      const Wp = makeBatch()
+      for (const s of [-0.62, 0.62]) {
+        Wp.line(M.red, D(-5, 1.45, s), ni(5, -0.5, s), 0.11, 12)
+        Wp.line(M.steelL, D(-4, 2.7, s), ni(5, -0.5, s), 0.063, 12)
+      }
+      const gp = new Group()
+      gp.name = 'pistones_izaje'
+      g.add(gp)
+      Wp.flush(gp, 'pistones_izaje')
 
       // Conducto eléctrico vertical (línea negra fina) por la arista posterior de la cara +z, hasta la última luminaria.
       const C = makeBatch()
@@ -7912,7 +7919,7 @@ window.__rigExt.onPost(() => {
       add: ['malacate', 'motor', 'cabina', 'bop', 'llave', 'caballetes'],
       geo: true,
       texto:
-        'Se suman malacate, motor y transmisión, cabina, BOP con acumulador y choke manifold, llave y caballetes.',
+        'Se suman malacate, motor y transmisión, cabina, BOP con acumulador y choke manifold, llave y caballetes. La cabina del maquinista es desmontable: se monta fuera del carrier, entre las dos escaleras.',
     },
     {
       n: 6,
@@ -7921,7 +7928,7 @@ window.__rigExt.onPost(() => {
       add: ['mastil', 'aparejo', 'enganche', 'vientos'],
       geo: true,
       texto:
-        'Aparece el mástil con aparejo, piso del enganchador y vientos. El izamiento NO se anima: no hay secuencia ni ángulos documentados. Plomo y verificación estructural no se representan.',
+        'Aparece el mástil con aparejo, piso del enganchador y vientos. Izamiento (secuencia indicada por el usuario): pistón de izaje del 1.er tramo de 0 a 90°, el 2.º pistón extiende el tramo embutido y se tensan los vientos. Usá el control de abajo; plomo y verificación estructural no se representan.',
     },
     {
       n: 7,
@@ -8055,6 +8062,7 @@ window.__rigExt.onPost(() => {
     current = k
     setVisible(k === 0 ? null : visibleAt(k - 1))
     render()
+    document.dispatchEvent(new CustomEvent('tacker:seq-step', { detail: k }))
   }
 
   $('sq-range').addEventListener('input', (e) => go(e.target.value))
@@ -8283,6 +8291,55 @@ window.__rigExt.onPost(() => {
   p.textContent =
     'Entorno de locación (tráilers, tanques, vallado, señalización): unidades simplificadas ubicadas según el layout TKR-10; el detalle es ilustrativo. No muestra marcas de terceros ni capacidades de las unidades de la locación, y la disposición varía según operador, contratista y país.'
   card.appendChild(p)
+})
+
+/* 79-cabina-desmontable.js */
+/*
+ * 79-cabina-desmontable.js — la casilla del maquinista es DESMONTABLE: en operación va montada FUERA del carrier, entre las dos
+ * escaleras laterales (la de tránsito SUB-2, x ≈ −8 m, y la lateral de la subestructura PT-1, x ≈ −1 m), sobre ménsulas del chasis.
+ *
+ * Dato aportado por el usuario (experto de equipo); la posición exacta (lado +Z, separación) es una lectura del modelo, no una
+ * cota documentada: `pendingValidation`. El módulo NO cambia la geometría de `cabina` (30-carrier.js): la traslada como conjunto
+ * (los puntos DROPS CAS-1/2/3 van con ella) y le agrega dos ménsulas al chasis y dos apoyos al terreno, hijos de `cabina`
+ * para que sigan su visibilidad y su selección.
+ *
+ * Marco: origen = boca de pozo, +X hacia el mástil, carrier hacia −X, Z lateral. La cabina queda en el lado +Z, el de la escalera PT-1.
+ */
+window.__rigExt.onPost((R) => {
+  const cab = R.groups && R.groups.cabina
+  const T = R.three
+  if (!cab || !T) return
+
+  /** Desplazamiento respecto de la posición sobre el carrier (la cabina estaba en z ±1,25, x −6,55…−3,27). */
+  const DZ = 3.45 // borde interior de la cabina a 2,20 m del eje: justo fuera del ancho del carrier (±2,15 m)
+  const DX = 0.4 // la aleja de SUB-2 (x −8,35…−7,45) y la deja lejos de PT-1 (x −1,28…−0,27)
+  const Y_PISO = 1.3 // nivel de la plataforma del carrier (bajo el piso de la cabina)
+
+  cab.position.set(DX, 0, DZ)
+
+  // Soportes en coordenadas de `cabina` (local = mundo − posición del grupo).
+  const mat = new T.MeshStandardMaterial({ color: '#2B2F36', roughness: 0.6, metalness: 0.4 })
+  const soportes = new T.Group()
+  soportes.name = 'cabina_soportes'
+  const box = (sx, sy, sz, x, y, z) => {
+    const m = new T.Mesh(new T.BoxGeometry(sx, sy, sz), mat)
+    m.position.set(x, y, z)
+    soportes.add(m)
+  }
+  const zIn = -DZ + 2.0 // borde exterior del chasis (z mundo 2,0) en coordenadas locales
+  const zOut = 1.25 // borde exterior de la cabina
+  for (const xw of [-5.6, -3.6]) {
+    const x = xw - DX
+    // ménsula: viga horizontal del chasis a la cabina, bajo el piso
+    box(0.14, 0.16, zOut - zIn, x, Y_PISO - 0.1, (zIn + zOut) / 2)
+    // apoyo al terreno en el borde exterior
+    box(0.14, Y_PISO - 0.18, 0.14, x, (Y_PISO - 0.18) / 2, zOut - 0.12)
+    box(0.4, 0.05, 0.4, x, 0.025, zOut - 0.12) // base de apoyo
+  }
+  cab.add(soportes)
+
+  if (R.invalidate) R.invalidate()
+  window.__tackerCabina = { DX, DZ, lado: '+Z', estado: 'pendingValidation' }
 })
 
 /* 80-perf.js */
@@ -8612,6 +8669,250 @@ window.__rigExt.onPost((R) => {
   }
   perf.origRender = origRender
   perf.signatureChanged = shadowSignatureChanged // diagnóstico / medición
+})
+
+/* 81-izamiento-mastil.js */
+/*
+ * 81-izamiento-mastil.js — izamiento del mástil, ILUSTRATIVO (paso 6 de la secuencia de montaje, 76-secuencia-montaje.js).
+ *
+ * SECUENCIA (aportada por el usuario, experto del equipo; estatus `pendingValidation`, no es el procedimiento de Tacker):
+ *   1. Pistón de izaje del 1.er tramo: el mástil gira de 0° (acostado sobre el carrier) a 90° (vertical).
+ *   2. Izaje del 2.º tramo: un segundo pistón extiende el tramo que va EMBUTIDO dentro del 1.º.
+ *   3. Se tensan los vientos.
+ *
+ * QUÉ MUEVE: rota `mastil_pivote` alrededor del pivote de la base (la pose final es la del V2, con su leve inclinación), desliza el
+ * tramo superior (reticulado, corona y luminarias del 2.º tramo) a lo largo del eje, dibuja los pistones con su longitud según la
+ * posición y oculta lo que todavía no está montado (aparejo, piso del enganchador, vientos). En 100 % el visor queda exactamente
+ * como antes. NO es una simulación: no hay cargas, presiones, velocidades ni tiempos reales; las carreras de los pistones y el
+ * pistón interno del 2.º tramo son ilustrativos.
+ *
+ * Limitación conocida: el cable del malacate hacia la corona está fusionado con el acero del malacate: se oculta (con el resto del acero
+ * del malacate) mientras dura el izamiento y reaparece al montar la corona.
+ *
+ * API: `window.__tackerErect = { set(p), play(), pause(), progress(), fases }` con p en [0, 1]. La UI aparece en el paso 6.
+ */
+window.__rigExt.onPost((R) => {
+  const T = R.three
+  const G = R.groups || {}
+  const mastG = G.mastil
+  const P = mastG && mastG.children.find((c) => c.name === 'mastil_pivote')
+  if (!T || !P || !R.mast) return
+
+  const { bx, by, a: aFinal, scale: S } = R.mast
+  const E = 14.0 // m locales: cuánto queda embutido el tramo superior en el transporte (ilustrativo)
+  const PHASE = { raiseEnd: 0.55, extendEnd: 0.85 }
+  const ease = (x) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x))
+  const deg = (r) => (r * 180) / Math.PI
+
+  // ───────── reparentar el 2.º tramo a un grupo propio (mismo marco local del pivote: sin cambiar la pose) ─────────
+  const sup = new T.Group()
+  sup.name = 'mastil_tramo_superior'
+  P.add(sup)
+  for (const name of [
+    'tramo_superior',
+    'corona',
+    'drops_DCO-1',
+    'drops_DCO-2',
+    'drops_DCO-3',
+    'drops_DCO-9',
+    'drops_DPE-5',
+  ]) {
+    const o = P.children.find((c) => c.name === name)
+    if (o) sup.add(o)
+  }
+  const conducto = P.children.find((c) => c.name === 'conducto_negro_acero')
+  // el cable del malacate a la corona está fusionado con el acero del malacate: se oculta mientras la corona no está en su lugar
+  const cableMalacate = G.malacate && G.malacate.children.find((c) => c.name === 'malacate_steel')
+
+  // ───────── pistones ─────────
+  const matRojo = new T.MeshStandardMaterial({ color: '#A72A32', roughness: 0.5, metalness: 0.3 })
+  const matAcero = new T.MeshStandardMaterial({ color: '#A9B1B7', roughness: 0.35, metalness: 0.7 })
+  const matOscuro = new T.MeshStandardMaterial({ color: '#2B2F35', roughness: 0.6, metalness: 0.4 })
+  const cyl = (r, mat) => {
+    const m = new T.Mesh(new T.CylinderGeometry(r, r, 1, 12), mat)
+    m.castShadow = true
+    m.frustumCulled = false
+    return m
+  }
+  /** Coloca un cilindro unitario entre dos puntos del plano XY (z fijo). */
+  function between(m, ax, ay, bx2, by2, z) {
+    const dx = bx2 - ax
+    const dy = by2 - ay
+    const len = Math.hypot(dx, dy)
+    m.visible = len > 1e-4
+    m.scale.set(1, Math.max(len, 1e-4), 1)
+    m.position.set((ax + bx2) / 2, (ay + by2) / 2, z)
+    m.rotation.set(0, 0, Math.atan2(dy, dx) - Math.PI / 2)
+    return len
+  }
+  const izaje = []
+  const gDyn = new T.Group()
+  gDyn.name = 'pistones_izaje_dinamicos'
+  gDyn.visible = false
+  for (const z of [-0.62, 0.62]) {
+    const barrel = cyl(0.11, matRojo)
+    const rod = cyl(0.063, matAcero)
+    gDyn.add(barrel, rod)
+    izaje.push({ z, barrel, rod })
+  }
+  mastG.add(gDyn)
+  const pistonesEstaticos = mastG.children.find((c) => c.name === 'pistones_izaje')
+
+  // pistón interno del 2.º tramo (en el marco del mástil; se ve a través del reticulado)
+  const gExt = new T.Group()
+  gExt.name = 'piston_extension_2do_tramo'
+  const extBarrel = cyl(0.12, matOscuro)
+  const extRod = cyl(0.07, matAcero)
+  gExt.add(extBarrel, extRod)
+  gExt.visible = false
+  P.add(gExt)
+  const EXT_Y0 = 0.4
+  const EXT_BARREL = 7.0
+
+  const B0 = (z) => [-5, 1.45, z] // fijación del cuerpo del pistón al chasis (la misma del V2)
+  /** Punto del mástil donde empujan los pistones: t = 5 sobre el eje, −0,5 hacia la boca de pozo (igual que el V2). */
+  const attach = (theta) => [
+    bx + 5 * S * Math.sin(theta) - 0.5 * Math.cos(theta),
+    by + 5 * S * Math.cos(theta) + 0.5 * Math.sin(theta),
+  ]
+
+  // ───────── ocultar lo que aún no está montado ─────────
+  const tardios = [G.aparejo, G.enganche, G.vientos].filter(Boolean)
+
+  let p = 1
+  let raf = 0
+  let t0 = 0
+  const DURACION = 14000 // ms de la reproducción ilustrativa
+
+  function fase(pp) {
+    if (pp >= 1) return 'Montado. Pose final del modelo.'
+    if (pp < PHASE.raiseEnd) {
+      const elev = Math.min(90, ease(pp / PHASE.raiseEnd) * (90 + deg(aFinal)) * 1)
+      return `Fase 1 · pistón de izaje del 1.er tramo: ${elev.toFixed(0)}° de 90°`
+    }
+    if (pp < PHASE.extendEnd) {
+      const e = ease((pp - PHASE.raiseEnd) / (PHASE.extendEnd - PHASE.raiseEnd))
+      return `Fase 2 · pistón del 2.º tramo: extiende el tramo embutido en el 1.º (${(e * 100).toFixed(0)} %)`
+    }
+    return 'Fase 3 · se tensan los vientos'
+  }
+
+  function set(value) {
+    p = Math.max(0, Math.min(1, Number(value)))
+    const completo = p >= 1
+    const raise = ease(p / PHASE.raiseEnd)
+    const ext = ease((p - PHASE.raiseEnd) / (PHASE.extendEnd - PHASE.raiseEnd))
+    // θ: ángulo del eje respecto de la vertical (+ hacia la boca de pozo). Acostado hacia atrás: −90°. Final: el del V2.
+    const theta = completo ? aFinal : -Math.PI / 2 + raise * (Math.PI / 2 + aFinal)
+    P.rotation.z = -theta
+    sup.position.y = completo ? 0 : -E * (1 - ext)
+    if (conducto) conducto.visible = completo || p >= PHASE.extendEnd
+    for (const g of tardios) g.visible = completo || p >= PHASE.extendEnd
+    if (cableMalacate) cableMalacate.visible = completo || p >= PHASE.extendEnd
+
+    gDyn.visible = !completo
+    if (pistonesEstaticos) pistonesEstaticos.visible = completo
+    gExt.visible = !completo
+    if (!completo) {
+      const [mx, my] = attach(theta)
+      for (const { z, barrel, rod } of izaje) {
+        const [x0, y0] = B0(z)
+        const l = Math.hypot(mx - x0, my - y0)
+        const lb = Math.min(l, 3.0)
+        const ux = (mx - x0) / l
+        const uy = (my - y0) / l
+        between(barrel, x0, y0, x0 + ux * lb, y0 + uy * lb, z)
+        between(rod, x0 + ux * lb, y0 + uy * lb, mx, my, z)
+      }
+      const supBottom = 14.8 - E * (1 - ext)
+      const barrelTop = EXT_Y0 + EXT_BARREL
+      between(extBarrel, 0, EXT_Y0, 0, barrelTop, 0)
+      between(extRod, 0, Math.min(barrelTop, supBottom), 0, Math.max(supBottom, barrelTop), 0)
+    }
+    if (R.perf && R.perf.invalidateShadows) R.perf.invalidateShadows()
+    if (R.invalidate) R.invalidate()
+    ui.update()
+  }
+
+  function play() {
+    cancelAnimationFrame(raf)
+    if (p >= 1) p = 0
+    t0 = performance.now() - p * DURACION
+    const step = (now) => {
+      const next = (now - t0) / DURACION
+      set(Math.min(1, next))
+      if (next < 1) raf = requestAnimationFrame(step)
+      else ui.update()
+    }
+    raf = requestAnimationFrame(step)
+    ui.update()
+  }
+  function pause() {
+    cancelAnimationFrame(raf)
+    raf = 0
+    ui.update()
+  }
+
+  // ───────── UI (solo en el paso 6 de la secuencia de montaje) ─────────
+  const style = document.createElement('style')
+  style.id = 'erect-style'
+  style.textContent = `
+    #rig-erect{position:fixed;left:50%;bottom:194px;transform:translateX(-50%);z-index:21;width:min(760px,calc(100vw - 32px));
+      background:rgba(20,27,38,.96);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:12.5px;padding:8px 12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.45)}
+    #rig-erect .er-row{display:flex;gap:10px;align-items:center}
+    #rig-erect b{color:#DDBB65}
+    #rig-erect input[type=range]{flex:1}
+    #rig-erect button{font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px 10px;cursor:pointer}
+    #rig-erect button:hover{background:rgba(255,255,255,.1)}
+    #rig-erect .er-note{margin-top:4px;font-size:11px;opacity:.75;line-height:1.35}
+    body.opts-hidden #rig-erect{display:none}
+  `
+  document.head.appendChild(style)
+  const box = document.createElement('section')
+  box.id = 'rig-erect'
+  box.hidden = true
+  box.setAttribute('aria-label', 'Izamiento del mástil (ilustrativo)')
+  box.innerHTML = `
+    <div class="er-row"><b>Izamiento del mástil</b>
+      <button type="button" id="er-play">Reproducir</button>
+      <input type="range" id="er-range" min="0" max="100" step="1" value="100" aria-label="Avance del izamiento (100 = montado)">
+    </div>
+    <div id="er-fase" aria-live="polite"></div>
+    <div class="er-note">Secuencia indicada por el usuario (pendingValidation): pistón de izaje del 1.er tramo de 0 a 90°, luego el 2.º pistón extiende el tramo embutido, y se tensan los vientos. Ilustrativo: sin cargas, presiones ni tiempos; carreras de los pistones y pistón interno aproximados.</div>`
+  document.body.appendChild(box)
+  const ui = {
+    update() {
+      const r = document.getElementById('er-range')
+      if (r) r.value = String(Math.round(p * 100))
+      const f = document.getElementById('er-fase')
+      if (f) f.textContent = fase(p)
+      const b = document.getElementById('er-play')
+      if (b) b.textContent = raf ? 'Pausar' : p >= 1 ? 'Reproducir' : 'Continuar'
+    },
+  }
+  document.getElementById('er-play').addEventListener('click', () => (raf ? pause() : play()))
+  document.getElementById('er-range').addEventListener('input', (e) => {
+    pause()
+    set(Number(e.target.value) / 100)
+  })
+  document.addEventListener('tacker:seq-step', (e) => {
+    const en6 = e.detail === 6
+    box.hidden = !en6
+    if (!en6) {
+      pause()
+      if (p < 1) set(1)
+    }
+    ui.update()
+  })
+  document.addEventListener('tacker:mode', () => {
+    pause()
+    if (p < 1) set(1)
+    box.hidden = true
+  })
+  ui.update()
+
+  window.__tackerErect = { set, play, pause, progress: () => p, fases: PHASE }
 })
 
 </script>
