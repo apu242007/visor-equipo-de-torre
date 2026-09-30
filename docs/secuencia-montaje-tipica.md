@@ -55,3 +55,10 @@ Con las imágenes de referencia (concepto, no el equipo): el mástil sube **hast
 al final **los vientos se tensan** (de un tendido flojo con catenaria a cable recto) y el mástil toma su **plomo final** (la leve inclinación del V2). Antes el mástil
 llegaba a su inclinación final antes de extender. Los vientos usan los puntos del V2 (4 anclajes a ±25 m, dos cables por anclaje desde los niveles 26 y 18,5 del
 mástil y dos cables traseros cortos). Sin cargas, presiones ni tiempos; `pendingValidation`.
+
+### Gatos de nivelación del carrier (2026-09-30)
+
+El usuario indicó que las patas que se bajan son **gatos en el carrier** (no las PT-5 de la subestructura). El V2 no los tenía: `legacy-ext/82-gatos-carrier.js` agrega **3 por lado**
+(delantero, medio y trasero, x = −15,2 / −9,8 / −1,9 m; libres de SUB-2, de la cabina y de PT-1), cada uno con brazo lateral, camisa, vástago y zapata. Cantidad, posición y medidas
+son una lectura del modelo a partir de las imágenes de referencia (`pendingValidation`). En el montaje se bajan en el paso 4 (nivelación; en el paso 3 están recogidos) y el izamiento
+del mástil empieza con la **fase 0**: se bajan los gatos. No se modelan cargas ni nivelación real.
