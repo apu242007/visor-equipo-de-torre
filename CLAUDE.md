@@ -78,7 +78,7 @@ npm run assets:decoders               # refresca public/decoders desde three
 src/app · components/{viewer,equipment,qhse,operation,training,ui} · scene/{cameras,lighting,controls,loaders,effects}
 src/data/{rigs,equipment,qhse,training} · stores · hooks · lib/{three,geometry,units} · types
 public/{legacy,models/tacker10,textures,environments,decoders} · assets/source
-legacy-ext/ (módulos del visor V2) · scripts/ (build-legacy, snap, gltf-*) · tests/ (node --test)
+cad/ (CadQuery paramétrico → GLB en assets/source, ver cad/README.md) · legacy-ext/ (módulos del visor V2) · scripts/ (build-legacy, snap, gltf-*) · tests/ (node --test)
 docs/{fuentes/{tacker10,drops},drops,pdf-review,references,preview} · reference/{legacy,v2-previo}
 ```
 

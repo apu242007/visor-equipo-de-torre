@@ -57,3 +57,5 @@ docs/references/enganche/*.png
 
 # worktrees de agentes
 .claude/worktrees/
+__pycache__/
+*.pyc

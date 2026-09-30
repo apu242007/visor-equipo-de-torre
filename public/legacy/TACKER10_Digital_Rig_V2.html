@@ -228,6 +228,8 @@ window.__rigExt = (() => {
 
 /* datos DROPS (src/data/qhse/tacker10-drops.json) */
 window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Puntos de control DROPS del Tacker 10 (Libro DROPS Tacker 2024, RCCO Rev.03)","generated":"2026-09-25","assumptions":["Estatus 'procedure': decisión del usuario, se aplican los ítems del Libro DROPS Tacker 2024 (RCCO Rev.03) como procedimiento de la empresa. El Libro no nombra el equipo (no dice 'TK10' ni 'Tacker 10', solo el logo Tacker): su aplicabilidad al TK10 la declara el usuario y no está afirmada por el documento.","El Libro trae 66 puntos en 11 secciones; el anexo POWSG020-A3 trae 64 (Corona 9 en lugar de 11): el Libro (Rev.03, 04/01/24) agrega COR-10 y el soporte de banderas sin número. Los IDs son los del extracto (prefijos COR, DCO, PE, DPE, BP, SUB, CAS, PLA, PIL, PT, PRL); el Libro solo numera 'Art.' por sección.","Filas dudosas conservadas y marcadas flags:['dudoso']: COR-10 (columnas posiblemente desplazadas), COR-11 (sin número Art. impreso; ID asignado por este dataset) y PLA-1 (fila incompleta, 'BANDEJA HCA.'). Otras lecturas ambiguas llevan 'texto-ambiguo' (COR-5 '5/8 9/16' sin unidad; PRL-1/PRL-2 '8 por bulones'); BP-2 (power swivel) dice 'NA' en las tres columnas ('no-aplica').","primary/secondary/observation transcriben el Libro sin corregir errores de tipeo (salvo espacios perdidos por la maquetación). secondaryRequired:false cuando el Libro dice 'No requerida' o 'NA', o no declara retención (PLA-1). basis.page es la página donde comienza la fila; si cruza salto de página, basis.note lo indica. La pág. 25 del Libro lleva otro encabezado (Rev.01, 18/09/23).","Zona de cada sección tomada del layout POWSG020-A2: corona, debajo de corona, piso de enganche y debajo del piso de enganche = ALTO; boca de pozo, subestructura y carrier, casilla, plano inclinado = MEDIO; piletas = BAJO. El A2 es una planta con 3 anillos concéntricos SIN radio ni cota; sus acotaciones (2,4 a 20 m) son huellas de equipos en locación, no distancias de exclusión. Este dataset no contiene radios, alturas, pesos ni distancias.","Conflicto de nivel no resuelto: 'Área boca de pozo' es MEDIO en el A2 pero el RCCO (A3, págs. 15-16) marca sus 4 ítems como Riesgo Alto; y PO-WSG-020 6.3.5 asigna 'la torre' a Riesgo Medio y 'piletas, bombas, acumuladores, carrier' a Riesgo Bajo, lo que no coincide con el A2 (mástil = Alto; subestructura y carrier = Medio). Se usa el A2; corresponde al usuario decidir qué prevalece.","piso-trabajo y poste-llave NO figuran en el A2: zone:null con zoneBasis 'No clasificada en POWSG020-A2'. El RCCO (A3) los rotula por su cuenta ('Ligero' y 'Riesgo medio' en el piso de trabajo; Riesgo Medio en el poste), pero eso no es una clasificación de área del A2 y no se usa. Un punto sin zona no se presenta como zona Baja.","componentId es INFERIDO (componentIdBasis:'inferido'): los documentos no usan los ids del visor. Regla: corona, debajo de corona y debajo del piso de enganche = mastil salvo vientos, grilletes y riendas = vientos (DCO-4..8, DPE-4); piso de enganche = enganche salvo PE-10 y PE-13 = vientos; BP-1 = malacate; BP-2..4 = aparejo; subestructura y carrier = subestructura salvo SUB-1 (pistones y tensores) = camion; piso de trabajo = subestructura; casilla = cabina; poste = llave; plano inclinado = caballetes; piletas = circulacion.","TK10 (05/10/2023, 36 fotos, 26 'CORRECTO', 10 hallazgos en las fotos 4, 8, 19, 21, 22, 30, 32, 33, 34, 35): el TK10 no rotula la ubicación de las fotos, así que toda relación foto-punto es tentativa (inferred:true). Solo se marcó 'correcto' donde la correspondencia es razonable (COR-7, PE-11, PE-13, DPE-6, SUB-1); el resto queda 'sin-dato'. Los hallazgos no figuran en el Libro (posterior, 04/01/24); no consta si se cerraron. El bolsillo antichaída de roldanas sí figura en PO-WSG-020 6.3.4 ítem 2.","Manual DROPS Rev.04 (©2017, genérico, offshore), Taller YPF y Alerta YPF INC18068 son guías o evidencia de incidente, no requisitos de Tacker: solo aparecen en 'references' y 'sources' (no son puntos). Como el enum de 'sources.kind' no tiene un tipo para guías/alertas, se los clasificó 'brochure'; ninguno respalda un punto.","Frecuencias (PO-WSG-020, texto): A1 previo a cada montaje y desmontaje; RCCO mensual; deficiencias reportadas en POSGI011-A1 y corregidas 'inmediatamente' (sin plazo numérico). No definidos por los documentos: alturas, pesos, radios o distancias de caída, umbrales de la calculadora DROPS (anexo A4, ausente de los archivos) ni criterio numérico de aceptación."],"disclaimer":"Dataset cualitativo derivado de documentos internos (Libro DROPS Tacker 2024, PO-WSG-020 y anexos, TK10 Drops 05/10/2023). No contiene distancias, radios, alturas ni pesos, y no es un cálculo ni una validación de seguridad. Las zonas Alto/Medio/Bajo son clasificaciones de área del layout A2, sin dimensión. La aplicabilidad del Libro al Tacker 10 la declara el usuario; la relación de las fotos TK10 con los puntos es tentativa."},"sources":[{"id":"libro-drops-2024","kind":"procedure","title":"Libro DROPS Tacker 2024 (Reporte de Control de Caídas de Objetos, RCCO)","ref":"docs/fuentes/drops/Libro DROPS Tacker 2024.pdf (25 págs)","revision":"Rev.03, 04/01/24 (págs. 1-24); pág. 25 con encabezado Rev.01, 18/09/23","verified":true},{"id":"powsg020-rev02","kind":"procedure","title":"PO-WSG-020 Prevención de Caídas de Objetos desde Altura","ref":"docs/fuentes/drops/POWSG020 Caída de Objetos desde Altura 02.pdf (7 págs)","revision":"Rev.02, 11/07/22","verified":true},{"id":"powsg020-a1","kind":"procedure","title":"PO-WSG-020-A1 Check List de Caídas de Objetos","ref":"docs/fuentes/drops/POWSG020-A1 Check List de Caídas de Objetos.pdf (1 pág; código impreso PO-WSG-020-A1-1)","revision":null,"verified":true},{"id":"powsg020-a2","kind":"layout","title":"PO-WSG-020-A2 Layout - Clasificación de Áreas sobre Caídas de Objetos","ref":"docs/fuentes/drops/POWSG020-A2 Layout Equipo Caida Objetos.pdf (1 pág; rótulo POWSG020-A2-0)","revision":null,"verified":true},{"id":"powsg020-a3","kind":"procedure","title":"PO-WSG-020-A3 Reporte de Control de Caídas de Objetos (RCCO)","ref":"docs/fuentes/drops/POWSG020-A3 Reporte de Control de Caidas de Objetos RCCO.pdf (25 págs; código impreso POWSG020-A3-2)","revision":null,"verified":true},{"id":"tk10-drops-2023","kind":"photo","title":"TK10 Drops, inspección fotográfica del Tacker 10 (Quick Report, 05/10/2023)","ref":"docs/fuentes/drops/TK10 DROPS 05102023.pdf (9 págs, 36 fotos)","revision":null,"verified":true},{"id":"manual-drops-rev04","kind":"brochure","title":"Manual DROPS Retención Confiable (DROPS Reliable Securing), guía genérica de la industria","ref":"docs/fuentes/drops/Manual Drops Rev. 04 en Español.pdf (67 págs)","revision":"Rev.04, septiembre 2017 (©2017)","verified":true},{"id":"taller-ypf-drops","kind":"brochure","title":"Taller de Aseguramiento de elementos en altura (DROPS), Equipos de Torre, YPF Regional Oeste","ref":"docs/fuentes/drops/Taller de Aseguramiento de elemtnos en altura DROPS - Equipos de Torre Regional Oeste.pdf (25 págs)","revision":null,"verified":true},{"id":"alerta-ypf-inc18068","kind":"brochure","title":"Advertencia de Seguridad YPF: caída de giratorio (destorcedor) de winche, SIGEO INC18068","ref":"docs/fuentes/drops/Upstream YPF - Advertencia de Seguridad - Caída de giratorio de Winche.pdf (1 pág)","revision":"07/10/2024","verified":true}],"zones":[{"id":"alto","label":"Riesgo ALTO","color":"#EF4444","areas":["Corona de equipo","Entre Corona y Piso de enganche","Piso de enganche","Entre Piso de enganche y Sección de mastil"],"sourceId":"powsg020-a2","note":"Leyenda del layout POWSG020-A2 (anillo interior, rojo). Clasificación cualitativa de áreas: el A2 no trae radio ni cota de la zona."},{"id":"medio","label":"Riesgo MEDIO","color":"#F59E0B","areas":["Área boca de pozo","Sub estructura y Carrier","Casilla de Maquinista","Plano inclinado y Planchada"],"sourceId":"powsg020-a2","note":"Leyenda del layout POWSG020-A2 (anillo intermedio, naranja). Sin radio ni cota. El RCCO (A3) marca 'Riesgo Alto' los 4 ítems del área de boca de pozo."},{"id":"bajo","label":"Riesgo BAJO","color":"#22C55E","areas":["Pileta","Bomba","Generador","Campamento","Depósito"],"sourceId":"powsg020-a2","note":"Leyenda del layout POWSG020-A2 (anillo exterior, verde). Sin radio ni cota."}],"sections":[{"id":"corona","label":"Corona","order":1,"zone":"alto","zoneBasis":"POWSG020-A2: 'Corona de equipo' = Riesgo ALTO (RCCO A3, sección Corona: Riesgo Alto).","pageRange":"1-4","sourceId":"libro-drops-2024"},{"id":"debajo-corona","label":"Debajo de la Corona y Encima del Piso de Enganche","order":2,"zone":"alto","zoneBasis":"POWSG020-A2: 'Entre Corona y Piso de enganche' = Riesgo ALTO (RCCO A3: Riesgo Alto).","pageRange":"4-7","sourceId":"libro-drops-2024"},{"id":"piso-enganche","label":"Piso de Enganche","order":3,"zone":"alto","zoneBasis":"POWSG020-A2: 'Piso de enganche' = Riesgo ALTO (RCCO A3: Riesgo Alto).","pageRange":"7-11","sourceId":"libro-drops-2024"},{"id":"debajo-piso-enganche","label":"Debajo del Piso de Enganche y sobre la Primer Sección del Mástil","order":4,"zone":"alto","zoneBasis":"POWSG020-A2: 'Entre Piso de enganche y Sección de mastil' = Riesgo ALTO (RCCO A3: Riesgo Alto).","pageRange":"11-14","sourceId":"libro-drops-2024"},{"id":"boca-pozo","label":"Área de Boca de Pozo","order":5,"zone":"medio","zoneBasis":"POWSG020-A2: 'Área boca de pozo' = Riesgo MEDIO. Conflicto: el RCCO (A3, págs. 15-16) marca sus 4 ítems como Riesgo Alto; no se resuelve aquí.","pageRange":"14-15","sourceId":"libro-drops-2024"},{"id":"subestructura-carrier","label":"Subestructura y Carrier","order":6,"zone":"medio","zoneBasis":"POWSG020-A2: 'Sub estructura y Carrier' = Riesgo MEDIO (RCCO A3: Riesgo Medio). PO-WSG-020 6.3.5 nombra 'carrier' junto a piletas y bombas bajo Riesgo Bajo: no coincide con el A2.","pageRange":"16-17","sourceId":"libro-drops-2024"},{"id":"casilla-maquinista","label":"Casilla de Maquinista","order":7,"zone":"medio","zoneBasis":"POWSG020-A2: 'Casilla de Maquinista' = Riesgo MEDIO.","pageRange":"18-19","sourceId":"libro-drops-2024"},{"id":"plano-inclinado","label":"Plano inclinado y Planchada","order":8,"zone":"medio","zoneBasis":"POWSG020-A2: 'Plano inclinado y Planchada' = Riesgo MEDIO.","pageRange":"20","sourceId":"libro-drops-2024"},{"id":"piletas","label":"Piletas · Bombas · Generador · Depósito · Trailer Campamento","order":9,"zone":"bajo","zoneBasis":"POWSG020-A2: 'Pileta; Bomba; Generador; Campamento; Depósito' = Riesgo BAJO.","pageRange":"21","sourceId":"libro-drops-2024"},{"id":"piso-trabajo","label":"Piso de trabajo · Escalera de acceso","order":10,"zone":null,"zoneBasis":"No clasificada en POWSG020-A2","pageRange":"22-24","sourceId":"libro-drops-2024"},{"id":"poste-llave","label":"Poste de retenida de llave hidráulica","order":11,"zone":null,"zoneBasis":"No clasificada en POWSG020-A2","pageRange":"24-25","sourceId":"libro-drops-2024"}],"points":[{"id":"COR-1","sectionId":"corona","order":1,"name":"Polea de pistón","componentId":"mastil","componentIdBasis":"inferido","primary":"3 topes guía cable con bulones tuercas auto frenantes o tuercas con chaveta partida.","secondary":"No requerida","secondaryRequired":false,"quantity":"3 topes guía cable","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":1,"note":null},"tk10":{"status":"hallazgo","photos":[4],"note":"Hallazgo(s) TK10 05/10/2023 — foto 4: Pasteca/polea sin bolsillo que evite la caída de la polea si se corta el eje (TK10: «INCORRECTO SEGUN REQUERIMIENTO LAS PASTECAS DEBEN DISPONER DE UN BOLSILLO QUE EVITE LA CAIDA DE LA POLEA CASO SE CORTE EL EJE DE LA MISMA»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"COR-2","sectionId":"corona","order":2,"name":"Polea viajera","componentId":"mastil","componentIdBasis":"inferido","primary":"3 topes guía cable con bulones tuercas auto frenantes o tuercas con chaveta partida","secondary":"No requerida","secondaryRequired":false,"quantity":"3 topes guía cable","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":1,"note":null},"tk10":{"status":"hallazgo","photos":[4],"note":"Hallazgo(s) TK10 05/10/2023 — foto 4: Pasteca/polea sin bolsillo que evite la caída de la polea si se corta el eje (TK10: «INCORRECTO SEGUN REQUERIMIENTO LAS PASTECAS DEBEN DISPONER DE UN BOLSILLO QUE EVITE LA CAIDA DE LA POLEA CASO SE CORTE EL EJE DE LA MISMA»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"COR-3","sectionId":"corona","order":3,"name":"Polea de punto muerto","componentId":"mastil","componentIdBasis":"inferido","primary":"3 topes guía cable con bulones tuercas auto frenantes o tuercas con chaveta partida","secondary":"No requerida","secondaryRequired":false,"quantity":"3 topes guía cable","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":1,"note":null},"tk10":{"status":"hallazgo","photos":[4],"note":"Hallazgo(s) TK10 05/10/2023 — foto 4: Pasteca/polea sin bolsillo que evite la caída de la polea si se corta el eje (TK10: «INCORRECTO SEGUN REQUERIMIENTO LAS PASTECAS DEBEN DISPONER DE UN BOLSILLO QUE EVITE LA CAIDA DE LA POLEA CASO SE CORTE EL EJE DE LA MISMA»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"COR-4","sectionId":"corona","order":4,"name":"Polea de líneas 1, 2, y 3 de aparejo","componentId":"mastil","componentIdBasis":"inferido","primary":"3 topes guía cable con bulones tuercas auto frenantes o tuercas con chaveta partida","secondary":"No requerida","secondaryRequired":false,"quantity":"3 topes guía cable","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":2,"note":null},"tk10":{"status":"hallazgo","photos":[4],"note":"Hallazgo(s) TK10 05/10/2023 — foto 4: Pasteca/polea sin bolsillo que evite la caída de la polea si se corta el eje (TK10: «INCORRECTO SEGUN REQUERIMIENTO LAS PASTECAS DEBEN DISPONER DE UN BOLSILLO QUE EVITE LA CAIDA DE LA POLEA CASO SE CORTE EL EJE DE LA MISMA»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"COR-5","sectionId":"corona","order":5,"name":"Poleas de izaje de cable de guinche","componentId":"mastil","componentIdBasis":"inferido","primary":"4 pastecas de pasaje 5/8 9/16 sujetas con bulones tuercas auto frenantes.","secondary":"No requerida","secondaryRequired":false,"quantity":"4 pastecas; pasaje 5/8 9/16 (el texto no indica unidad)","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida","flags":["texto-ambiguo"],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":2,"note":null},"tk10":{"status":"hallazgo","photos":[4],"note":"Hallazgo(s) TK10 05/10/2023 — foto 4: Pasteca/polea sin bolsillo que evite la caída de la polea si se corta el eje (TK10: «INCORRECTO SEGUN REQUERIMIENTO LAS PASTECAS DEBEN DISPONER DE UN BOLSILLO QUE EVITE LA CAIDA DE LA POLEA CASO SE CORTE EL EJE DE LA MISMA»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"COR-6","sectionId":"corona","order":6,"name":"Placa certificada de sujeción para T-5","componentId":"mastil","componentIdBasis":"inferido","primary":"Placa soldada sujetas con 4 bulones tuercas auto frenantes y arandelas Norlock.","secondary":"No requerida","secondaryRequired":false,"quantity":"4 bulones","observation":"Verificar visualmente condición de soldaduras y verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":2,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"COR-7","sectionId":"corona","order":7,"name":"Baliza de la corona","componentId":"mastil","componentIdBasis":"inferido","primary":"Baliza roscada y sujeta con eslinga de seguridad.","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de los cables de seguridad","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":2,"note":"Fila entre págs. 2 y 3 (art. 7 impreso en p.3)."},"tk10":{"status":"correcto","photos":[1,2],"note":"Foto(s) 1, 2 del TK10 («CORRECTO»): baliza (esfera amarilla y baliza en la corona). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"COR-8","sectionId":"corona","order":8,"name":"Banderas en cajón de corona","componentId":"mastil","componentIdBasis":"inferido","primary":"Sujetas por medio de grampas ancladas a la estructura por medio de bulones, tuercas autofrenantes, arandelas Norlock, prisioneros y eslingas de seguridad","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de los cables de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":3,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"COR-9","sectionId":"corona","order":9,"name":"Dispositivo retráctil T5","componentId":"mastil","componentIdBasis":"inferido","primary":"Dispositivo sujeto con Grillete (retención primaria) y eslinga (retención secundaria)","secondary":"Eslinga de seguridad 4 mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 4 mm","observation":"Verificar condición grillete y cable de seguridad","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":3,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"COR-10","sectionId":"corona","order":10,"name":"Amortiguador Corona: Línea de vida T3","componentId":"mastil","componentIdBasis":"inferido","primary":"Sujetas por medio de grampas ancladas a la estructura por medio de bulones, tuercas autofrenantes, arandelas Norlock","secondary":"Sujetas por medio de grampas ancladas a la estructura por medio de bulones, tuercas autofrenantes, arandelas Norlock","secondaryRequired":false,"quantity":null,"observation":"Libro, columna Observaciones: «No requerida». DUDOSO: la columna «Retención de Seguridad» repite el texto de la sujeción y «No requerida» figura en la columna de observaciones; pueden estar desplazadas las columnas. Se toma secondaryRequired:false por el «No requerida» impreso en la fila. Confirmar con el original.","flags":["dudoso"],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":3,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"COR-11","sectionId":"corona","order":11,"name":"Soporte de accesorios: banderas","componentId":"mastil","componentIdBasis":"inferido","primary":"Tintero soldado con mariposa sujeta con cadena, arandela Norlock y eslinga de seguridad","secondary":"Tintero soldado con mariposa sujeta con cadena, arandela Norlock y eslinga de seguridad","secondaryRequired":true,"quantity":"Eslinga de seguridad 6 mm","observation":"Libro, columna Observaciones: «Eslinga seguridad 6 mm». DUDOSO: la fila no tiene número Art. impreso (sigue al 10) y la cifra de la eslinga está en la columna de observaciones, no en la de retención (que repite la sujeción). Confirmar con el original.","flags":["dudoso"],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":3,"note":"Fila entre págs. 3 y 4."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-1","sectionId":"debajo-corona","order":1,"name":"Luminarias/artefactos en mástil x 7 unidades","componentId":"mastil","componentIdBasis":"inferido","primary":"Fijación de luminarias con grampas bulones, tuercas auto frenaste, arandelas Norlock y eslingas de seguridad","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"7 unidades; eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de eslingas de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":4,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-2","sectionId":"debajo-corona","order":2,"name":"Reflector led","componentId":"mastil","componentIdBasis":"inferido","primary":"Fijación de Reflector led con grampas bulones, tuercas autofrenantes y arandelas Norlock y eslingas de seguridad","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de eslingas de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":4,"note":null},"tk10":{"status":"hallazgo","photos":[30],"note":"Hallazgo(s) TK10 05/10/2023 — foto 30: Reflector led con tornillos sueltos y faltantes (TK10: «INCORRECTO. COLOCAR BULONES FALTANTES»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DCO-3","sectionId":"debajo-corona","order":3,"name":"Depósito de purga","componentId":"mastil","componentIdBasis":"inferido","primary":"Fijado con grampa laterales sujetos a la estructura del mástil los cuales cuentan con bulones, tuercas auto frénate, arandelas Norlock y eslingas de seguridad.","secondary":"Eslingas de seguridad de 3mm.","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de cables de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":4,"note":"Fila entre págs. 4 y 5."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-4","sectionId":"debajo-corona","order":4,"name":"Vientos posteriores del segundo tramo","componentId":"vientos","componentIdBasis":"inferido","primary":"Fijado con 2 grilletes de 4 elementos certificados que sirven como método de sujeción al anclaje, se encuentran posicionados en cáncamos de bloque de corona.","secondary":"No requerida","secondaryRequired":false,"quantity":"2 grilletes de 4 elementos certificados","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":5,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-5","sectionId":"debajo-corona","order":5,"name":"Vientos de carga","componentId":"vientos","componentIdBasis":"inferido","primary":"Cuentan con 2 grilletes de 4 elementos certificados que son los encargados de realizar la sujeción y se encuentran posicionados en chasis","secondary":"No requerida","secondaryRequired":false,"quantity":"2 grilletes de 4 elementos certificados","observation":"Verificar condiciones de grilletes y condición de cables de seguridad","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":5,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-6","sectionId":"debajo-corona","order":6,"name":"Vientos carga trasero","componentId":"vientos","componentIdBasis":"inferido","primary":"Sujetas con grilletes a cáncamos soldados a la estructura. Cáncamo original con grillete 4 elementos con perno, tuerca, chaveta partida y arandelas Norlock","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar condiciones de grilletes y condición de cables de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":5,"note":"Fila entre págs. 5 y 6."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-7","sectionId":"debajo-corona","order":7,"name":"Viento de anclaje terrestre trasero","componentId":"vientos","componentIdBasis":"inferido","primary":"Cuentan con 2 grilletes de 4 elementos certificados que son los encargados de realizar la sujeción y se encuentran posicionados en chasis","secondary":"No requerida","secondaryRequired":false,"quantity":"2 grilletes de 4 elementos certificados","observation":"Verificar condiciones de soldadura, estado de grilletes y condición de cables de seguridad","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":6,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-8","sectionId":"debajo-corona","order":8,"name":"Viento frontales de segundo tramo","componentId":"vientos","componentIdBasis":"inferido","primary":"Cuenta con 2 Cáncamos certificados con perno y chaveta Sujetas cada uno con grilletes de 4 elementos a cáncamos soldados a la estructura.","secondary":"No requerida","secondaryRequired":false,"quantity":"2 cáncamos certificados","observation":"Verificar condiciones de soldadura, estado de grilletes y condición de cables de seguridad","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":6,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DCO-9","sectionId":"debajo-corona","order":9,"name":"Poleas superiores de piso de enganche","componentId":"mastil","componentIdBasis":"inferido","primary":"Cuenta con 2 poleas soldadas con pernos eje y tuerca castillas y chaveta partida.","secondary":"No requerida","secondaryRequired":false,"quantity":"2 poleas","observation":"Verificas estado de soldadura de pastecas y condición de gramas","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":6,"note":"Fila entre págs. 6 y 7."},"tk10":{"status":"hallazgo","photos":[8],"note":"Hallazgo(s) TK10 05/10/2023 — foto 8: Polea sin bolsillo antichaída (TK10: «IDEM OBSERVACIÓN ANTERIOR DE POLEA. FALTANTE DE BOLSILLO. INCORRECTO SEGUN REQUERIMIENTO DE PROCEDIMEINTO DE INSPECCIÓN DE EQUIPOS.»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"PE-1","sectionId":"piso-enganche","order":1,"name":"Caran block Enganchador","componentId":"enganche","componentIdBasis":"inferido","primary":"Sujeto a cáncamo con grillete","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar condición de grilletes y condición de los cables de seguridad.","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":7,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-2","sectionId":"piso-enganche","order":2,"name":"Sujeción del cable del pirosalva.","componentId":"enganche","componentIdBasis":"inferido","primary":"Sujeto a cáncamos y grilletes de cuatro elementos.","secondary":"No requerida.","secondaryRequired":false,"quantity":null,"observation":"Verificar condición de grilletes y condicion de los cables de seguridad.","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":7,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-3","sectionId":"piso-enganche","order":3,"name":"Pirosalva","componentId":"enganche","componentIdBasis":"inferido","primary":"Elemento original abulanado con 7 bulones","secondary":"No requerida.","secondaryRequired":false,"quantity":"7 bulones","observation":"Verificar condición de pirosalva y sus bulones","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":7,"note":"Fila entre págs. 7 y 8."},"tk10":{"status":"hallazgo","photos":[22],"note":"Hallazgo(s) TK10 05/10/2023 — foto 22: Deslizador de pirosalva con faltante de un tornillo (TK10: «INCORRECTO. SE DEBE COMPLETAR ELEMENTO FALTANTE EN DESLIZADOR DE PIROSALVA»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"PE-4","sectionId":"piso-enganche","order":4,"name":"Rejilla de material desplegable","componentId":"enganche","componentIdBasis":"inferido","primary":"Abulonada con seguros y tuerca autofrenante o tuercas con chaveta partida y arandelas Norlock","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":8,"note":null},"tk10":{"status":"hallazgo","photos":[19],"note":"Hallazgo(s) TK10 05/10/2023 — foto 19: Plancha metálica con bisagra sin retención secundaria (TK10: «INCORRECTO. SE DEBE COLOCAR RETENCION SECUNDARIA AL ELEMENTO.»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"PE-5","sectionId":"piso-enganche","order":5,"name":"Trampolín","componentId":"enganche","componentIdBasis":"inferido","primary":"Abulonada con tuercas auto frenantes, arandelas Norlock y sujeción de cables de seguridad","secondary":"Eslinga de seguridad de 3/8\" con 4 eslabones engrampados","secondaryRequired":true,"quantity":"Eslinga de seguridad 3/8\"; 4 eslabones engrampados","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida. Chequear estado de los eslabones de eslinga de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":8,"note":null},"tk10":{"status":"hallazgo","photos":[19],"note":"Hallazgo(s) TK10 05/10/2023 — foto 19: Plancha metálica con bisagra sin retención secundaria (TK10: «INCORRECTO. SE DEBE COLOCAR RETENCION SECUNDARIA AL ELEMENTO.»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"PE-6","sectionId":"piso-enganche","order":6,"name":"Peines de piso de enganche","componentId":"enganche","componentIdBasis":"inferido","primary":"Abulonados con tuerca autofrenantes o tuercas con chaveta partida y arandelas Norlock","secondary":"Eslinga de seguridad 3/8\"","secondaryRequired":true,"quantity":"Eslinga de seguridad 3/8\"","observation":"Verificar condición de peines. Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":8,"note":"Fila entre págs. 8 y 9."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-7","sectionId":"piso-enganche","order":7,"name":"Puerta de ingreso a piso de enganche","componentId":"enganche","componentIdBasis":"inferido","primary":"Bisagras soldadas","secondary":"Cadenas soldadas","secondaryRequired":true,"quantity":null,"observation":"Verificar, Chequear estado de los eslabones de cadenas de seguridad y estado de soldaduras","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":9,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-8","sectionId":"piso-enganche","order":8,"name":"Sujeción de piso de enganche","componentId":"enganche","componentIdBasis":"inferido","primary":"Cáncamo soldado","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar soldadura de cáncamo","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":9,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-9","sectionId":"piso-enganche","order":9,"name":"Cable de sujeción de seguridad de piso enganche","componentId":"enganche","componentIdBasis":"inferido","primary":"Cable certificado sujeta con greille a cáncamos a la estructura. Cable de seguridad con 4 grampas de sujeción","secondary":"Cable de seguridad","secondaryRequired":true,"quantity":"4 grampas de sujeción","observation":"Verificar estado de cables, grampas y grilletes","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":9,"note":"Fila entre págs. 9 y 10."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-10","sectionId":"piso-enganche","order":10,"name":"Viento de anclaje inferior","componentId":"vientos","componentIdBasis":"inferido","primary":"Sujetas con grilletes a cáncamos soldados a la estructura.","secondary":"No requerida.","secondaryRequired":false,"quantity":null,"observation":"Verificar condiciones de grilletes y condición de cables de seguridad. Verificar estado de soldadura.","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":10,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PE-11","sectionId":"piso-enganche","order":11,"name":"Puerta de ingreso pirosalva","componentId":"enganche","componentIdBasis":"inferido","primary":"Bisagras soldadas. Perno pasador sujeta a cadena soldada","secondary":"Cadenas soldadas","secondaryRequired":true,"quantity":null,"observation":"Verificar, Chequear estado de los eslabones de cadenas de seguridad y estado de soldaduras","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":10,"note":null},"tk10":{"status":"correcto","photos":[28],"note":"Foto(s) 28 del TK10 («CORRECTO»): pasador retenido con cadena. Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"PE-12","sectionId":"piso-enganche","order":12,"name":"Poleas de deslizamiento de piso de enganche","componentId":"enganche","componentIdBasis":"inferido","primary":"2 poleas viajeras abulonados con tuercas autofrenantes. Sujetas a cáncamos soldados a la estructura.","secondary":"No requerida.","secondaryRequired":false,"quantity":"2 poleas viajeras","observation":"Verificar condiciones de perno de seguridad y condición de cables. Verificar condición, ajuste de bulones y de las tuercas.","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":10,"note":"Fila entre págs. 10 y 11."},"tk10":{"status":"hallazgo","photos":[21],"note":"Hallazgo(s) TK10 05/10/2023 — foto 21: Polea sin bolsillo (TK10: «IDEM OBSERVACIONES ANTERIORES DE POLEAS.»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"PE-13","sectionId":"piso-enganche","order":13,"name":"Vientos de sujeción superior","componentId":"vientos","componentIdBasis":"inferido","primary":"Cuenta con 2 vientos sujetas con grilletes a cáncamos soldados a la estructura. Cable con grampa de sujeción","secondary":"cadena de seguridad.","secondaryRequired":true,"quantity":"2 vientos","observation":"Verificar condiciones de grilletes y condición de cables de seguridad. Verificar condiciones de grampa de sujeción","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":11,"note":null},"tk10":{"status":"correcto","photos":[10,11],"note":"Foto(s) 10, 11 del TK10 («CORRECTO»): grillete con cadena en nudo del reticulado. Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DPE-1","sectionId":"debajo-piso-enganche","order":1,"name":"Luminarias de mástil x 5 pax","componentId":"mastil","componentIdBasis":"inferido","primary":"Fijación de luminarias con grampas bulones, tuercas auto frenaste y eslingas de seguridad","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"5 unidades; eslinga de seguridad 3 mm","observation":"Verificar condición y ajuste del bulón, de la tuerca y condición de eslingas de seguridad.","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":11,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DPE-2","sectionId":"debajo-piso-enganche","order":2,"name":"Reflectores Led","componentId":"mastil","componentIdBasis":"inferido","primary":"Cuentas con 3 unidades la cual se encuentran en caballete de pivoteo de mástil, los mismos cuentan con grampas de seguridad, tornillos y tuercas autofrenantes , más eslingas de seguridad 3mm","secondary":"Eslingas de seguridad de 3mm.","secondaryRequired":true,"quantity":"3 unidades; eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de eslingas de seguridad","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":11,"note":"Fila entre págs. 11 y 12."},"tk10":{"status":"hallazgo","photos":[30],"note":"Hallazgo(s) TK10 05/10/2023 — foto 30: Reflector led con tornillos sueltos y faltantes (TK10: «INCORRECTO. COLOCAR BULONES FALTANTES»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DPE-3","sectionId":"debajo-piso-enganche","order":3,"name":"Interruptor alimentación de luz del segundo tramo","componentId":"mastil","componentIdBasis":"inferido","primary":"El interruptor se encuentra sujeto con bulones, tuercas autofrenantes , arandelas Norlock y eslinga de seguridad.","secondary":"Eslinga de seguridad de 3mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida y condición de eslingas de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":12,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DPE-4","sectionId":"debajo-piso-enganche","order":4,"name":"Grillete de rienda de carga primer tramo","componentId":"vientos","componentIdBasis":"inferido","primary":"Cuenta con 2 grillete de 4 elementos de riendas de carga primer tramo. Estos son los encargados de realizar la sujeción y se encuentran posicionados en chasis","secondary":"No requerida","secondaryRequired":false,"quantity":"2 grilletes de 4 elementos","observation":"Verificar condición y ajuste del bulón, de la tuerca","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":12,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"DPE-5","sectionId":"debajo-piso-enganche","order":5,"name":"Polea de deslizamiento interior de piso de enganche","componentId":"mastil","componentIdBasis":"inferido","primary":"2 poleas viajeras abulonados con tuercas autofrenantes. Sujetas a cáncamos soldados a la estructura.","secondary":"No requerida.","secondaryRequired":false,"quantity":"2 poleas viajeras","observation":"Verificar condiciones de perno de seguridad y condición de cables. Verificar condición, ajuste de bulones y de las tuercas.","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":13,"note":null},"tk10":{"status":"hallazgo","photos":[21],"note":"Hallazgo(s) TK10 05/10/2023 — foto 21: Polea sin bolsillo (TK10: «IDEM OBSERVACIONES ANTERIORES DE POLEAS.»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DPE-6","sectionId":"debajo-piso-enganche","order":6,"name":"Caja de conexión eléctrica de todo el mástil","componentId":"mastil","componentIdBasis":"inferido","primary":"Abulonado al mástil con tuercas auto frenantes y arandelas Norlock","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":13,"note":null},"tk10":{"status":"correcto","photos":[31],"note":"Foto(s) 31 del TK10 («CORRECTO»): caja de conexión blanca. Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DPE-7","sectionId":"debajo-piso-enganche","order":7,"name":"Soporte de stand pipe","componentId":"mastil","componentIdBasis":"inferido","primary":"Sujetos con grampas cepo abulonados a estructura de mastil","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar el estado de las grampas y su correcto abulonado","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":13,"note":null},"tk10":{"status":"hallazgo","photos":[32,33],"note":"Hallazgo(s) TK10 05/10/2023 — foto 32: Grampas cepo sin retención: se debe asegurar que el tornillo de la grampa no se salga (TK10, sin la palabra «INCORRECTO»). | foto 33: Grampas cepo sin retención (TK10: descripción de la foto, sin campo de resultado propio). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DPE-8","sectionId":"debajo-piso-enganche","order":8,"name":"Grampas en manguerote de cuello de cisne.","componentId":"mastil","componentIdBasis":"inferido","primary":"Abulonada con tuercas auto frenantes y arandelas Norlock","secondary":"Grilletes de cuatro elementos y eslinga de seguridad","secondaryRequired":true,"quantity":null,"observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta partida. Verificar estado de eslinga de seguridad y grilletes. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":14,"note":null},"tk10":{"status":"hallazgo","photos":[32,33,34,35],"note":"Hallazgo(s) TK10 05/10/2023 — foto 32: Grampas cepo sin retención: se debe asegurar que el tornillo de la grampa no se salga (TK10, sin la palabra «INCORRECTO»). | foto 33: Grampas cepo sin retención (TK10: descripción de la foto, sin campo de resultado propio). | foto 34: Eslinga de retención secundaria colocada de manera errónea (TK10: descripción de la foto, sin resultado propio). | foto 35: Manguera hidráulica sin retención secundaria colocada (TK10: «ESLINGAS DE RETENCION DEBEN TENER UN EXTREMO COLOCADO EN UN PUNTO FIJO.»; ese texto está en la posición de la fila 35, su aplicación a la 34 es dudosa). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"DPE-9","sectionId":"debajo-piso-enganche","order":9,"name":"Pulmón de Indicador de peso Martin Decker","componentId":"mastil","componentIdBasis":"inferido","primary":"Se encuentra mediante prensado a cable con cadena de seguridad con grampa de sujeción","secondary":"Cadena de seguridad sujetado en grampa","secondaryRequired":true,"quantity":null,"observation":"Verificar condición, ajuste de bulones y tuercas de grampa. Estado de eslabones de cadena. Ajuste de prensa de pulmón de indicador de peso","flags":[],"zone":"alto","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":14,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"BP-1","sectionId":"boca-pozo","order":1,"name":"Guinche","componentId":"malacate","componentIdBasis":"inferido","primary":"Cable de 9/16\" Ojo /Ojo guardacabo sujeto con grillete de 4 cuerpo y giratorio.","secondary":"No requerida","secondaryRequired":false,"quantity":"Cable 9/16\"","observation":"Verificar estado grillete certificado y ajuste de perno","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":15,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"BP-2","sectionId":"boca-pozo","order":2,"name":"Power swivel – Cabeza rotativa","componentId":"aparejo","componentIdBasis":"inferido","primary":"NA","secondary":"NA","secondaryRequired":false,"quantity":null,"observation":"NA","flags":["no-aplica"],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":15,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"BP-3","sectionId":"boca-pozo","order":3,"name":"Aparejo","componentId":"aparejo","componentIdBasis":"inferido","primary":"Sostenido por 8 línea de cables 1 1/8\" torción derecha","secondary":"No requerida","secondaryRequired":false,"quantity":"8 líneas de cable 1 1/8\" (torción derecha)","observation":"Verificar estado de aparejo. Inspección y certificado vigente. Inspeccionar freno de aparejo y cable","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":15,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"BP-4","sectionId":"boca-pozo","order":4,"name":"Eslinga de sujeción y anclaje","componentId":"aparejo","componentIdBasis":"inferido","primary":"Sujeto con grillete y eslinga de seguridad de 9/16\" + eslinga de seguridad de 1/2\"","secondary":"Eslinga De seguridad de 1/2\"","secondaryRequired":true,"quantity":"Eslinga de seguridad 9/16\" y 1/2\"","observation":"Verificar estado de eslinga de seguridad y grilletes. Verificar colocación de seguro en perno de grillete.","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":15,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"SUB-1","sectionId":"subestructura-carrier","order":1,"name":"Pistones y tensores","componentId":"camion","componentIdBasis":"inferido","primary":"6 tensores abulonados con seguros y tuerca autofrenante y chaveta partida","secondary":"No requerida","secondaryRequired":false,"quantity":"6 tensores","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":16,"note":null},"tk10":{"status":"correcto","photos":[23],"note":"Foto(s) 23 del TK10 («CORRECTO»): cilindros hidráulicos con cables. Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"SUB-2","sectionId":"subestructura-carrier","order":2,"name":"Escaleras y plataformas de tránsito/trabajo","componentId":"subestructura","componentIdBasis":"inferido","primary":"Escalera con perno y seguro. Baranda colocadas en tinteros soldado sujeto con perno y seguro en cada baranda.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar colocación de perno y seguros en escalera y barandas","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":16,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"SUB-3","sectionId":"subestructura-carrier","order":3,"name":"Barandas y rodapié","componentId":"subestructura","componentIdBasis":"inferido","primary":"Baranda colocada en tintero soldado sujeto a en perno y seguro","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar estado de soldadura de tintero y colocación de perno y seguro","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":16,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"SUB-4","sectionId":"subestructura-carrier","order":4,"name":"Artefactos de iluminación","componentId":"subestructura","componentIdBasis":"inferido","primary":"Fijacion de Reflector led con grampas bulones, tuercas autofrenantes, arandelas Norlock y eslingas de seguridad","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta y condición de eslingas de seguridad. Verificar que estén colocadas las arandelas Norlock","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":17,"note":null},"tk10":{"status":"hallazgo","photos":[30],"note":"Hallazgo(s) TK10 05/10/2023 — foto 30: Reflector led con tornillos sueltos y faltantes (TK10: «INCORRECTO. COLOCAR BULONES FALTANTES»). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"CAS-1","sectionId":"casilla-maquinista","order":1,"name":"Mangueras, comandos de izaje","componentId":"cabina","componentIdBasis":"inferido","primary":"Sujetos con grampas cepo abulonados a estructura de mástil","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar el estado de las grampas y su correcto abulonado","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":18,"note":null},"tk10":{"status":"hallazgo","photos":[32,33,34,35],"note":"Hallazgo(s) TK10 05/10/2023 — foto 32: Grampas cepo sin retención: se debe asegurar que el tornillo de la grampa no se salga (TK10, sin la palabra «INCORRECTO»). | foto 33: Grampas cepo sin retención (TK10: descripción de la foto, sin campo de resultado propio). | foto 34: Eslinga de retención secundaria colocada de manera errónea (TK10: descripción de la foto, sin resultado propio). | foto 35: Manguera hidráulica sin retención secundaria colocada (TK10: «ESLINGAS DE RETENCION DEBEN TENER UN EXTREMO COLOCADO EN UN PUNTO FIJO.»; ese texto está en la posición de la fila 35, su aplicación a la 34 es dudosa). Correspondencia tentativa: el TK10 no rotula la ubicación de sus fotos.","inferred":true}},{"id":"CAS-2","sectionId":"casilla-maquinista","order":2,"name":"Soporte y pernos","componentId":"cabina","componentIdBasis":"inferido","primary":"Casilla Maquinista fijado en tinteros soldados sujetos con perno y seguro","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar estado de soldadura de tintero y colocación de perno y seguro","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":18,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"CAS-3","sectionId":"casilla-maquinista","order":3,"name":"Escaleras y pasadores","componentId":"cabina","componentIdBasis":"inferido","primary":"Escalera con perno y seguro. Baranda colocadas en tinteros soldado sujeto con perno y seguro en cada baranda.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar estado de pasadores colocación de perno y seguros en escalera y barandas","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":19,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PLA-1","sectionId":"plano-inclinado","order":1,"name":"Plano inclinado y pernos","componentId":"caballetes","componentIdBasis":"inferido","primary":"BANDEJA HCA.","secondary":null,"secondaryRequired":false,"quantity":null,"observation":"Fila incompleta en el original: la sujeción dice solo «BANDEJA HCA.» y las columnas de retención de seguridad y observaciones están vacías (sin criterio de verificación). DUDOSO: no se puede afirmar si la retención secundaria es requerida (secondaryRequired:false = el Libro no la declara).","flags":["dudoso"],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":20,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PLA-2","sectionId":"plano-inclinado","order":2,"name":"Barandas","componentId":"caballetes","componentIdBasis":"inferido","primary":"Baranda colocada en tintero soldado sujeto con perno y seguro","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar estado de soldadura de tintero y colocación de perno y seguro","flags":[],"zone":"medio","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":20,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PIL-1","sectionId":"piletas","order":1,"name":"Luminarias","componentId":"circulacion","componentIdBasis":"inferido","primary":"Soporte abulonado en base soldado. Fijación de palmeras rebatibles con perno pasante y seguro bulones. Artefactos anclados con grampa cepo, abulonadas con tuercas auto frenaste y eslingas de seguridad doble","secondary":"Eslingas de Seguridad 3 mm","secondaryRequired":true,"quantity":"Eslinga de seguridad 3 mm","observation":"Verificar estado soldadura de soporte de fijación de mástil luminaria. Verificar visualmente que los elementos estén correctamente colocados, ya sea tuerca auto frenante o tuerca común con chaveta y condición de eslingas de seguridad.","flags":[],"zone":"bajo","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":21,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PIL-2","sectionId":"piletas","order":2,"name":"Barandas y rodapié","componentId":"circulacion","componentIdBasis":"inferido","primary":"Baranda colocada en tintero soldado sujeto a en perno y seguro","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar estado de soldadura de tintero y colocación de perno y seguro","flags":[],"zone":"bajo","basis":{"status":"procedure","sourceId":"libro-drops-2024","page":21,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PT-1","sectionId":"piso-trabajo","order":1,"name":"Escaleras y plataformas de tránsito/trabajo","componentId":"subestructura","componentIdBasis":"inferido","primary":"Escalera con perno y seguro. Barandas colocadas en tinteros soldado sujeto con perno y seguro en cada baranda.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar colocación de perno y seguros en escalera.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":22,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PT-2","sectionId":"piso-trabajo","order":2,"name":"Pernos de fijación a piso de trabajo","componentId":"subestructura","componentIdBasis":"inferido","primary":"Bujes de escalera colocados en cuna de piso de trabajo, con pernos y seguros.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar correcta colocación de bujes en cuna de apoyo y que se encuentren colocados los pernos y seguros de fijación.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":22,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PT-3","sectionId":"piso-trabajo","order":3,"name":"Barandas y rodapié","componentId":"subestructura","componentIdBasis":"inferido","primary":"Baranda colocada en tintero soldado a estructura de piso, con pernos pasantes y seguro de fijación.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar colocación de pernos pasantes y seguros de fijación.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":23,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PT-4","sectionId":"piso-trabajo","order":4,"name":"Baranda de plano inclinado","componentId":"subestructura","componentIdBasis":"inferido","primary":"Baranda colocada en tintero soldado a estructura de piso, con pernos pasantes y seguro de fijación.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar colocación de pernos pasantes y seguros de fijación.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":23,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PT-5","sectionId":"piso-trabajo","order":5,"name":"Patas de apoyo de piso de trabajo","componentId":"subestructura","componentIdBasis":"inferido","primary":"Patas de apoyo de piso con pernos pasantes y seguro de fijación.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar colocación de pernos pasantes y seguros de fijación.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":23,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PT-6","sectionId":"piso-trabajo","order":6,"name":"Pasadores de sujeción de aleros","componentId":"subestructura","componentIdBasis":"inferido","primary":"Pasadores de sujeción de aleros rebatibles de piso de trabajo con pernos y seguros de fijación.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar colocación de pernos pasantes y seguros de fijación en pasadores.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":24,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PRL-1","sectionId":"poste-llave","order":1,"name":"Grampa superior de sujeción.","componentId":"llave","componentIdBasis":"inferido","primary":"Grampa con 8 por bulones y tuercas autofrenantes.","secondary":"No requerida","secondaryRequired":false,"quantity":"8 bulones (el texto dice «8 por bulones»)","observation":"Verificar visualmente que los elementos estén correctamente colocados, (tuerca auto frenante).","flags":["texto-ambiguo"],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":24,"note":null},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PRL-2","sectionId":"poste-llave","order":2,"name":"Grampa Inferior de sujeción.","componentId":"llave","componentIdBasis":"inferido","primary":"Grampa con 8 por bulones y tuercas autofrenantes.","secondary":"No requerida","secondaryRequired":false,"quantity":"8 bulones (el texto dice «8 por bulones»)","observation":"Verificar visualmente que los elementos estén correctamente colocados, (tuerca auto frenante)","flags":["texto-ambiguo"],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":25,"note":"La pág. 25 lleva otro encabezado: «REGISTRO DE CAÍDAS ELEMENTOS EN ALTURA (DROPS)», Rev.01, 18/09/23 (págs. 1-24: Rev.03, 04/01/24)."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}},{"id":"PRL-3","sectionId":"poste-llave","order":3,"name":"Sujeción de brazo de llave a poste de retenida.","componentId":"llave","componentIdBasis":"inferido","primary":"Perno pasante con cadena soldada y seguro. Eslinga con grillete 4 elementos.","secondary":"No requerida","secondaryRequired":false,"quantity":null,"observation":"Verificar que se encuentre colocado el seguro en perno pasante y grillete cuete los 4 elementos.","flags":[],"zone":null,"basis":{"status":"procedure","sourceId":"libro-drops-2024","page":25,"note":"La pág. 25 lleva otro encabezado: «REGISTRO DE CAÍDAS ELEMENTOS EN ALTURA (DROPS)», Rev.01, 18/09/23 (págs. 1-24: Rev.03, 04/01/24)."},"tk10":{"status":"sin-dato","photos":[],"note":"Sin foto asociada en el TK10 (05/10/2023); el TK10 no rotula ubicaciones.","inferred":true}}],"tk10Inspection":{"date":"2023-10-05","sourceId":"tk10-drops-2023","total":36,"correct":26,"findings":[{"photo":4,"summary":"Pasteca/polea sin bolsillo que evite la caída de la polea si se corta el eje (TK10: «INCORRECTO SEGUN REQUERIMIENTO LAS PASTECAS DEBEN DISPONER DE UN BOLSILLO QUE EVITE LA CAIDA DE LA POLEA CASO SE CORTE EL EJE DE LA MISMA»).","relatedPointIds":["COR-1","COR-2","COR-3","COR-4","COR-5"],"inferred":true},{"photo":8,"summary":"Polea sin bolsillo antichaída (TK10: «IDEM OBSERVACIÓN ANTERIOR DE POLEA. FALTANTE DE BOLSILLO. INCORRECTO SEGUN REQUERIMIENTO DE PROCEDIMEINTO DE INSPECCIÓN DE EQUIPOS.»).","relatedPointIds":["DCO-9"],"inferred":true},{"photo":19,"summary":"Plancha metálica con bisagra sin retención secundaria (TK10: «INCORRECTO. SE DEBE COLOCAR RETENCION SECUNDARIA AL ELEMENTO.»).","relatedPointIds":["PE-4","PE-5"],"inferred":true},{"photo":21,"summary":"Polea sin bolsillo (TK10: «IDEM OBSERVACIONES ANTERIORES DE POLEAS.»).","relatedPointIds":["PE-12","DPE-5"],"inferred":true},{"photo":22,"summary":"Deslizador de pirosalva con faltante de un tornillo (TK10: «INCORRECTO. SE DEBE COMPLETAR ELEMENTO FALTANTE EN DESLIZADOR DE PIROSALVA»).","relatedPointIds":["PE-3"],"inferred":true},{"photo":30,"summary":"Reflector led con tornillos sueltos y faltantes (TK10: «INCORRECTO. COLOCAR BULONES FALTANTES»).","relatedPointIds":["DCO-2","DPE-2","SUB-4"],"inferred":true},{"photo":32,"summary":"Grampas cepo sin retención: se debe asegurar que el tornillo de la grampa no se salga (TK10, sin la palabra «INCORRECTO»).","relatedPointIds":["DPE-7","DPE-8","CAS-1"],"inferred":true},{"photo":33,"summary":"Grampas cepo sin retención (TK10: descripción de la foto, sin campo de resultado propio).","relatedPointIds":["DPE-7","DPE-8","CAS-1"],"inferred":true},{"photo":34,"summary":"Eslinga de retención secundaria colocada de manera errónea (TK10: descripción de la foto, sin resultado propio).","relatedPointIds":["DPE-8","CAS-1"],"inferred":true},{"photo":35,"summary":"Manguera hidráulica sin retención secundaria colocada (TK10: «ESLINGAS DE RETENCION DEBEN TENER UN EXTREMO COLOCADO EN UN PUNTO FIJO.»; ese texto está en la posición de la fila 35, su aplicación a la 34 es dudosa).","relatedPointIds":["DPE-8","CAS-1"],"inferred":true}]},"references":[{"id":"ref-ypf-giratorio-winche","title":"Advertencia de Seguridad YPF: caída de giratorio (destorcedor) de winche (SIGEO INC18068)","date":"2024-10-07","summary":"Al montar la cuña hidráulica, previo a la sacada de tubería, se desprende el seguro del dispositivo giratorio (destorcedor) del cable del winche y este cae «desde una altura de 5,3 mts»; un operario en zona de boca de pozo recibe un golpe con la eslinga vinculada, en la parte posterior del casco. La alerta no declara la causa y dice no ser conclusión excluyente sobre las causas. Es un equipo de perforación de otra empresa: se cita como referencia del punto guinche/giratorio (BP-1, cuyo texto en el Libro incluye «y giratorio»), no como dato del Tacker 10. El giratorio del winche no es el power swivel (BP-2).","relatedPointIds":["BP-1"],"sourceId":"alerta-ypf-inc18068"},{"id":"ref-powsg020-bolsillo-roldanas","title":"PO-WSG-020 6.3.4 (ítem 2): roldanas con protección por corte del eje (bolsillo contenedor)","date":"2022-07-11","summary":"El procedimiento dice: «Verificar que las roldanas posean un sistema de protección por corte del eje (Bolsillo contenedor) y eslinga de seguridad a las colgadas en los perfiles.» Los ítems de poleas del Libro (RCCO Rev.03) no listan ese bolsillo; los hallazgos TK10 de las fotos 4, 8 y 21 (poleas sin bolsillo) lo invocan. Vinculación con los puntos de poleas por similitud de nombre (tentativa).","relatedPointIds":["COR-1","COR-2","COR-3","COR-4","COR-5","DCO-9","PE-12","DPE-5"],"sourceId":"powsg020-rev02"},{"id":"ref-powsg020-a1-checklist","title":"PO-WSG-020-A1 Check List de Caídas de Objetos (14 ítems, Si/No)","date":"2022-07-11","summary":"Check list previo a cada montaje y desmontaje (PO-WSG-020 p.3, rev.02, 11/07/22): baliza, aparejo, pistón principal, peines, grilletes y eslingas del piso de enganche, pirosalva, guinche, corona, elevadores, luminarias, stand pipe y manguerote, power swivel, poleas y eslingas sobre la corona. Vinculación por similitud de nombre (tentativa); el A1 no cita ids de punto.","relatedPointIds":["COR-1","COR-2","COR-3","COR-4","COR-5","COR-7","DCO-1","DCO-2","DPE-1","DPE-2","DPE-7","DPE-8","PE-3","PE-5","PE-6","BP-1","BP-2","BP-3","SUB-1"],"sourceId":"powsg020-a1"},{"id":"ref-manual-drops-rev04","title":"Manual DROPS Retención Confiable, Rev.04 (guía genérica de la industria)","date":"2017-09","summary":"Guía de consenso del grupo de trabajo DROPS (recomendaciones, no requisitos legales; lenguaje orientado a offshore). Buena práctica: no se promueve a requisito ni se asocia a puntos del Tacker 10.","relatedPointIds":[],"sourceId":"manual-drops-rev04"},{"id":"ref-taller-ypf-aseguramiento","title":"Taller de Aseguramiento de elementos en altura (DROPS), YPF Regional Oeste","date":"2024-10-13","summary":"Diapositivas de YPF sobre uniones atornilladas confiables y no confiables (fecha tomada de los metadatos del archivo; el taller no fecha sus diapositivas). Buena práctica genérica, no requisito de Tacker. Punto abierto: el taller califica la tuerca autoblocante con inserto de nailon como no confiable para conexiones críticas, mientras el Libro usa «tuerca auto frenante» como sujeción primaria; el Libro no especifica el tipo de tuerca.","relatedPointIds":[],"sourceId":"taller-ypf-drops"}]};
+/* datos de la capa CAD (src/data/cad/capa-cad.json) */
+window.__TACKER_CAD={"version":1,"unidades":"m","marco":"V2: +X hacia el mástil, Z lateral, Y arriba","confianza":"C","aviso":"Referencia dimensional verificada contra technical-spec.js y LAYOUT TKR-10. No es as-built ni apta para fabricación.","items":[{"id":"carrier_huella","nombre":"Carrier SK-575 (huella 18 × 4 m)","ancla":"mundo","color":"#e0504f","fuente":"folleto + LAYOUT TKR-10 (1,3 m a la boca)","estado":"REF_OEM","tris":[{"p":[-19.3,0,2.5,-19.3,0.05,2.5,-1.3,0.05,2.5,-1.3,0,2.5,-1.3,0,2.5,-1.3,0.05,2.5,-1.3,0.05,-1.5,-1.3,0,-1.5,-1.3,0,-1.5,-1.3,0.05,-1.5,-19.3,0.05,-1.5,-19.3,0,-1.5,-19.3,0,-1.5,-19.3,0.05,-1.5,-19.3,0.05,2.5,-19.3,0,2.5,-19.3,0,2.5,-1.3,0,2.5,-1.3,0,-1.5,-19.3,0,-1.5,-19.3,0.05,2.5,-1.3,0.05,2.5,-1.3,0.05,-1.5,-19.3,0.05,-1.5],"i":[3,1,0,3,2,1,7,5,4,7,6,5,11,9,8,11,10,9,15,13,12,15,14,13,18,17,16,18,16,19,22,20,21,22,23,20]}]},{"id":"layout_tkr10","nombre":"Layout TKR-10 (acumulador, bomba, pileta, planchada)","ancla":"mundo","color":"#9aa1a8","fuente":"LAYOUT TKR-10: tamaños y 5 m / 3 m / 1,3 m rotulados; posiciones medidas del vector (C)","estado":"REF_OEM","tris":[{"p":[-21.206,0,5.394,-21.206,0.05,5.394,-13.202,0.05,5.394,-13.202,0,5.394,-13.202,0,5.394,-13.202,0.05,5.394,-13.202,0.05,3.005,-13.202,0,3.005,-13.202,0,3.005,-13.202,0.05,3.005,-21.206,0.05,3.005,-21.206,0,3.005,-21.206,0,3.005,-21.206,0.05,3.005,-21.206,0.05,5.394,-21.206,0,5.394,-21.206,0,5.394,-13.202,0,5.394,-13.202,0,3.005,-21.206,0,3.005,-21.206,0.05,5.394,-13.202,0.05,5.394,-13.202,0.05,3.005,-21.206,0.05,3.005],"i":[2,1,0,3,2,0,7,5,4,7,6,5,10,9,8,11,10,8,15,13,12,15,14,13,18,17,16,18,16,19,22,20,21,22,23,20],"color":"#3e7896","nombre":"acumulador"},{"p":[-19.316,0,-13.503,-19.316,0.05,-13.503,-13.306,0.05,-13.503,-13.306,0,-13.503,-13.306,0,-13.503,-13.306,0.05,-13.503,-13.306,0.05,-15.905,-13.306,0,-15.905,-13.306,0,-15.905,-13.306,0.05,-15.905,-19.316,0.05,-15.905,-19.316,0,-15.905,-19.316,0,-15.905,-19.316,0.05,-15.905,-19.316,0.05,-13.503,-19.316,0,-13.503,-19.316,0,-13.503,-13.306,0,-13.503,-13.306,0,-15.905,-19.316,0,-15.905,-19.316,0.05,-13.503,-13.306,0.05,-13.503,-13.306,0.05,-15.905,-19.316,0.05,-15.905],"i":[2,1,0,3,2,0,7,5,4,7,6,5,10,9,8,11,10,8,15,13,12,15,14,13,18,17,16,18,16,19,22,20,21,22,23,20],"color":"#d36b6b","nombre":"bomba"},{"p":[-8.306,0,-13.503,-8.306,0.05,-13.503,3.701,0.05,-13.503,3.701,0,-13.503,3.701,0,-13.503,3.701,0.05,-13.503,3.701,0.05,-15.905,3.701,0,-15.905,3.701,0,-15.905,3.701,0.05,-15.905,-8.306,0.05,-15.905,-8.306,0,-15.905,-8.306,0,-15.905,-8.306,0.05,-15.905,-8.306,0.05,-13.503,-8.306,0,-13.503,-8.306,0,-13.503,3.701,0,-13.503,3.701,0,-15.905,-8.306,0,-15.905,-8.306,0.05,-13.503,3.701,0.05,-13.503,3.701,0.05,-15.905,-8.306,0.05,-15.905],"i":[3,1,0,3,2,1,7,5,4,7,6,5,11,9,8,11,10,9,15,13,12,15,14,13,18,17,16,18,16,19,22,20,21,22,23,20],"color":"#9aa1a8","nombre":"pileta"},{"p":[2.831,0,1.172,2.831,0.05,1.172,14.826,0.05,1.172,14.826,0,1.172,14.826,0,1.172,14.826,0.05,1.172,14.826,0.05,-1.23,14.826,0,-1.23,14.826,0,-1.23,14.826,0.05,-1.23,2.831,0.05,-1.23,2.831,0,-1.23,2.831,0,-1.23,2.831,0.05,-1.23,2.831,0.05,1.172,2.831,0,1.172,2.831,0,1.172,14.826,0,1.172,14.826,0,-1.23,2.831,0,-1.23,2.831,0.05,1.172,14.826,0.05,1.172,14.826,0.05,-1.23,2.831,0.05,-1.23],"i":[2,1,0,3,2,0,7,5,4,7,6,5,11,9,8,11,10,9,15,13,12,15,14,13,18,17,16,18,16,19,22,20,21,22,23,20],"color":"#f2b632","nombre":"planchada"}]},{"id":"piso_trabajo","nombre":"Piso de trabajo (2,6 × 3,3 m a 3.0 m)","ancla":"mundo","color":"#f2b632","fuente":"folleto (tamaño y altura); posición medida del layout (C). Conflicto: el V2 lo dibuja a 2,30 m","estado":"REF_OEM","tris":[{"p":[0.649,2.9,3.599,0.649,3,3.599,3.249,3,3.599,3.249,2.9,3.599,3.249,2.9,3.599,3.249,3,3.599,3.249,3,0.299,3.249,2.9,0.299,3.249,2.9,0.299,3.249,3,0.299,0.649,3,0.299,0.649,2.9,0.299,0.649,2.9,0.299,0.649,3,0.299,0.649,3,3.599,0.649,2.9,3.599,0.649,2.9,3.599,3.249,2.9,3.599,3.249,2.9,0.299,0.649,2.9,0.299,0.649,3,3.599,3.249,3,3.599,3.249,3,0.299,0.649,3,0.299],"i":[3,1,0,3,2,1,7,5,4,7,6,5,11,9,8,11,10,9,15,13,12,15,14,13,18,17,16,18,16,19,22,20,21,22,23,20]}]},{"id":"mastil","nombre":"Mástil SK104-330 (celosía ILUSTRATIVA, 31,6992 m)","ancla":"mastil","color":"#c8c2ae","fuente":"altura y tramos: folleto; ancho, paneles y diámetros: ILUSTRATIVOS (PENDIENTE)","estado":"ILUSTRATIVO","lineas":[{"color":"#c8c2ae","p":[0.8,0,-0.8,0.781,2.05,-0.781,-0.8,0,-0.8,-0.781,2.05,-0.781,-0.8,0,0.8,-0.781,2.05,0.781,0.8,0,0.8,0.781,2.05,0.781,0.781,2.05,-0.781,0.761,4.1,-0.761,-0.781,2.05,-0.781,-0.761,4.1,-0.761,-0.781,2.05,0.781,-0.761,4.1,0.761,0.781,2.05,0.781,0.761,4.1,0.761,0.761,4.1,-0.761,0.742,6.15,-0.742,-0.761,4.1,-0.761,-0.742,6.15,-0.742,-0.761,4.1,0.761,-0.742,6.15,0.742,0.761,4.1,0.761,0.742,6.15,0.742,0.742,6.15,-0.742,0.722,8.2,-0.722,-0.742,6.15,-0.742,-0.722,8.2,-0.722,-0.742,6.15,0.742,-0.722,8.2,0.722,0.742,6.15,0.742,0.722,8.2,0.722,0.722,8.2,-0.722,0.703,10.25,-0.703,-0.722,8.2,-0.722,-0.703,10.25,-0.703,-0.722,8.2,0.722,-0.703,10.25,0.703,0.722,8.2,0.722,0.703,10.25,0.703,0.703,10.25,-0.703,0.684,12.3,-0.684,-0.703,10.25,-0.703,-0.684,12.3,-0.684,-0.703,10.25,0.703,-0.684,12.3,0.684,0.703,10.25,0.703,0.684,12.3,0.684,0.684,12.3,-0.684,0.664,14.35,-0.664,-0.684,12.3,-0.684,-0.664,14.35,-0.664,-0.684,12.3,0.684,-0.664,14.35,0.664,0.684,12.3,0.684,0.664,14.35,0.664,0.664,14.35,-0.664,0.645,16.4,-0.645,-0.664,14.35,-0.664,-0.645,16.4,-0.645,-0.664,14.35,0.664,-0.645,16.4,0.645,0.664,14.35,0.664,0.645,16.4,0.645,0.645,16.4,-0.645,0.627,18.312,-0.627,-0.645,16.4,-0.645,-0.627,18.312,-0.627,-0.645,16.4,0.645,-0.627,18.312,0.627,0.645,16.4,0.645,0.627,18.312,0.627,0.627,18.312,-0.627,0.609,20.225,-0.609,-0.627,18.312,-0.627,-0.609,20.225,-0.609,-0.627,18.312,0.627,-0.609,20.225,0.609,0.627,18.312,0.627,0.609,20.225,0.609,0.609,20.225,-0.609,0.59,22.137,-0.59,-0.609,20.225,-0.609,-0.59,22.137,-0.59,-0.609,20.225,0.609,-0.59,22.137,0.59,0.609,20.225,0.609,0.59,22.137,0.59,0.59,22.137,-0.59,0.572,24.05,-0.572,-0.59,22.137,-0.59,-0.572,24.05,-0.572,-0.59,22.137,0.59,-0.572,24.05,0.572,0.59,22.137,0.59,0.572,24.05,0.572,0.572,24.05,-0.572,0.554,25.962,-0.554,-0.572,24.05,-0.572,-0.554,25.962,-0.554,-0.572,24.05,0.572,-0.554,25.962,0.554,0.572,24.05,0.572,0.554,25.962,0.554,0.554,25.962,-0.554,0.536,27.874,-0.536,-0.554,25.962,-0.554,-0.536,27.874,-0.536,-0.554,25.962,0.554,-0.536,27.874,0.536,0.554,25.962,0.554,0.536,27.874,0.536,0.536,27.874,-0.536,0.518,29.787,-0.518,-0.536,27.874,-0.536,-0.518,29.787,-0.518,-0.536,27.874,0.536,-0.518,29.787,0.518,0.536,27.874,0.536,0.518,29.787,0.518,0.518,29.787,-0.518,0.5,31.699,-0.5,-0.518,29.787,-0.518,-0.5,31.699,-0.5,-0.518,29.787,0.518,-0.5,31.699,0.5,0.518,29.787,0.518,0.5,31.699,0.5]},{"color":"#dad6c6","p":[0.8,0,-0.8,-0.8,0,-0.8,-0.8,0,-0.8,-0.8,0,0.8,-0.8,0,0.8,0.8,0,0.8,0.781,2.05,-0.781,-0.781,2.05,-0.781,-0.781,2.05,-0.781,-0.781,2.05,0.781,-0.781,2.05,0.781,0.781,2.05,0.781,0.761,4.1,-0.761,-0.761,4.1,-0.761,-0.761,4.1,-0.761,-0.761,4.1,0.761,-0.761,4.1,0.761,0.761,4.1,0.761,0.742,6.15,-0.742,-0.742,6.15,-0.742,-0.742,6.15,-0.742,-0.742,6.15,0.742,-0.742,6.15,0.742,0.742,6.15,0.742,0.722,8.2,-0.722,-0.722,8.2,-0.722,-0.722,8.2,-0.722,-0.722,8.2,0.722,-0.722,8.2,0.722,0.722,8.2,0.722,0.703,10.25,-0.703,-0.703,10.25,-0.703,-0.703,10.25,-0.703,-0.703,10.25,0.703,-0.703,10.25,0.703,0.703,10.25,0.703,0.684,12.3,-0.684,-0.684,12.3,-0.684,-0.684,12.3,-0.684,-0.684,12.3,0.684,-0.684,12.3,0.684,0.684,12.3,0.684,0.664,14.35,-0.664,-0.664,14.35,-0.664,-0.664,14.35,-0.664,-0.664,14.35,0.664,-0.664,14.35,0.664,0.664,14.35,0.664,0.645,16.4,-0.645,-0.645,16.4,-0.645,-0.645,16.4,-0.645,-0.645,16.4,0.645,-0.645,16.4,0.645,0.645,16.4,0.645,0.627,18.312,-0.627,-0.627,18.312,-0.627,-0.627,18.312,-0.627,-0.627,18.312,0.627,-0.627,18.312,0.627,0.627,18.312,0.627,0.609,20.225,-0.609,-0.609,20.225,-0.609,-0.609,20.225,-0.609,-0.609,20.225,0.609,-0.609,20.225,0.609,0.609,20.225,0.609,0.59,22.137,-0.59,-0.59,22.137,-0.59,-0.59,22.137,-0.59,-0.59,22.137,0.59,-0.59,22.137,0.59,0.59,22.137,0.59,0.572,24.05,-0.572,-0.572,24.05,-0.572,-0.572,24.05,-0.572,-0.572,24.05,0.572,-0.572,24.05,0.572,0.572,24.05,0.572,0.554,25.962,-0.554,-0.554,25.962,-0.554,-0.554,25.962,-0.554,-0.554,25.962,0.554,-0.554,25.962,0.554,0.554,25.962,0.554,0.536,27.874,-0.536,-0.536,27.874,-0.536,-0.536,27.874,-0.536,-0.536,27.874,0.536,-0.536,27.874,0.536,0.536,27.874,0.536,0.518,29.787,-0.518,-0.518,29.787,-0.518,-0.518,29.787,-0.518,-0.518,29.787,0.518,-0.518,29.787,0.518,0.518,29.787,0.518,0.5,31.699,-0.5,-0.5,31.699,-0.5,-0.5,31.699,-0.5,-0.5,31.699,0.5,-0.5,31.699,0.5,0.5,31.699,0.5]},{"color":"#e0504f","p":[-0.8,0,-0.8,0.781,2.05,-0.781,-0.8,0,-0.8,-0.781,2.05,0.781,0.8,0,0.8,-0.781,2.05,0.781,0.781,2.05,-0.781,-0.761,4.1,-0.761,-0.781,2.05,0.781,-0.761,4.1,-0.761,-0.781,2.05,0.781,0.761,4.1,0.761,-0.761,4.1,-0.761,0.742,6.15,-0.742,-0.761,4.1,-0.761,-0.742,6.15,0.742,0.761,4.1,0.761,-0.742,6.15,0.742,0.742,6.15,-0.742,-0.722,8.2,-0.722,-0.742,6.15,0.742,-0.722,8.2,-0.722,-0.742,6.15,0.742,0.722,8.2,0.722,-0.722,8.2,-0.722,0.703,10.25,-0.703,-0.722,8.2,-0.722,-0.703,10.25,0.703,0.722,8.2,0.722,-0.703,10.25,0.703,0.703,10.25,-0.703,-0.684,12.3,-0.684,-0.703,10.25,0.703,-0.684,12.3,-0.684,-0.703,10.25,0.703,0.684,12.3,0.684,-0.684,12.3,-0.684,0.664,14.35,-0.664,-0.684,12.3,-0.684,-0.664,14.35,0.664,0.684,12.3,0.684,-0.664,14.35,0.664,0.664,14.35,-0.664,-0.645,16.4,-0.645,-0.664,14.35,0.664,-0.645,16.4,-0.645,-0.664,14.35,0.664,0.645,16.4,0.645,-0.645,16.4,-0.645,0.627,18.312,-0.627,-0.645,16.4,-0.645,-0.627,18.312,0.627,0.645,16.4,0.645,-0.627,18.312,0.627,0.627,18.312,-0.627,-0.609,20.225,-0.609,-0.627,18.312,0.627,-0.609,20.225,-0.609,-0.627,18.312,0.627,0.609,20.225,0.609,-0.609,20.225,-0.609,0.59,22.137,-0.59,-0.609,20.225,-0.609,-0.59,22.137,0.59,0.609,20.225,0.609,-0.59,22.137,0.59,0.59,22.137,-0.59,-0.572,24.05,-0.572,-0.59,22.137,0.59,-0.572,24.05,-0.572,-0.59,22.137,0.59,0.572,24.05,0.572,-0.572,24.05,-0.572,0.554,25.962,-0.554,-0.572,24.05,-0.572,-0.554,25.962,0.554,0.572,24.05,0.572,-0.554,25.962,0.554,0.554,25.962,-0.554,-0.536,27.874,-0.536,-0.554,25.962,0.554,-0.536,27.874,-0.536,-0.554,25.962,0.554,0.536,27.874,0.536,-0.536,27.874,-0.536,0.518,29.787,-0.518,-0.536,27.874,-0.536,-0.518,29.787,0.518,0.536,27.874,0.536,-0.518,29.787,0.518,0.518,29.787,-0.518,-0.5,31.699,-0.5,-0.518,29.787,0.518,-0.5,31.699,-0.5,-0.518,29.787,0.518,0.5,31.699,0.5]}]}]};
 /* 10-layers.js */
 /*
  * 10-layers.js — API programática de las capas del visor V2: `window.__tackerLayers`.
@@ -2944,6 +2946,9 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
 
   const PI = Math.PI
 
+  /** Desplazamiento del acumulador (m en X) para ubicarlo como en el LAYOUT TKR-10 (cad/components/layout_tkr10.py). */
+  const DX_ACUM = -3.2
+
   // ═════════════════════════════════════════ BOP + CHOKE MANIFOLD + ACUMULADOR ═════════════════════════════════════════
   /** Anillo de `n` bulones (cilindros cortos, pocos segmentos) alrededor de un eje 'x' | 'y' | 'z' centrado en (cx,cy,cz). */
   function boltRing(b, c, cx, cy, cz, axis, R, n, len, r = 0.015, seg = 5) {
@@ -3215,7 +3220,7 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
 
     // líneas hidráulicas de control desde el acumulador (cuatro: bonetes izq/der y anular)
     const trunk = [
-      [-10.4, 0.9, 3.75],
+      [-10.4 + DX_ACUM, 0.9, 3.75],
       [-8, 0.25, 3.3],
       [-3.5, 0.15, 2.6],
       [-1.6, 0.15, 2.3],
@@ -3282,6 +3287,7 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     const ga = new K.Group()
     ga.name = 'acumulador_5_botellas'
     g.add(ga)
+    ga.position.x = DX_ACUM // LAYOUT TKR-10: x −21,2…−13,2 (medido del vector del PDF); el modelo estaba en −18…−10. Lateral z 4,2 coincide
     const AP = new Batch()
     const AM = new Batch()
     const zc = 4.2
@@ -4203,6 +4209,7 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     const M = new Batch() // circulacion_acero: bomba y cañerías al pozo
     const H = new Batch() // circulacion_mangueras
     const zc = -14.7 // eje longitudinal de pileta y bomba (lateral del layout ≈ 14,4 m)
+    const DX_BOMBA = -3.0 // m: bomba a 5 m de la pileta (cota rotulada en LAYOUT TKR-10); la pileta (x −8…4) no se mueve
     const BLACK = '#1B1D21' // patín de vigas y rodillos (foto de campo: patín negro)
     const WHITE_R = '#D3D6D0' // chapa lisa entre nervaduras (las nervaduras van en C.WHITE)
     const SUB = '#8E1F25' // rojo oscuro: bandas de soldadura y uniones
@@ -4539,49 +4546,60 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     flange(GB, C.STEEL, C.DARK, gx + 0.82, 0.55, gz, 'x', 0.09)
     GB.flush(gG, m.paint, 'golpeador_pintura')
 
-    // ── bomba triplex 6×2,4 m (camisas 5", carrera 8", 3.000 psi, 12 bpm) en x −16…−10
-    P.box(C.SKID, 6, 0.22, 2.4, -13, 0.11, zc) // patín
-    for (const dz of [-1.1, 1.1]) P.box(C.GRAY, 6, 0.1, 0.12, -13, 0.27, zc + dz)
-    // motor diésel Detroit S60 (rojo) con radiador frontal, tapa de válvulas y escape
-    P.box(C.RED, 2.0, 1.25, 1.3, -14.9, 0.845, zc)
-    P.box(C.DARK, 0.08, 1.0, 1.15, -15.94, 0.85, zc) // radiador
-    for (let k = -2; k <= 2; k++) M.box(C.GRAY_L, 0.03, 0.9, 0.03, -15.99, 0.85, zc + k * 0.22) // aletas
-    P.box(C.POWER, 1.5, 0.16, 0.9, -14.8, 1.55, zc) // tapa de válvulas
-    M.rod(C.STEEL, [-15.6, 1.62, zc + 0.3], [-15.6, 2.7, zc + 0.3], 0.06, 8)
-    M.cyl(C.DARK, 0.13, 0.13, 0.55, -15.6, 2.1, zc + 0.3, 'y', 10) // silenciador
-    M.cyl(C.STEEL, 0.1, 0.1, 0.06, -15.6, 2.75, zc + 0.3, 'y', 10)
-    P.box(C.GRAY, 1.0, 0.95, 0.95, -13.4, 0.695, zc) // caja Allison
-    P.box(C.YEL, 0.7, 0.26, 0.5, -12.6, 0.45, zc) // protector de cardán
-    M.cyl(C.STEEL, 0.06, 0.06, 0.6, -12.6, 0.7, zc, 'x', 8) // cardán
-    // bastidor de fuerza con tapas de cruceta, tornillería y ojal de izaje
-    P.box(C.POWER, 1.3, 1.1, 1.5, -11.9, 0.77, zc)
-    for (const dz of [-0.42, 0, 0.42]) {
-      M.cyl(C.GRAY_L, 0.2, 0.2, 0.1, -11.22, 0.77, zc + dz, 'x', 14) // tapa de cruceta
-      M.cyl(C.GRAY_L, 0.05, 0.05, 0.4, -11.4, 0.7, zc + dz, 'x', 8) // émbolo
+    // ── bomba triplex 6×2,4 m (camisas 5", carrera 8", 3.000 psi, 12 bpm). Se modela en x −16…−10 y su grupo se desplaza DX_BOMBA:
+    //    el LAYOUT TKR-10 rotula 5 m entre la bomba y la pileta (cota confirmada) y el modelo dejaba 2 m (ver docs/audit-dimensional-*.md).
+    const bombaG = new K.Group()
+    bombaG.name = 'bomba_triplex'
+    bombaG.position.x = DX_BOMBA
+    g.add(bombaG)
+    {
+      const P = new Batch() // bomba: pintura (sombrea el P del sistema solo dentro de este bloque)
+      const M = new Batch() // bomba: acero
+      P.box(C.SKID, 6, 0.22, 2.4, -13, 0.11, zc) // patín
+      for (const dz of [-1.1, 1.1]) P.box(C.GRAY, 6, 0.1, 0.12, -13, 0.27, zc + dz)
+      // motor diésel Detroit S60 (rojo) con radiador frontal, tapa de válvulas y escape
+      P.box(C.RED, 2.0, 1.25, 1.3, -14.9, 0.845, zc)
+      P.box(C.DARK, 0.08, 1.0, 1.15, -15.94, 0.85, zc) // radiador
+      for (let k = -2; k <= 2; k++) M.box(C.GRAY_L, 0.03, 0.9, 0.03, -15.99, 0.85, zc + k * 0.22) // aletas
+      P.box(C.POWER, 1.5, 0.16, 0.9, -14.8, 1.55, zc) // tapa de válvulas
+      M.rod(C.STEEL, [-15.6, 1.62, zc + 0.3], [-15.6, 2.7, zc + 0.3], 0.06, 8)
+      M.cyl(C.DARK, 0.13, 0.13, 0.55, -15.6, 2.1, zc + 0.3, 'y', 10) // silenciador
+      M.cyl(C.STEEL, 0.1, 0.1, 0.06, -15.6, 2.75, zc + 0.3, 'y', 10)
+      P.box(C.GRAY, 1.0, 0.95, 0.95, -13.4, 0.695, zc) // caja Allison
+      P.box(C.YEL, 0.7, 0.26, 0.5, -12.6, 0.45, zc) // protector de cardán
+      M.cyl(C.STEEL, 0.06, 0.06, 0.6, -12.6, 0.7, zc, 'x', 8) // cardán
+      // bastidor de fuerza con tapas de cruceta, tornillería y ojal de izaje
+      P.box(C.POWER, 1.3, 1.1, 1.5, -11.9, 0.77, zc)
+      for (const dz of [-0.42, 0, 0.42]) {
+        M.cyl(C.GRAY_L, 0.2, 0.2, 0.1, -11.22, 0.77, zc + dz, 'x', 14) // tapa de cruceta
+        M.cyl(C.GRAY_L, 0.05, 0.05, 0.4, -11.4, 0.7, zc + dz, 'x', 8) // émbolo
+      }
+      M.loop(C.STEEL, -11.9, 1.5, zc, 0.09, 'xy', 0, 2 * PI, 0.018, 10) // ojal de izaje
+      // cuerpo de fluido (acero), tapas de válvula y cabezal de descarga
+      M.box(C.STEEL, 0.6, 0.55, 1.3, -10.95, 0.7, zc)
+      for (const dz of [-0.42, 0, 0.42])
+        M.cyl(C.GRAY_L, 0.11, 0.11, 0.25, -10.95, 1.12, zc + dz, 'y', 10)
+      M.rod(C.STEEL, [-10.65, 0.9, zc - 0.5], [-10.65, 0.9, zc + 0.5], 0.06)
+      M.rod(C.STEEL, [-10.95, 0.35, zc - 0.55], [-10.95, 0.35, zc + 0.55], 0.06) // múltiple de succión
+      P.cyl(C.RED, 0.2, 0.2, 0.65, -10.3, 0.55, zc + 0.75, 'y', 14) // amortiguador de pulsaciones
+      P.cyl(C.RED, 0.08, 0.2, 0.14, -10.3, 0.94, zc + 0.75, 'y', 14)
+      M.cyl(C.WHITE, 0.09, 0.09, 0.05, -10.6, 1.28, zc - 0.1, 'x', 12) // manómetro (tipo Cameron)
+      M.cyl(C.RED, 0.05, 0.05, 0.16, -10.65, 1.08, zc + 0.3, 'y', 8) // válvula de seguridad 3.000 psi
+      // barandas amarillas del patín (lado exterior y extremos)
+      P.rail(
+        C.YEL,
+        [
+          [-16, zc - 1.2],
+          [-16, zc - 1.2 + 2.4],
+          [-10.05, zc + 1.2],
+        ],
+        0.22,
+        0.95,
+        false,
+      )
+      P.flush(bombaG, m.paint, 'bomba_pintura')
+      M.flush(bombaG, m.metal, 'bomba_acero')
     }
-    M.loop(C.STEEL, -11.9, 1.5, zc, 0.09, 'xy', 0, 2 * PI, 0.018, 10) // ojal de izaje
-    // cuerpo de fluido (acero), tapas de válvula y cabezal de descarga
-    M.box(C.STEEL, 0.6, 0.55, 1.3, -10.95, 0.7, zc)
-    for (const dz of [-0.42, 0, 0.42])
-      M.cyl(C.GRAY_L, 0.11, 0.11, 0.25, -10.95, 1.12, zc + dz, 'y', 10)
-    M.rod(C.STEEL, [-10.65, 0.9, zc - 0.5], [-10.65, 0.9, zc + 0.5], 0.06)
-    M.rod(C.STEEL, [-10.95, 0.35, zc - 0.55], [-10.95, 0.35, zc + 0.55], 0.06) // múltiple de succión
-    P.cyl(C.RED, 0.2, 0.2, 0.65, -10.3, 0.55, zc + 0.75, 'y', 14) // amortiguador de pulsaciones
-    P.cyl(C.RED, 0.08, 0.2, 0.14, -10.3, 0.94, zc + 0.75, 'y', 14)
-    M.cyl(C.WHITE, 0.09, 0.09, 0.05, -10.6, 1.28, zc - 0.1, 'x', 12) // manómetro (tipo Cameron)
-    M.cyl(C.RED, 0.05, 0.05, 0.16, -10.65, 1.08, zc + 0.3, 'y', 8) // válvula de seguridad 3.000 psi
-    // barandas amarillas del patín (lado exterior y extremos)
-    P.rail(
-      C.YEL,
-      [
-        [-16, zc - 1.2],
-        [-16, zc - 1.2 + 2.4],
-        [-10.05, zc + 1.2],
-      ],
-      0.22,
-      0.95,
-      false,
-    )
 
     // PIL-1 · luminarias (soporte abulonado, palmera rebatible con perno y seguro, artefacto con grampa cepo + eslinga de 3 mm)
     const pil1 = dropsGroup(
@@ -4628,7 +4646,7 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
     if (CHOKE_ROUTING === 'legacy') {
       // A · descarga bomba → manifold de maniobra → línea de matar del BOP
       line([
-        [-10.65, 0.9, zc],
+        [-10.65 + DX_BOMBA, 0.9, zc],
         [-9.2, 0.9, zc],
         [-9.2, 0.5, zc],
         [-9.2, 0.5, -12.9],
@@ -4660,7 +4678,7 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
       // Ruteo con choke manifold (PENDIENTE de validación: lados choke/kill y tendidos, según P&ID / procedimiento de control de pozo).
       // K · bomba → línea de matar (kill) del BOP, lado x=+0,2: rodea por z=−12,9 y sube por x=+0,2 (bajo la línea de choke).
       line([
-        [-10.65, 0.9, zc],
+        [-10.65 + DX_BOMBA, 0.9, zc],
         [-9.2, 0.9, zc],
         [-9.2, 0.5, zc],
         [-9.2, 0.5, -12.9],
@@ -4700,16 +4718,19 @@ window.__TACKER_DROPS={"schemaVersion":1,"meta":{"rigId":"TACKER-10","title":"Pu
         M.box(C.GRAY, 0.28, 0.04, 0.16, outX, 0.69, z)
       }
     }
-    // succión pileta → bomba
+    // succión pileta → múltiple de succión de la bomba (y 0,35, z +0,6: no pisa la descarga)
     line([
       [-8, 0.9, zc],
-      [-9.2, 0.9, zc],
+      [-8.6, 0.9, zc],
+      [-8.6, 0.9, zc + 0.6],
+      [-8.6, 0.35, zc + 0.6],
+      [-10.95 + DX_BOMBA, 0.35, zc + 0.6],
     ])
     // mangueras de servicio (goma)
     H.tube(
       C.HOSE,
       [
-        [-10.3, 0.4, zc - 0.7],
+        [-10.3 + DX_BOMBA, 0.4, zc - 0.7],
         [-9.6, 0.2, zc - 1.6],
         [-8.6, 0.2, zc - 2.4],
       ],
@@ -7826,6 +7847,443 @@ window.__rigExt.onPost(() => {
 
   window.__tackerPresets = { presets: PRESETS, apply }
 })()
+
+/* 76-secuencia-montaje.js */
+/*
+ * 76-secuencia-montaje.js — secuencia de MONTAJE (rig-up) ilustrativa, paso a paso.
+ *
+ * Un control de 8 pasos que va armando el equipo: muestra/oculta componentes del visor usando las casillas del árbol (la misma
+ * técnica que 75-mode-presets.js) y explica qué pasa en cada paso. NO es una simulación ni un procedimiento: es un recorrido
+ * visual y acumulativo.
+ *
+ * FUENTE Y ESTATUS: la lista de pasos es la "secuencia típica de montaje" aportada por el usuario (docs/secuencia-montaje-tipica.md).
+ * NO es el procedimiento de Tacker ni una exigencia de empresa, cliente o norma: estatus `pendingValidation`. La asignación de
+ * componentes a cada paso es una lectura visual orientativa del modelo, no una afirmación de ingeniería. Los pasos 1-3 y 8 son en
+ * buena parte documentales (reunión, verificaciones, pruebas): no tienen geometría propia y el panel lo dice.
+ *
+ * NO se anima el izamiento del mástil (no hay secuencia ni ángulos documentados) ni se inventan tiempos, cargas o distancias.
+ * Antorcha y separador no están modelados: el panel los marca "sin geometría".
+ *
+ * Extras para pruebas: `window.__tackerSeq = { steps, go(n), current() }`.
+ */
+window.__rigExt.onPost(() => {
+  const $ = (id) => document.getElementById(id)
+  const R = window.__rig
+  if (!R || !R.groups) return
+
+  const ALL = Object.keys(R.groups)
+
+  /** `add` = componentes que aparecen EN ese paso (se acumulan). `nota` = lo que el modelo no dibuja. */
+  const STEPS = [
+    {
+      n: 1,
+      titulo: 'Reunión pre-tarea, ATS y asignación de responsabilidades',
+      add: [],
+      geo: false,
+      texto: 'Paso documental: no tiene geometría asociada. La locación se ve sin equipo.',
+    },
+    {
+      n: 2,
+      titulo: 'Verificación de acceso, nivelación, capacidad portante, drenajes y anclajes',
+      add: [],
+      geo: false,
+      texto:
+        'Paso documental: verificaciones de la locación. El modelo no representa capacidad portante ni drenajes; los anclajes de vientos se ven recién al izar el mástil (paso 6).',
+    },
+    {
+      n: 3,
+      titulo: 'Descarga y alineación de componentes (plan de izaje y zonas de riesgo)',
+      add: ['camion'],
+      geo: true,
+      texto:
+        'Llega el portaequipo. El plan de izaje y las zonas de riesgo son del procedimiento; acá solo se ve el camión.',
+    },
+    {
+      n: 4,
+      titulo: 'Posicionamiento y nivelación de la subestructura',
+      add: ['subestructura'],
+      geo: true,
+      texto:
+        'Subestructura y piso de trabajo sobre el portaequipo. La nivelación no se representa.',
+    },
+    {
+      n: 5,
+      titulo: 'Montaje de malacate, motores, transmisión, cabina, BOP y equipos auxiliares',
+      add: ['malacate', 'motor', 'cabina', 'bop', 'llave', 'caballetes'],
+      geo: true,
+      texto:
+        'Se suman malacate, motor y transmisión, cabina, BOP con acumulador y choke manifold, llave y caballetes.',
+    },
+    {
+      n: 6,
+      titulo:
+        'Izamiento del mástil, con control de plomo, contravientos y verificación estructural',
+      add: ['mastil', 'aparejo', 'enganche', 'vientos'],
+      geo: true,
+      texto:
+        'Aparece el mástil con aparejo, piso del enganchador y vientos. El izamiento NO se anima: no hay secuencia ni ángulos documentados. Plomo y verificación estructural no se representan.',
+    },
+    {
+      n: 7,
+      titulo:
+        'Líneas de circulación, choke manifold, separador/golpeador, líneas de retorno, piletas y antorcha',
+      add: ['circulacion'],
+      geo: true,
+      nota: 'Sin geometría: antorcha y separador.',
+      texto:
+        'Bomba triplex, pileta de ensayo con golpeador y cañerías al pozo. El choke manifold ya venía con el BOP.',
+    },
+    {
+      n: 8,
+      titulo:
+        'Pruebas funcionales, prueba de presión cuando corresponda, checklists y liberación para workover',
+      add: [],
+      geo: false,
+      texto: 'Paso documental: pruebas y liberación. El equipo queda completo en el modelo.',
+    },
+  ]
+
+  const visibleAt = (idx) => {
+    const set = new Set()
+    for (let i = 0; i <= idx; i++) STEPS[i].add.forEach((c) => ALL.includes(c) && set.add(c))
+    return set
+  }
+
+  // ───────── UI ─────────
+  const style = document.createElement('style')
+  style.id = 'seq-style'
+  style.textContent = `
+    #rig-seq{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:20;width:min(760px,calc(100vw - 32px));
+      background:rgba(20,27,38,.95);border:1px solid #303B4B;border-radius:12px;color:#DDE3EC;font-size:13px;
+      box-shadow:0 10px 30px rgba(0,0,0,.45)}
+    #rig-seq .sq-head{display:flex;align-items:center;gap:10px;padding:8px 12px}
+    #rig-seq .sq-title{font-weight:600;color:#DDBB65;letter-spacing:.02em}
+    #rig-seq .sq-tag{font-size:11px;opacity:.75}
+    #rig-seq button{font:inherit;color:inherit;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+      border-radius:8px;padding:4px 10px;cursor:pointer}
+    #rig-seq button:hover{background:rgba(255,255,255,.1)}
+    #rig-seq button[aria-pressed="true"]{border-color:#DDBB65;color:#DDBB65}
+    #rig-seq button:focus-visible,#rig-seq input:focus-visible{outline:none;box-shadow:0 0 0 2px #05060A,0 0 0 4px rgba(139,92,246,.7)}
+    #rig-seq .sq-spacer{flex:1}
+    #rig-seq .sq-body{padding:0 12px 10px}
+    #rig-seq.collapsed .sq-body{display:none}
+    #rig-seq input[type=range]{width:100%;margin:4px 0 8px}
+    #rig-seq .sq-steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+    #rig-seq .sq-steps button{min-width:32px;padding:3px 0}
+    #rig-seq .sq-step-title{font-weight:600;margin-bottom:2px}
+    #rig-seq .sq-text{opacity:.9;line-height:1.4}
+    #rig-seq .sq-meta{margin-top:6px;font-size:12px;opacity:.8;line-height:1.4}
+    #rig-seq .sq-warn{margin-top:6px;font-size:11.5px;color:#E0B870}
+    body.opts-hidden #rig-seq{display:none}
+    @media (max-width:700px){#rig-seq{bottom:38px}}
+  `
+  document.head.appendChild(style)
+
+  const panel = document.createElement('section')
+  panel.id = 'rig-seq'
+  panel.setAttribute('aria-label', 'Secuencia de montaje ilustrativa')
+  panel.className = window.innerWidth < 1100 ? 'collapsed' : ''
+  panel.innerHTML = `
+    <div class="sq-head">
+      <span class="sq-title">Secuencia de montaje</span>
+      <span class="sq-tag">ilustrativa · pendiente de validar</span>
+      <span class="sq-spacer"></span>
+      <button type="button" id="sq-prev" aria-label="Paso anterior">‹</button>
+      <button type="button" id="sq-next" aria-label="Paso siguiente">›</button>
+      <button type="button" id="sq-toggle" aria-expanded="${panel_expanded()}" aria-controls="sq-body">Ocultar</button>
+    </div>
+    <div class="sq-body" id="sq-body">
+      <input type="range" id="sq-range" min="0" max="${STEPS.length}" step="1" value="0" aria-label="Paso del montaje (0 = sin secuencia)">
+      <div class="sq-steps" id="sq-steps"></div>
+      <div id="sq-status" aria-live="polite">
+        <div class="sq-step-title">Sin secuencia activa</div>
+        <div class="sq-text">Elegí un paso para ir armando el equipo. El 0 deja todos los componentes visibles.</div>
+      </div>
+    </div>`
+  function panel_expanded() {
+    return window.innerWidth < 1100 ? 'false' : 'true'
+  }
+  document.body.appendChild(panel)
+
+  const stepsBox = $('sq-steps')
+  STEPS.forEach((s) => {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.textContent = String(s.n)
+    b.title = s.titulo
+    b.setAttribute('aria-pressed', 'false')
+    b.addEventListener('click', () => go(s.n))
+    stepsBox.appendChild(b)
+  })
+
+  let current = 0
+
+  function setVisible(only) {
+    for (const id of ALL) {
+      const want = only ? only.has(id) : true
+      const box = document.querySelector('.item[data-id="' + id + '"] input')
+      if (box && box.checked !== want) box.click()
+    }
+  }
+
+  function render() {
+    $('sq-range').value = String(current)
+    Array.from(stepsBox.children).forEach((b, i) =>
+      b.setAttribute('aria-pressed', String(i + 1 === current)),
+    )
+    const status = $('sq-status')
+    if (current === 0) {
+      status.innerHTML =
+        '<div class="sq-step-title">Sin secuencia activa</div><div class="sq-text">Elegí un paso para ir armando el equipo. El 0 deja todos los componentes visibles.</div>'
+      return
+    }
+    const s = STEPS[current - 1]
+    const vis = [...visibleAt(current - 1)]
+    const names = vis.map((id) => (R.COMPONENTS && R.COMPONENTS[id] && R.COMPONENTS[id].name) || id)
+    status.innerHTML =
+      `<div class="sq-step-title">${s.n}/8 · ${s.titulo}</div>` +
+      `<div class="sq-text">${s.texto}</div>` +
+      `<div class="sq-meta">${s.geo ? 'Se suma en este paso: ' + (s.add.join(', ') || '—') : 'Paso documental: sin geometría propia.'}` +
+      `${vis.length ? ' · Visibles: ' + names.length + ' de ' + ALL.length : ' · Sin componentes visibles'}${s.nota ? ' · ' + s.nota : ''}</div>` +
+      '<div class="sq-warn">Secuencia típica aportada por el usuario: no es el procedimiento de Tacker ni un requisito. Recorrido visual, no simulación.</div>'
+    const meta = status.querySelector('.sq-meta')
+    if (meta) meta.title = names.join(' · ')
+  }
+
+  function go(n) {
+    const k = Math.max(0, Math.min(STEPS.length, Number(n) || 0))
+    current = k
+    setVisible(k === 0 ? null : visibleAt(k - 1))
+    render()
+  }
+
+  $('sq-range').addEventListener('input', (e) => go(e.target.value))
+  $('sq-prev').addEventListener('click', () => go(current - 1))
+  $('sq-next').addEventListener('click', () => go(current + 1))
+  $('sq-toggle').addEventListener('click', () => {
+    const collapsed = panel.classList.toggle('collapsed')
+    $('sq-toggle').textContent = collapsed ? 'Mostrar' : 'Ocultar'
+    $('sq-toggle').setAttribute('aria-expanded', String(!collapsed))
+  })
+  $('sq-toggle').textContent = panel.classList.contains('collapsed') ? 'Mostrar' : 'Ocultar'
+
+  // Un cambio de modo aplica su propio preset de componentes: la secuencia deja de mandar.
+  document.addEventListener('tacker:mode', () => {
+    if (current !== 0) {
+      current = 0
+      render()
+    }
+  })
+
+  window.__tackerSeq = { steps: STEPS, go, current: () => current }
+})
+
+/* 77-capa-cad.js */
+/*
+ * 77-capa-cad.js — CAPA CAD (referencia dimensional) sobre el visor V2.
+ *
+ * Dibuja encima del modelo procedural la geometría CAD verificada (cad/ → src/data/cad/capa-cad.json → window.__TACKER_CAD):
+ * huella del carrier, piso de trabajo, huellas del layout TKR-10 y las barras de la celosía del mástil. Sirve para ver dónde el
+ * V2 coincide con las cotas documentadas y dónde no (p. ej. el piso: 3 m en el folleto, 2,30 m en el V2).
+ *
+ * NO reemplaza nada ni es as-built: confianza C, malla semitransparente y aristas. El mástil es ILUSTRATIVO (ancho, paneles y
+ * diámetros sin plano del fabricante) y se ubica sobre el eje del mástil del V2 (`R.mast`), no sobre una posición documentada.
+ *
+ * Botón "Capa CAD" en el menú Capas. API para pruebas: `window.__tackerCad = { on, off, toggle, isOn, items }`.
+ */
+window.__rigExt.onPost((R) => {
+  const D = window.__TACKER_CAD
+  if (!D || !Array.isArray(D.items) || !R.scene || !R.three) return
+  const T = R.three
+  const FloatAttr = new T.BoxGeometry(1, 1, 1).attributes.position.constructor
+  const invalidate = () => {
+    if (typeof R.invalidate === 'function') R.invalidate()
+  }
+
+  const toF32 = (arr) => new Float32Array(arr)
+
+  /** Aristas: bordes de un solo triángulo o con ángulo entre caras > ~25°. Devuelve posiciones de segmentos. */
+  function aristas(pos, idx) {
+    const key = (i, j) => (i < j ? i + '_' + j : j + '_' + i)
+    const normal = (a, b, c) => {
+      const ux = pos[b * 3] - pos[a * 3],
+        uy = pos[b * 3 + 1] - pos[a * 3 + 1],
+        uz = pos[b * 3 + 2] - pos[a * 3 + 2]
+      const vx = pos[c * 3] - pos[a * 3],
+        vy = pos[c * 3 + 1] - pos[a * 3 + 1],
+        vz = pos[c * 3 + 2] - pos[a * 3 + 2]
+      const nx = uy * vz - uz * vy,
+        ny = uz * vx - ux * vz,
+        nz = ux * vy - uy * vx
+      const l = Math.hypot(nx, ny, nz) || 1
+      return [nx / l, ny / l, nz / l]
+    }
+    const edges = new Map()
+    for (let t = 0; t < idx.length; t += 3) {
+      const n = normal(idx[t], idx[t + 1], idx[t + 2])
+      for (let e = 0; e < 3; e++) {
+        const i = idx[t + e],
+          j = idx[t + ((e + 1) % 3)]
+        const k = key(i, j)
+        const cur = edges.get(k)
+        if (cur) cur.n2 = n
+        else edges.set(k, { i, j, n1: n, n2: null })
+      }
+    }
+    const out = []
+    for (const { i, j, n1, n2 } of edges.values()) {
+      const filo = !n2 || n1[0] * n2[0] + n1[1] * n2[1] + n1[2] * n2[2] < 0.9
+      if (!filo) continue
+      out.push(
+        pos[i * 3],
+        pos[i * 3 + 1],
+        pos[i * 3 + 2],
+        pos[j * 3],
+        pos[j * 3 + 1],
+        pos[j * 3 + 2],
+      )
+    }
+    return out
+  }
+
+  function segmentos(posiciones, color, opacity) {
+    const g = new T.BufferGeometry()
+    g.setAttribute('position', new FloatAttr(toF32(posiciones), 3))
+    const mat = new T.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false })
+    const l = new T.Line(g, mat)
+    l.isLineSegments = true // three elige gl.LINES por esta marca: así una sola Line dibuja N segmentos sueltos
+    l.renderOrder = 10
+    l.frustumCulled = false
+    return l
+  }
+
+  function malla(t, colorBase) {
+    const g = new T.BufferGeometry()
+    g.setAttribute('position', new FloatAttr(toF32(t.p), 3))
+    g.setIndex(t.i)
+    const mat = new T.MeshBasicMaterial({
+      color: t.color || colorBase,
+      transparent: true,
+      opacity: 0.42,
+      depthWrite: false,
+      side: T.DoubleSide,
+    })
+    const m = new T.Mesh(g, mat)
+    m.renderOrder = 9
+    m.frustumCulled = false
+    const grupo = new T.Group()
+    grupo.add(m)
+    grupo.add(segmentos(aristas(t.p, t.i), t.color || colorBase, 0.95))
+    return grupo
+  }
+
+  const root = new T.Group()
+  root.name = 'capa_cad'
+  root.visible = false
+  root.userData = { role: 'HELPER' } // fuera de los 13 componentes: ni seleccionable ni en R.pickables
+  const usados = []
+  for (const it of D.items) {
+    const g = new T.Group()
+    g.name = 'cad_' + it.id
+    for (const t of it.tris || []) g.add(malla(t, it.color))
+    for (const l of it.lineas || []) g.add(segmentos(l.p, l.color || it.color, 0.9))
+    if (it.ancla === 'mastil') {
+      const m = R.mast
+      if (!m) continue // sin eje del mástil del V2 no hay dónde ubicarlo: no se inventa
+      g.position.set(m.bx, m.by, 0)
+      g.rotation.z = -m.a
+    }
+    root.add(g)
+    usados.push(it)
+  }
+  R.scene.add(root)
+
+  // ───────── UI: botón en el menú Capas + tarjeta de leyenda ─────────
+  const style = document.createElement('style')
+  style.id = 'cad-layer-style'
+  style.textContent = `
+    #cad-card{position:fixed;left:16px;bottom:44px;z-index:19;width:min(330px,calc(100vw - 32px));padding:10px 12px;border-radius:12px;
+      background:rgba(20,27,38,.95);border:1px solid #303B4B;color:#DDE3EC;font-size:12px;line-height:1.4;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+    #cad-card summary{cursor:pointer;color:#DDBB65;list-style:none}
+    #cad-card summary::-webkit-details-marker{display:none}
+    #cad-card .row{display:flex;gap:8px;align-items:flex-start;margin:4px 0}
+    #cad-card .sw{flex:none;width:11px;height:11px;border-radius:3px;margin-top:2px;border:1px solid rgba(255,255,255,.35)}
+    #cad-card .tag{font-size:10.5px;opacity:.75}
+    #cad-card .warn{margin-top:6px;color:#E0B870;font-size:11px}
+    body.opts-hidden #cad-card{display:none}
+  `
+  document.head.appendChild(style)
+
+  const card = document.createElement('aside')
+  card.id = 'cad-card'
+  card.hidden = true
+  card.setAttribute('aria-label', 'Leyenda de la capa CAD')
+  const esc = (s) =>
+    String(s).replace(
+      /[&<>"]/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c],
+    )
+  card.innerHTML =
+    '<details><summary><b>Capa CAD · referencia dimensional</b> <span class="tag">confianza ' +
+    esc(D.confianza) +
+    ' · no as-built</span></summary>' +
+    usados
+      .map(
+        (it) =>
+          `<div class="row"><span class="sw" style="background:${esc(it.color)}"></span><div>${esc(it.nombre)}<div class="tag">${esc(it.estado)} · ${esc(it.fuente)}</div></div></div>`,
+      )
+      .join('') +
+    `<div class="warn">${esc(D.aviso)} El mástil se apoya en el eje del V2.</div></details>`
+  document.body.appendChild(card)
+
+  const btn = document.createElement('button')
+  btn.className = 'btn'
+  btn.id = 'c-cad'
+  btn.type = 'button'
+  btn.textContent = 'Capa CAD'
+  btn.title =
+    'Superpone la geometría CAD verificada (carrier, piso, layout, mástil ilustrativo) sobre el modelo'
+  btn.setAttribute('aria-pressed', 'false')
+  if (window.__rigToolbar && typeof window.__rigToolbar.add === 'function')
+    window.__rigToolbar.add('capas', btn)
+  else document.querySelector('header')?.appendChild(btn)
+
+  function set(on) {
+    root.visible = !!on
+    card.hidden = !on
+    btn.setAttribute('aria-pressed', String(!!on))
+    btn.classList.toggle('on', !!on)
+    invalidate()
+  }
+  btn.addEventListener('click', () => set(!root.visible))
+
+  window.__tackerCad = {
+    on: () => set(true),
+    off: () => set(false),
+    toggle: () => set(!root.visible),
+    isOn: () => root.visible,
+    items: usados.map((i) => i.id),
+  }
+})
+
+/* 78-aviso-entorno.js */
+/*
+ * 78-aviso-entorno.js — aviso del entorno de locación en la card "Referencia del conjunto" (#cad-inspector).
+ *
+ * Los tráilers, tanques, vallado y señalización del entorno (`locacion_entorno`) son unidades SIMPLIFICADAS ubicadas según el
+ * LAYOUT TKR-10: su posición sale del plano y su detalle es ilustrativo. No muestran marcas, capacidades ni textos de equipos
+ * reales, y la disposición de una locación varía según operador, contratista y país.
+ */
+window.__rigExt.onPost(() => {
+  const card = document.getElementById('cad-inspector')
+  if (!card || document.getElementById('site-dressing-note')) return
+  const p = document.createElement('p')
+  p.id = 'site-dressing-note'
+  p.style.cssText = 'margin:8px 0 0;font-size:11px;line-height:1.4;opacity:.75'
+  p.textContent =
+    'Entorno de locación (tráilers, tanques, vallado, señalización): unidades simplificadas ubicadas según el layout TKR-10; el detalle es ilustrativo. No muestra marcas de terceros ni capacidades de las unidades de la locación, y la disposición varía según operador, contratista y país.'
+  card.appendChild(p)
+})
 
 /* 80-perf.js */
 /*

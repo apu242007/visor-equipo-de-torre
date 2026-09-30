@@ -1,0 +1,19 @@
+{
+  "unidades": "m",
+  "estado": "ILUSTRATIVO",
+  "nota": "Tamaño y rango de altura documentados (folleto, vía technical-spec.js). El espesor de la placa es ILUSTRATIVO.",
+  "base": {
+    "largo": "@spec:workFloor.sizeM.0",
+    "ancho": "@spec:workFloor.sizeM.1",
+    "h": "@spec:workFloor.modelHeightM",
+    "h_min": "@spec:workFloor.minHeightM",
+    "h_max": "@spec:workFloor.maxHeightM",
+    "esp": 0.1
+  },
+  "rangos": { "h": [1.0, 4.0], "esp": [0.02, 0.4] },
+  "presets": {
+    "minimo": { "h": 1.0 },
+    "maximo": { "h": 4.0 },
+    "tacker10": { "esp": null }
+  }
+}

@@ -51,6 +51,8 @@ test('subconjuntos con nombre propio y mallas fusionadas por material (presupues
     [
       'PIL-1_luminarias',
       'PIL-2_barandas',
+      'bomba_acero',
+      'bomba_pintura',
       'circulacion_acero',
       'circulacion_mangueras',
       'circulacion_pintura',
@@ -58,7 +60,7 @@ test('subconjuntos con nombre propio y mallas fusionadas por material (presupues
       'pileta_ensayo_acero',
       'pileta_ensayo_pintura',
     ].sort(),
-    'un mesh por material y subconjunto (línea base: 6 meshes → 8)',
+    'un mesh por material y subconjunto (línea base: 6 meshes → 8; +2 por la bomba desplazada a 5 m de la pileta según LAYOUT TKR-10)',
   );
 });
 
@@ -82,6 +84,6 @@ test('lo documentado se conserva: pileta 12 × 2,4 m, cubicador Ø1,3 × 2,4 m, 
   assert.match(circ, /tank\(PE, TX, zc, 12, 2\.4, 2\.0\)/);
   assert.match(circ, /PE\.cyl\(C\.BLUE_L, 0\.65, 0\.65, 2\.4, cbx, 1\.4, zc/);
   assert.match(circ, /P\.box\(C\.SKID, 6, 0\.22, 2\.4, -13, 0\.11, zc\)/); // patín de la bomba 6 × 2,4 m
-  assert.match(circ, /\[-10\.65, 0\.9, zc\],\s*\[-9\.2, 0\.9, zc\],\s*\[-9\.2, 0\.5, zc\],\s*\[-9\.2, 0\.5, -12\.9\]/); // línea de matar
+  assert.match(circ, /\[-10\.65 \+ DX_BOMBA, 0\.9, zc\],\s*\[-9\.2, 0\.9, zc\],\s*\[-9\.2, 0\.5, zc\],\s*\[-9\.2, 0\.5, -12\.9\]/); // línea de matar
   assert.match(circ, /\[3\.0, 1\.25, -13\.5\]/); // llegada de la línea D a la pileta
 });

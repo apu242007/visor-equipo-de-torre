@@ -1,0 +1,6 @@
+# Entorno CAD (Python 3.13 probado). venv: python -m venv %USERPROFILE%\cad-env
+cadquery==2.8.0
+trimesh
+ezdxf
+pillow
+scipy

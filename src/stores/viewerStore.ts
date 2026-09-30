@@ -19,6 +19,8 @@ export function isViewerEngine(value: unknown): value is ViewerEngine {
 interface ViewerState {
   engine: ViewerEngine
   selectedComponentId: string | null
+  /** Componente bajo el puntero en la escena nativa (contorno de hover). */
+  hoveredComponentId: string | null
   /** El visor V2 embebido terminó de arrancar (`tacker:ready`). */
   legacyReady: boolean
   /** Espejo del estado del visor V2 (`tacker:state`); `null` = aún desconocido. */
@@ -28,6 +30,7 @@ interface ViewerState {
   selection: LegacySelection | null
   setEngine: (engine: ViewerEngine) => void
   selectComponent: (id: string | null) => void
+  hoverComponent: (id: string | null) => void
   setLegacyReady: (ready: boolean) => void
   setLegacyState: (state: { view: LegacyView | null; layers: LegacyLayer[] }) => void
   setSelection: (selection: LegacySelection | null) => void
@@ -36,12 +39,14 @@ interface ViewerState {
 export const useViewerStore = create<ViewerState>()((set) => ({
   engine: DEFAULT_ENGINE,
   selectedComponentId: null,
+  hoveredComponentId: null,
   legacyReady: false,
   view: null,
   layers: null,
   selection: null,
   setEngine: (engine) => set({ engine }),
   selectComponent: (selectedComponentId) => set({ selectedComponentId }),
+  hoverComponent: (hoveredComponentId) => set({ hoveredComponentId }),
   setLegacyReady: (legacyReady) => set({ legacyReady }),
   setLegacyState: ({ view, layers }) => set({ view, layers }),
   setSelection: (selection) => set({ selection, selectedComponentId: selection?.id ?? null }),

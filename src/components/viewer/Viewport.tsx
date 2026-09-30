@@ -6,13 +6,18 @@ import { CAMERA_PRESETS, DEFAULT_CAMERA_PRESET } from '@/scene/cameras/presets'
 import { CameraRig } from '@/scene/controls/CameraRig'
 import { Lighting } from '@/scene/lighting/Lighting'
 import { RigModel } from '@/scene/loaders/RigModel'
+import { PostFx } from '@/scene/effects/PostFx'
+import { SelectableModel } from '@/scene/picking/SelectableModel'
+import { useViewerStore } from '@/stores/viewerStore'
+import { TACKER10_SCENE, type SceneModel } from '@/data/rigs/tacker10'
 
 interface ViewportProps {
-  /** URLs de GLB a cargar. Vacío = escena de referencia (grilla 1 m). */
-  modelUrls?: readonly string[]
+  /** GLB a cargar (con su posición). Vacío = escena de referencia (grilla 1 m). */
+  models?: readonly SceneModel[]
 }
 
-export function Viewport({ modelUrls = [] }: ViewportProps) {
+export function Viewport({ models = TACKER10_SCENE }: ViewportProps) {
+  const selectComponent = useViewerStore((s) => s.selectComponent)
   return (
     <Canvas
       role="img"
@@ -23,6 +28,7 @@ export function Viewport({ modelUrls = [] }: ViewportProps) {
       frameloop="demand"
       shadows={{ type: PCFShadowMap }}
       dpr={[1, 2]}
+      onPointerMissed={() => selectComponent(null)}
       camera={{
         position: [...CAMERA_PRESETS[DEFAULT_CAMERA_PRESET].position],
         fov: 42,
@@ -50,9 +56,12 @@ export function Viewport({ modelUrls = [] }: ViewportProps) {
         sectionColor="#4b5566"
       />
       <Suspense fallback={null}>
-        {modelUrls.map((url) => (
-          <RigModel key={url} url={url} />
+        {models.map((m) => (
+          <SelectableModel key={m.url} componentId={m.componentId} position={m.position}>
+            <RigModel url={`${import.meta.env.BASE_URL}${m.url.replace(/^\//, '')}`} />
+          </SelectableModel>
         ))}
+        <PostFx />
       </Suspense>
       <CameraRig />
     </Canvas>

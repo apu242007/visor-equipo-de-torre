@@ -200,6 +200,20 @@ function build() {
         ';',
     )
   }
+  const cadJson = path.join(root, 'src', 'data', 'cad', 'capa-cad.json')
+  if (fs.existsSync(cadJson)) {
+    // mismo saneo que los datos DROPS: nada del JSON puede cerrar ni alterar el <script>.
+    const safeCad = JSON.stringify(JSON.parse(fs.readFileSync(cadJson, 'utf8')))
+      .replace(/<\//g, '<\\/')
+      .replace(/<!--/g, '<\\!--')
+      .replaceAll(' ', '\\u2028')
+      .replaceAll(' ', '\\u2029')
+    blocks.push(
+      '/* datos de la capa CAD (src/data/cad/capa-cad.json) */\nwindow.__TACKER_CAD=' +
+        safeCad +
+        ';',
+    )
+  }
   for (const f of readExtModules().filter((f) => f !== runtimeFile)) {
     blocks.push(`/* ${f} */\n` + fs.readFileSync(path.join(extDir, f), 'utf8'))
   }

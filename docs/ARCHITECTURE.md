@@ -29,8 +29,7 @@ no calculan geometría (usan `src/lib/geometry`). Alias `@/` → `src/`.
   `Source` (`verified`) y confianza A/B/C. `src/data/schema.ts` (zod) valida integridad; todo dato nuevo
   debe pasarlo. QHSE bow-tie: `Risk` (hazard → event → consequence), `Barrier` (`preventive` |
   `mitigative`), estatus `confirmed` / `procedure` / `goodPractice` / `pendingValidation`; `Rig.service`.
-  `src/data/{rigs,equipment,training}` existen con `.gitkeep` y sin datos (los de TACKER 10 están
-  pendientes; cotas en `reference/v2-previo/src/technical-spec.js`).
+  `src/data/rigs/tacker10.ts` tiene el rig TACKER 10 (4 componentes con envolvente CAD, confianza C, generadas en `cad/`) y la lista de GLB de la escena nativa; `equipment` y `training` siguen vacíos (cotas en `reference/v2-previo/src/technical-spec.js`).
 - **Stores** (`src/stores`): `modeStore` (EXPLORE / OPERATION / QHSE / TRAINING) y `viewerStore`
   (`engine`: `legacy` | `native`, `selectedComponentId`). Los modos son estado derivado, no mutan materiales.
   Con el motor `legacy`, `LegacyRigViewer` reenvía el modo al V2 por `postMessage` (`tacker:setMode`,

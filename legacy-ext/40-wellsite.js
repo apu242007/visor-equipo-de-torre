@@ -274,6 +274,9 @@
 
   const PI = Math.PI
 
+  /** Desplazamiento del acumulador (m en X) para ubicarlo como en el LAYOUT TKR-10 (cad/components/layout_tkr10.py). */
+  const DX_ACUM = -3.2
+
   // ═════════════════════════════════════════ BOP + CHOKE MANIFOLD + ACUMULADOR ═════════════════════════════════════════
   /** Anillo de `n` bulones (cilindros cortos, pocos segmentos) alrededor de un eje 'x' | 'y' | 'z' centrado en (cx,cy,cz). */
   function boltRing(b, c, cx, cy, cz, axis, R, n, len, r = 0.015, seg = 5) {
@@ -545,7 +548,7 @@
 
     // líneas hidráulicas de control desde el acumulador (cuatro: bonetes izq/der y anular)
     const trunk = [
-      [-10.4, 0.9, 3.75],
+      [-10.4 + DX_ACUM, 0.9, 3.75],
       [-8, 0.25, 3.3],
       [-3.5, 0.15, 2.6],
       [-1.6, 0.15, 2.3],
@@ -612,6 +615,7 @@
     const ga = new K.Group()
     ga.name = 'acumulador_5_botellas'
     g.add(ga)
+    ga.position.x = DX_ACUM // LAYOUT TKR-10: x −21,2…−13,2 (medido del vector del PDF); el modelo estaba en −18…−10. Lateral z 4,2 coincide
     const AP = new Batch()
     const AM = new Batch()
     const zc = 4.2
@@ -1533,6 +1537,7 @@
     const M = new Batch() // circulacion_acero: bomba y cañerías al pozo
     const H = new Batch() // circulacion_mangueras
     const zc = -14.7 // eje longitudinal de pileta y bomba (lateral del layout ≈ 14,4 m)
+    const DX_BOMBA = -3.0 // m: bomba a 5 m de la pileta (cota rotulada en LAYOUT TKR-10); la pileta (x −8…4) no se mueve
     const BLACK = '#1B1D21' // patín de vigas y rodillos (foto de campo: patín negro)
     const WHITE_R = '#D3D6D0' // chapa lisa entre nervaduras (las nervaduras van en C.WHITE)
     const SUB = '#8E1F25' // rojo oscuro: bandas de soldadura y uniones
@@ -1869,49 +1874,60 @@
     flange(GB, C.STEEL, C.DARK, gx + 0.82, 0.55, gz, 'x', 0.09)
     GB.flush(gG, m.paint, 'golpeador_pintura')
 
-    // ── bomba triplex 6×2,4 m (camisas 5", carrera 8", 3.000 psi, 12 bpm) en x −16…−10
-    P.box(C.SKID, 6, 0.22, 2.4, -13, 0.11, zc) // patín
-    for (const dz of [-1.1, 1.1]) P.box(C.GRAY, 6, 0.1, 0.12, -13, 0.27, zc + dz)
-    // motor diésel Detroit S60 (rojo) con radiador frontal, tapa de válvulas y escape
-    P.box(C.RED, 2.0, 1.25, 1.3, -14.9, 0.845, zc)
-    P.box(C.DARK, 0.08, 1.0, 1.15, -15.94, 0.85, zc) // radiador
-    for (let k = -2; k <= 2; k++) M.box(C.GRAY_L, 0.03, 0.9, 0.03, -15.99, 0.85, zc + k * 0.22) // aletas
-    P.box(C.POWER, 1.5, 0.16, 0.9, -14.8, 1.55, zc) // tapa de válvulas
-    M.rod(C.STEEL, [-15.6, 1.62, zc + 0.3], [-15.6, 2.7, zc + 0.3], 0.06, 8)
-    M.cyl(C.DARK, 0.13, 0.13, 0.55, -15.6, 2.1, zc + 0.3, 'y', 10) // silenciador
-    M.cyl(C.STEEL, 0.1, 0.1, 0.06, -15.6, 2.75, zc + 0.3, 'y', 10)
-    P.box(C.GRAY, 1.0, 0.95, 0.95, -13.4, 0.695, zc) // caja Allison
-    P.box(C.YEL, 0.7, 0.26, 0.5, -12.6, 0.45, zc) // protector de cardán
-    M.cyl(C.STEEL, 0.06, 0.06, 0.6, -12.6, 0.7, zc, 'x', 8) // cardán
-    // bastidor de fuerza con tapas de cruceta, tornillería y ojal de izaje
-    P.box(C.POWER, 1.3, 1.1, 1.5, -11.9, 0.77, zc)
-    for (const dz of [-0.42, 0, 0.42]) {
-      M.cyl(C.GRAY_L, 0.2, 0.2, 0.1, -11.22, 0.77, zc + dz, 'x', 14) // tapa de cruceta
-      M.cyl(C.GRAY_L, 0.05, 0.05, 0.4, -11.4, 0.7, zc + dz, 'x', 8) // émbolo
+    // ── bomba triplex 6×2,4 m (camisas 5", carrera 8", 3.000 psi, 12 bpm). Se modela en x −16…−10 y su grupo se desplaza DX_BOMBA:
+    //    el LAYOUT TKR-10 rotula 5 m entre la bomba y la pileta (cota confirmada) y el modelo dejaba 2 m (ver docs/audit-dimensional-*.md).
+    const bombaG = new K.Group()
+    bombaG.name = 'bomba_triplex'
+    bombaG.position.x = DX_BOMBA
+    g.add(bombaG)
+    {
+      const P = new Batch() // bomba: pintura (sombrea el P del sistema solo dentro de este bloque)
+      const M = new Batch() // bomba: acero
+      P.box(C.SKID, 6, 0.22, 2.4, -13, 0.11, zc) // patín
+      for (const dz of [-1.1, 1.1]) P.box(C.GRAY, 6, 0.1, 0.12, -13, 0.27, zc + dz)
+      // motor diésel Detroit S60 (rojo) con radiador frontal, tapa de válvulas y escape
+      P.box(C.RED, 2.0, 1.25, 1.3, -14.9, 0.845, zc)
+      P.box(C.DARK, 0.08, 1.0, 1.15, -15.94, 0.85, zc) // radiador
+      for (let k = -2; k <= 2; k++) M.box(C.GRAY_L, 0.03, 0.9, 0.03, -15.99, 0.85, zc + k * 0.22) // aletas
+      P.box(C.POWER, 1.5, 0.16, 0.9, -14.8, 1.55, zc) // tapa de válvulas
+      M.rod(C.STEEL, [-15.6, 1.62, zc + 0.3], [-15.6, 2.7, zc + 0.3], 0.06, 8)
+      M.cyl(C.DARK, 0.13, 0.13, 0.55, -15.6, 2.1, zc + 0.3, 'y', 10) // silenciador
+      M.cyl(C.STEEL, 0.1, 0.1, 0.06, -15.6, 2.75, zc + 0.3, 'y', 10)
+      P.box(C.GRAY, 1.0, 0.95, 0.95, -13.4, 0.695, zc) // caja Allison
+      P.box(C.YEL, 0.7, 0.26, 0.5, -12.6, 0.45, zc) // protector de cardán
+      M.cyl(C.STEEL, 0.06, 0.06, 0.6, -12.6, 0.7, zc, 'x', 8) // cardán
+      // bastidor de fuerza con tapas de cruceta, tornillería y ojal de izaje
+      P.box(C.POWER, 1.3, 1.1, 1.5, -11.9, 0.77, zc)
+      for (const dz of [-0.42, 0, 0.42]) {
+        M.cyl(C.GRAY_L, 0.2, 0.2, 0.1, -11.22, 0.77, zc + dz, 'x', 14) // tapa de cruceta
+        M.cyl(C.GRAY_L, 0.05, 0.05, 0.4, -11.4, 0.7, zc + dz, 'x', 8) // émbolo
+      }
+      M.loop(C.STEEL, -11.9, 1.5, zc, 0.09, 'xy', 0, 2 * PI, 0.018, 10) // ojal de izaje
+      // cuerpo de fluido (acero), tapas de válvula y cabezal de descarga
+      M.box(C.STEEL, 0.6, 0.55, 1.3, -10.95, 0.7, zc)
+      for (const dz of [-0.42, 0, 0.42])
+        M.cyl(C.GRAY_L, 0.11, 0.11, 0.25, -10.95, 1.12, zc + dz, 'y', 10)
+      M.rod(C.STEEL, [-10.65, 0.9, zc - 0.5], [-10.65, 0.9, zc + 0.5], 0.06)
+      M.rod(C.STEEL, [-10.95, 0.35, zc - 0.55], [-10.95, 0.35, zc + 0.55], 0.06) // múltiple de succión
+      P.cyl(C.RED, 0.2, 0.2, 0.65, -10.3, 0.55, zc + 0.75, 'y', 14) // amortiguador de pulsaciones
+      P.cyl(C.RED, 0.08, 0.2, 0.14, -10.3, 0.94, zc + 0.75, 'y', 14)
+      M.cyl(C.WHITE, 0.09, 0.09, 0.05, -10.6, 1.28, zc - 0.1, 'x', 12) // manómetro (tipo Cameron)
+      M.cyl(C.RED, 0.05, 0.05, 0.16, -10.65, 1.08, zc + 0.3, 'y', 8) // válvula de seguridad 3.000 psi
+      // barandas amarillas del patín (lado exterior y extremos)
+      P.rail(
+        C.YEL,
+        [
+          [-16, zc - 1.2],
+          [-16, zc - 1.2 + 2.4],
+          [-10.05, zc + 1.2],
+        ],
+        0.22,
+        0.95,
+        false,
+      )
+      P.flush(bombaG, m.paint, 'bomba_pintura')
+      M.flush(bombaG, m.metal, 'bomba_acero')
     }
-    M.loop(C.STEEL, -11.9, 1.5, zc, 0.09, 'xy', 0, 2 * PI, 0.018, 10) // ojal de izaje
-    // cuerpo de fluido (acero), tapas de válvula y cabezal de descarga
-    M.box(C.STEEL, 0.6, 0.55, 1.3, -10.95, 0.7, zc)
-    for (const dz of [-0.42, 0, 0.42])
-      M.cyl(C.GRAY_L, 0.11, 0.11, 0.25, -10.95, 1.12, zc + dz, 'y', 10)
-    M.rod(C.STEEL, [-10.65, 0.9, zc - 0.5], [-10.65, 0.9, zc + 0.5], 0.06)
-    M.rod(C.STEEL, [-10.95, 0.35, zc - 0.55], [-10.95, 0.35, zc + 0.55], 0.06) // múltiple de succión
-    P.cyl(C.RED, 0.2, 0.2, 0.65, -10.3, 0.55, zc + 0.75, 'y', 14) // amortiguador de pulsaciones
-    P.cyl(C.RED, 0.08, 0.2, 0.14, -10.3, 0.94, zc + 0.75, 'y', 14)
-    M.cyl(C.WHITE, 0.09, 0.09, 0.05, -10.6, 1.28, zc - 0.1, 'x', 12) // manómetro (tipo Cameron)
-    M.cyl(C.RED, 0.05, 0.05, 0.16, -10.65, 1.08, zc + 0.3, 'y', 8) // válvula de seguridad 3.000 psi
-    // barandas amarillas del patín (lado exterior y extremos)
-    P.rail(
-      C.YEL,
-      [
-        [-16, zc - 1.2],
-        [-16, zc - 1.2 + 2.4],
-        [-10.05, zc + 1.2],
-      ],
-      0.22,
-      0.95,
-      false,
-    )
 
     // PIL-1 · luminarias (soporte abulonado, palmera rebatible con perno y seguro, artefacto con grampa cepo + eslinga de 3 mm)
     const pil1 = dropsGroup(
@@ -1958,7 +1974,7 @@
     if (CHOKE_ROUTING === 'legacy') {
       // A · descarga bomba → manifold de maniobra → línea de matar del BOP
       line([
-        [-10.65, 0.9, zc],
+        [-10.65 + DX_BOMBA, 0.9, zc],
         [-9.2, 0.9, zc],
         [-9.2, 0.5, zc],
         [-9.2, 0.5, -12.9],
@@ -1990,7 +2006,7 @@
       // Ruteo con choke manifold (PENDIENTE de validación: lados choke/kill y tendidos, según P&ID / procedimiento de control de pozo).
       // K · bomba → línea de matar (kill) del BOP, lado x=+0,2: rodea por z=−12,9 y sube por x=+0,2 (bajo la línea de choke).
       line([
-        [-10.65, 0.9, zc],
+        [-10.65 + DX_BOMBA, 0.9, zc],
         [-9.2, 0.9, zc],
         [-9.2, 0.5, zc],
         [-9.2, 0.5, -12.9],
@@ -2030,16 +2046,19 @@
         M.box(C.GRAY, 0.28, 0.04, 0.16, outX, 0.69, z)
       }
     }
-    // succión pileta → bomba
+    // succión pileta → múltiple de succión de la bomba (y 0,35, z +0,6: no pisa la descarga)
     line([
       [-8, 0.9, zc],
-      [-9.2, 0.9, zc],
+      [-8.6, 0.9, zc],
+      [-8.6, 0.9, zc + 0.6],
+      [-8.6, 0.35, zc + 0.6],
+      [-10.95 + DX_BOMBA, 0.35, zc + 0.6],
     ])
     // mangueras de servicio (goma)
     H.tube(
       C.HOSE,
       [
-        [-10.3, 0.4, zc - 0.7],
+        [-10.3 + DX_BOMBA, 0.4, zc - 0.7],
         [-9.6, 0.2, zc - 1.6],
         [-8.6, 0.2, zc - 2.4],
       ],
