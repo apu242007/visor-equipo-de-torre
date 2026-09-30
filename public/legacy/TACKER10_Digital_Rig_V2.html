@@ -8708,7 +8708,7 @@ window.__rigExt.onPost((R) => {
   const CAMISA =
     D.pistones && Number.isFinite(D.pistones.largo_camisa) ? D.pistones.largo_camisa : 3.0
   const E = 14.0 // m locales: cuánto queda embutido el tramo superior en el transporte (ilustrativo)
-  const PHASE = { raiseEnd: 0.55, extendEnd: 0.85 }
+  const PHASE = { raiseEnd: 0.5, extendEnd: 0.8 }
   const ease = (x) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x))
   const deg = (r) => (r * 180) / Math.PI
 
@@ -8801,7 +8801,55 @@ window.__rigExt.onPost((R) => {
   ]
 
   // ───────── ocultar lo que aún no está montado ─────────
-  const tardios = [G.aparejo, G.enganche, G.vientos].filter(Boolean)
+  // ───────── vientos dinámicos (fase 3): del tendido flojo (con catenaria) al cable tenso ─────────
+  // Puntos del V2 (20-mast/visor): 4 anclajes a ±25 m, 2 cables por anclaje desde t = 26 y 18,5 del mástil, y 2 cables cortos traseros.
+  const FloatAttr = new T.BoxGeometry(1, 1, 1).attributes.position.constructor
+  const NSEG = 18
+  const cables = []
+  for (const a of [
+    [-25, 0.12, 25],
+    [-25, 0.12, -25],
+    [25, 0.12, 25],
+    [25, 0.12, -25],
+  ])
+    for (const t of [26, 18.5])
+      cables.push({ a, t, x: a[0] < 0 ? -0.6 : 0.6, z: a[2] < 0 ? -0.5 : 0.5 })
+  for (const s of [-1.3, 1.3])
+    cables.push({ a: [-9.6, 1.4, s], t: 14, x: -0.8, z: s > 0 ? 0.8 : -0.8 })
+  const gVientos = new T.Group()
+  gVientos.name = 'vientos_dinamicos'
+  gVientos.visible = false
+  const matCable = new T.LineBasicMaterial({ color: '#B9C0C7' })
+  for (const c of cables) {
+    const g = new T.BufferGeometry()
+    g.setAttribute('position', new FloatAttr(new Float32Array(NSEG * 3), 3))
+    c.line = new T.Line(g, matCable)
+    c.line.frustumCulled = false
+    gVientos.add(c.line)
+  }
+  mastG.add(gVientos)
+  const niW = (t, x, z, th) => [
+    bx + t * S * Math.sin(th) + x * Math.cos(th),
+    by + t * S * Math.cos(th) - x * Math.sin(th),
+    z,
+  ]
+  /** tension 0 = flojo (flecha máxima), 1 = tenso y recto (igual que los cables fijos del V2). */
+  function updateVientos(th, tension) {
+    for (const c of cables) {
+      const m = niW(c.t, c.x, c.z, th)
+      const L = Math.hypot(m[0] - c.a[0], m[1] - c.a[1], m[2] - c.a[2])
+      const flecha = L * 0.08 * Math.pow(1 - tension, 1.5)
+      const arr = c.line.geometry.attributes.position.array
+      for (let k = 0; k < NSEG; k++) {
+        const u = k / (NSEG - 1)
+        arr[k * 3] = c.a[0] + (m[0] - c.a[0]) * u
+        arr[k * 3 + 1] = c.a[1] + (m[1] - c.a[1]) * u - flecha * 4 * u * (1 - u)
+        arr[k * 3 + 2] = c.a[2] + (m[2] - c.a[2]) * u
+      }
+      c.line.geometry.attributes.position.needsUpdate = true
+    }
+  }
+  const tardios = [G.aparejo, G.enganche].filter(Boolean)
 
   let p = 1
   let raf = 0
@@ -8811,14 +8859,14 @@ window.__rigExt.onPost((R) => {
   function fase(pp) {
     if (pp >= 1) return 'Montado. Pose final del modelo.'
     if (pp < PHASE.raiseEnd) {
-      const elev = Math.min(90, EPS0 + ease(pp / PHASE.raiseEnd) * (90 + deg(aFinal) - EPS0))
+      const elev = EPS0 + ease(pp / PHASE.raiseEnd) * (90 - EPS0)
       return `Fase 1 · pistón de izaje del 1.er tramo: ${elev.toFixed(0)}° de 90°`
     }
     if (pp < PHASE.extendEnd) {
       const e = ease((pp - PHASE.raiseEnd) / (PHASE.extendEnd - PHASE.raiseEnd))
       return `Fase 2 · pistón del 2.º tramo: extiende el tramo embutido en el 1.º (${(e * 100).toFixed(0)} %)`
     }
-    return 'Fase 3 · se tensan los vientos'
+    return 'Fase 3 · se tensan los vientos y el mástil toma su plomo final'
   }
 
   function set(value) {
@@ -8827,11 +8875,17 @@ window.__rigExt.onPost((R) => {
     const raise = ease(p / PHASE.raiseEnd)
     const ext = ease((p - PHASE.raiseEnd) / (PHASE.extendEnd - PHASE.raiseEnd))
     // θ: ángulo del eje respecto de la vertical (+ hacia la boca de pozo). Acostado hacia atrás: −90°. Final: el del V2.
-    const theta = completo ? aFinal : THETA0 + raise * (aFinal - THETA0)
+    const tens = ease((p - PHASE.extendEnd) / (1 - PHASE.extendEnd))
+    // Fase 1: de la posición de transporte a 90° (vertical). Fase 2: vertical. Fase 3: los vientos tensos llevan el mástil a su plomo final.
+    const theta = completo ? aFinal : p < PHASE.extendEnd ? THETA0 * (1 - raise) : aFinal * tens
     P.rotation.z = -theta
     sup.position.y = completo ? 0 : -E * (1 - ext)
     if (conducto) conducto.visible = completo || p >= PHASE.extendEnd
     for (const g of tardios) g.visible = completo || p >= PHASE.extendEnd
+    const vientosTendidos = p >= PHASE.extendEnd
+    gVientos.visible = vientosTendidos && !completo
+    if (G.vientos) G.vientos.visible = completo
+    if (vientosTendidos && !completo) updateVientos(theta, tens)
     if (cableMalacate) cableMalacate.visible = completo || p >= PHASE.extendEnd
 
     gDyn.visible = !completo
