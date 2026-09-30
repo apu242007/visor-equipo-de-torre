@@ -52,3 +52,8 @@ test('la altura del mástil es la documentada (31,6992 m) y pesa poco', () => {
   assert.ok(Math.abs(Math.max(...ys) - Math.min(...ys) - 31.6992) < 0.001)
   assert.ok(fs.statSync(dataPath).size < 400_000)
 })
+
+test('aviso del entorno de locación (78) en el HTML, sin afirmar marcas ni capacidades', () => {
+  assert.ok(html.includes('/* 78-aviso-entorno.js */'))
+  assert.match(html, /unidades simplificadas ubicadas según el layout TKR-10/)
+})
